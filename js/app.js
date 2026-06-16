@@ -568,7 +568,8 @@ function limparFormFreelancer() {
 }
 
 // ══════════════════════════════════════════════════════════════
-// ESCALA CRUD
+// ESCALA CRUD — Modelo Figma
+// Escala = evento do dia. Funcionários são adicionados separadamente.
 // ══════════════════════════════════════════════════════════════
 
 async function renderEscalas() {
@@ -579,24 +580,20 @@ async function renderEscalas() {
   const filtroSt   = document.getElementById('esc-filter-status')?.value || '';
 
   const filtered = all.filter(e => {
-    const fl = freelancers.find(f => f.id === e.freelancerId) || {};
-    const matchSearch = !search ||
-      (fl.nome           || '').toLowerCase().includes(search) ||
-      (e.funcao          || '').toLowerCase().includes(search);
-    const matchMes = !filtroMes || (e.data || '').startsWith(filtroMes);
-    const matchSt  = !filtroSt  || e.status === filtroSt;
-    return matchSearch && matchMes && matchSt;
+    const data = e.dataEscala || e.data || '';
+    const matchMes = !filtroMes || data.startsWith(filtroMes);
+    const matchSt  = !filtroSt  || (e.statusEscala || e.status || '').toLowerCase() === filtroSt.toLowerCase();
+    return matchMes && matchSt;
+  }).sort((a, b) => {
+    const da = a.dataEscala || a.data || '';
+    const db = b.dataEscala || b.data || '';
+    return da.localeCompare(db);
   });
 
-  // Ordena por data
-  filtered.sort((a, b) => a.data.localeCompare(b.data));
-
-  // Stats
+  // ── Stats ──
   document.getElementById('esc-total').textContent       = all.length;
-  document.getElementById('esc-confirmadas').textContent = all.filter(e => e.status === 'confirmado').length;
-  document.getElementById('esc-pendentes').textContent   = all.filter(e => e.status === 'pendente').length;
-  const gasto = all.reduce((s, e) => s + (parseFloat(e.valorTotal) || 0), 0);
-  document.getElementById('esc-gasto').textContent = 'R$ ' + gasto.toFixed(2).replace('.', ',');
+  document.getElementById('esc-confirmadas').textContent = all.filter(e => (e.statusEscala||e.status||'').toLowerCase() === 'realizada').length;
+  document.getElementById('esc-pendentes').textContent   = all.filter(e => (e.statusEscala||e.status||'').toLowerCase() === 'agendada').length;
 
   const el = document.getElementById('esc-list');
 
@@ -604,174 +601,229 @@ async function renderEscalas() {
     el.innerHTML = `
       <div class="empty-state">
         <div class="empty-icon">📅</div>
-        <h4>${search || filtroMes || filtroSt ? 'Nenhum resultado' : 'Nenhuma escala cadastrada'}</h4>
-        <p>${search || filtroMes || filtroSt ? 'Ajuste os filtros.' : 'Clique em "Nova Escala" para começar.'}</p>
+        <h4>${filtroMes || filtroSt ? 'Nenhum resultado' : 'Nenhuma escala cadastrada'}</h4>
+        <p>${filtroMes || filtroSt ? 'Ajuste os filtros.' : 'Clique em "Nova Escala" para começar.'}</p>
       </div>`;
     return;
   }
 
-  // Agrupa por data
-  const grupos = {};
-  filtered.forEach(e => {
-    if (!grupos[e.data]) grupos[e.data] = [];
-    grupos[e.data].push(e);
-  });
+  // Renderiza cards — funcionários carregados assincronamente
+  el.innerHTML = filtered.map(e => {
+    const data   = e.dataEscala || e.data || '';
+    const status = (e.statusEscala || e.status || 'Agendada');
+    const statusLower = status.toLowerCase();
+    const badgeClass = statusLower === 'realizada' ? 'badge-success'
+                     : statusLower === 'cancelada' ? 'badge-error'
+                     : 'badge-warning';
+    const dur = calcularDuracao(
+      typeof e.horaInicio === 'string' ? e.horaInicio.slice(0,5) : '',
+      typeof e.horaFim    === 'string' ? e.horaFim.slice(0,5)    : ''
+    );
+    return `
+      <div class="escala-day-card" id="escala-card-${e.id}">
+        <div class="escala-day-header" style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;">
+          <div>
+            <div class="escala-day-title">${formatDate(data)}</div>
+            <div class="escala-day-date">
+              ${(e.horaInicio||'').slice(0,5)} – ${(e.horaFim||'').slice(0,5)}
+              ${dur ? `<span style="color:var(--text-muted);margin-left:6px;">(${dur}h)</span>` : ''}
+              ${e.observacoes ? `<span style="color:var(--text-muted);margin-left:8px;">· ${esc(e.observacoes)}</span>` : ''}
+            </div>
+          </div>
+          <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+            <span class="badge ${badgeClass}">${status}</span>
+            <button class="btn btn-sm btn-outline" onclick="abrirGerenciarFuncionarios(${e.id})" title="Gerenciar equipe">
+              <i class="fa fa-users"></i> Equipe
+            </button>
+            <button class="btn btn-sm btn-ghost" onclick="abrirEditarEscala(${e.id})" title="Editar">
+              <i class="fa fa-edit"></i>
+            </button>
+            <button class="btn btn-sm btn-ghost" style="color:var(--error);" onclick="confirmarExclusaoEscala(${e.id})" title="Excluir">
+              <i class="fa fa-trash"></i>
+            </button>
+          </div>
+        </div>
+        <div class="escala-funcionarios-container" id="esc-fns-${e.id}">
+          <div style="padding:12px 20px;color:var(--text-muted);font-size:.85rem;">
+            <i class="fa fa-spinner fa-spin"></i> Carregando equipe...
+          </div>
+        </div>
+      </div>`;
+  }).join('');
 
-  el.innerHTML = Object.entries(grupos).map(([data, lista]) => `
-    <div class="schedule-date-group">
-      <div class="schedule-date-label">
-        <i class="fa fa-calendar-day"></i> ${formatDate(data)} — ${lista.length} escala${lista.length !== 1 ? 's' : ''}
-      </div>
-      ${lista.map(e => {
-        const fl = freelancers.find(f => f.id === e.freelancerId) || {};
-        const dur = calcularDuracao(e.horaInicio, e.horaFim);
-        return `
-          <div class="schedule-card ${e.status}">
-            <div class="sc-time">
-              <div class="time-range">${e.horaInicio || '--'}–${e.horaFim || '--'}</div>
-              <div class="time-hours">${dur ? dur + 'h' : '—'}</div>
-            </div>
-            <div class="sc-info">
-              <div class="sc-name">${esc(fl.nome || 'Freelancer não encontrado')}</div>
-              <div class="sc-meta">${esc(e.funcao || fl.especialidade || '—')}${e.observacoes ? ' · ' + esc(e.observacoes) : ''}</div>
-            </div>
-            <span class="badge ${statusBadge(e.status)}">${e.status}</span>
-            <div class="sc-value">${e.valorTotal ? 'R$ ' + parseFloat(e.valorTotal).toFixed(2).replace('.', ',') : '—'}</div>
-            <div class="sc-actions">
-              <button class="btn btn-sm btn-ghost" onclick="editarEscala(${e.id})" title="Editar"><i class="fa fa-edit"></i></button>
-              <button class="btn btn-sm btn-ghost" style="color:var(--error);" onclick="confirmarExclusaoEscala(${e.id})" title="Excluir"><i class="fa fa-trash"></i></button>
-            </div>
-          </div>`;
-      }).join('')}
-    </div>`
-  ).join('');
+  // Carrega funcionários de cada escala em paralelo
+  await Promise.all(filtered.map(e => carregarFuncionariosNoCard(e, freelancers)));
 }
 
-// ── Abrir modal de nova escala ──
-async function abrirModalEscala() {
+// ── Carrega e renderiza os funcionários dentro do card de uma escala ──
+async function carregarFuncionariosNoCard(escala, freelancers) {
+  const container = document.getElementById(`esc-fns-${escala.id}`);
+  if (!container) return;
+
+  let vincs = [];
+  try {
+    vincs = await EscalaFuncionarioAPI.listar(escala.id);
+  } catch (e) { vincs = []; }
+
+  if (vincs.length === 0) {
+    container.innerHTML = `
+      <div style="padding:14px 20px;color:var(--text-muted);font-size:.85rem;display:flex;align-items:center;gap:8px;">
+        <i class="fa fa-user-plus"></i>
+        Nenhum funcionário escalado.
+        <button class="btn btn-sm btn-primary" onclick="abrirGerenciarFuncionarios(${escala.id})" style="margin-left:8px;">
+          <i class="fa fa-plus"></i> Adicionar
+        </button>
+      </div>`;
+    return;
+  }
+
+  // Agrupa por setor
+  const grupos = {};
+  let totalGeral = 0;
+  vincs.forEach(v => {
+    const setor = v.setorNome || 'Sem setor';
+    if (!grupos[setor]) grupos[setor] = [];
+    grupos[setor].push(v);
+    totalGeral += parseFloat(v.valorTotal || 0);
+  });
+
+  const setorColors = {
+    'Cozinha': '#2563EB', 'Garçom': '#16A34A', 'Atividades': '#9333EA',
+    'Bar': '#D97706', 'Recepção': '#0891B2'
+  };
+
+  const html = Object.entries(grupos).map(([setor, lista]) => {
+    const cor = setorColors[setor] || '#6B7280';
+    const subtotal = lista.reduce((s, v) => s + parseFloat(v.valorTotal || 0), 0);
+    return `
+      <div class="escala-area-section">
+        <div class="escala-area-title" style="color:${cor};display:flex;align-items:center;justify-content:space-between;">
+          <span><i class="fa fa-circle" style="font-size:.55rem;margin-right:6px;"></i>${setor}</span>
+          <span style="font-weight:600;">R$ ${subtotal.toFixed(2)}</span>
+        </div>
+        ${lista.map(v => {
+          const fl = freelancers.find(f => f.id === v.freelancerId) || {};
+          const nome = v.freelancerNome || fl.nome || 'Funcionário';
+          const valor = parseFloat(v.valorTotal || 0).toFixed(2);
+          return `
+            <div class="escala-person">
+              <div class="escala-person-name">${esc(nome)}</div>
+              <div style="display:flex;align-items:center;gap:10px;">
+                <span style="font-size:.82rem;font-weight:600;color:var(--success);">R$ ${valor}</span>
+                <button class="escala-person-btn remove" onclick="removerFuncionarioEscala(${escala.id}, ${v.id})" title="Remover">
+                  <i class="fa fa-times" style="font-size:.75rem;"></i>
+                </button>
+              </div>
+            </div>`;
+        }).join('')}
+      </div>`;
+  }).join('');
+
+  const footer = `
+    <div style="padding:10px 20px;border-top:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;font-size:.85rem;">
+      <span style="color:var(--text-muted);">${vincs.length} funcionário${vincs.length !== 1 ? 's' : ''} escalado${vincs.length !== 1 ? 's' : ''}</span>
+      <span style="font-weight:700;color:var(--primary);">Total: R$ ${totalGeral.toFixed(2)}</span>
+    </div>`;
+
+  container.innerHTML = html + footer;
+
+  // Atualiza stat de gasto total
+  atualizarGastoEscala();
+}
+
+// ── Atualiza o stat de custo total das escalas ──
+async function atualizarGastoEscala() {
+  try {
+    const escalas = await EscalaAPI.listar();
+    let total = 0;
+    await Promise.all(escalas.map(async e => {
+      try {
+        const vincs = await EscalaFuncionarioAPI.listar(e.id);
+        vincs.forEach(v => { total += parseFloat(v.valorTotal || 0); });
+      } catch {}
+    }));
+    const el = document.getElementById('esc-gasto');
+    if (el) el.textContent = 'R$ ' + total.toFixed(2).replace('.', ',');
+  } catch {}
+}
+
+// ── Abrir modal de NOVA escala ──
+function abrirModalEscala() {
   limparFormEscala();
-
-  // Popula select de freelancers ativos
-  await populateFreelancerSelect();
-
-  // Data padrão: hoje
-  document.getElementById('esc-data').value = new Date().toISOString().slice(0, 10);
-
   document.getElementById('modal-esc-title').textContent    = 'Nova Escala';
-  document.getElementById('modal-esc-subtitle').textContent = 'Defina data, horário e profissional';
-  document.getElementById('btn-esc-save-text').textContent  = 'Salvar';
+  document.getElementById('modal-esc-subtitle').textContent = 'Defina a data e o horário do evento';
+  document.getElementById('btn-esc-save-text').textContent  = 'Salvar Escala';
+  document.getElementById('esc-data').value = new Date().toISOString().slice(0, 10);
   abrirModal('modal-escala');
 }
 
-// ── Editar escala ──
-async function editarEscala(id) {
+// ── Abrir modal para EDITAR escala existente ──
+async function abrirEditarEscala(id) {
   limparFormEscala();
-  await populateFreelancerSelect();
-
   const list = await EscalaAPI.listar();
   const e = list.find(e => e.id === id);
   if (!e) { showToast('Escala não encontrada.', 'error'); return; }
 
   document.getElementById('esc-id').value          = e.id;
-  document.getElementById('esc-data').value        = e.data        || '';
-  document.getElementById('esc-freelancer').value  = e.freelancerId || '';
-  document.getElementById('esc-hora-inicio').value = e.horaInicio  || '';
-  document.getElementById('esc-hora-fim').value    = e.horaFim     || '';
-  document.getElementById('esc-funcao').value      = e.funcao      || '';
-  document.getElementById('esc-status').value      = e.status      || 'pendente';
+  document.getElementById('esc-data').value        = e.dataEscala || e.data || '';
+  document.getElementById('esc-hora-inicio').value = (e.horaInicio||'').slice(0,5);
+  document.getElementById('esc-hora-fim').value    = (e.horaFim||'').slice(0,5);
+  document.getElementById('esc-status').value      = e.statusEscala || e.status || 'Agendada';
   document.getElementById('esc-observacoes').value = e.observacoes || '';
 
   calcularValorEscala();
 
   document.getElementById('modal-esc-title').textContent    = 'Editar Escala';
-  document.getElementById('modal-esc-subtitle').textContent = 'Atualize os dados da escala';
+  document.getElementById('modal-esc-subtitle').textContent = 'Atualize os dados do evento';
   document.getElementById('btn-esc-save-text').textContent  = 'Atualizar';
   abrirModal('modal-escala');
 }
 
-async function populateFreelancerSelect() {
-  const freelancers = await FreelancerAPI.listar();
-  const ativos = freelancers.filter(f => f.status === 'ativo');
-  const sel = document.getElementById('esc-freelancer');
-  sel.innerHTML = '<option value="">Selecione o freelancer...</option>' +
-    ativos.map(f => `<option value="${f.id}" data-valor="${f.valorHora || 0}">${esc(f.nome)} — ${esc(f.especialidade || '—')}</option>`).join('');
-
-  sel.addEventListener('change', calcularValorEscala);
-}
-
-// ── Calcular valor estimado ──
-function calcularValorEscala() {
-  const inicio  = document.getElementById('esc-hora-inicio').value;
-  const fim     = document.getElementById('esc-hora-fim').value;
-  const flSel   = document.getElementById('esc-freelancer');
-  const option  = flSel.selectedOptions[0];
-  const vHora   = option ? parseFloat(option.dataset.valor || 0) : 0;
-
-  const dur = calcularDuracao(inicio, fim);
-
-  document.getElementById('esc-duracao').textContent       = dur ? dur + 'h' : '—';
-  document.getElementById('esc-valor-hora-display').textContent = vHora ? 'R$ ' + vHora.toFixed(2).replace('.', ',') : '—';
-
-  if (dur && vHora) {
-    const total = dur * vHora;
-    document.getElementById('esc-total-display').textContent = 'R$ ' + total.toFixed(2).replace('.', ',');
-    document.getElementById('esc-valor-total').value = total.toFixed(2);
-  } else {
-    document.getElementById('esc-total-display').textContent = '—';
-    document.getElementById('esc-valor-total').value = '';
-  }
-}
-
-// ── Salvar escala ──
+// ── Salvar escala (criar ou atualizar) ──
 async function salvarEscala() {
   clearModalAlert('modal-esc-alert');
 
   const data       = document.getElementById('esc-data').value;
-  const freelId    = document.getElementById('esc-freelancer').value;
   const horaInicio = document.getElementById('esc-hora-inicio').value;
   const horaFim    = document.getElementById('esc-hora-fim').value;
 
   let valid = true;
-  if (!data)      { setFieldError('esc-data', true);       valid = false; } else setFieldError('esc-data', false);
-  if (!freelId)   { setFieldError('esc-freelancer', true); valid = false; } else setFieldError('esc-freelancer', false);
-  if (!horaInicio){ setFieldError('esc-hora-inicio', true); valid = false; } else setFieldError('esc-hora-inicio', false);
-  if (!horaFim)   { setFieldError('esc-hora-fim', true);   valid = false; } else setFieldError('esc-hora-fim', false);
+  if (!data)       { setFieldError('esc-data', true);       valid = false; } else setFieldError('esc-data', false);
+  if (!horaInicio) { setFieldError('esc-hora-inicio', true); valid = false; } else setFieldError('esc-hora-inicio', false);
+  if (!horaFim)    { setFieldError('esc-hora-fim', true);   valid = false; } else setFieldError('esc-hora-fim', false);
 
   if (!valid) { showModalAlert('modal-esc-alert', 'Preencha todos os campos obrigatórios.'); return; }
-
   if (horaFim <= horaInicio) {
     showModalAlert('modal-esc-alert', 'O horário de término deve ser após o início.');
     return;
   }
 
-  // Java LocalTime exige formato "HH:MM:SS" — o input HTML retorna "HH:MM"
-  const horaInicioFmt = horaInicio.length === 5 ? horaInicio + ':00' : horaInicio;
-  const horaFimFmt    = horaFim.length    === 5 ? horaFim    + ':00' : horaFim;
+  const toSeconds = h => h.length === 5 ? h + ':00' : h;
 
   const dados = {
-    data,
-    freelancerId: parseInt(freelId),
-    horaInicio:   horaInicioFmt,
-    horaFim:      horaFimFmt,
-    funcao:       document.getElementById('esc-funcao').value,
-    status:       document.getElementById('esc-status').value,
-    observacoes:  document.getElementById('esc-observacoes').value.trim(),
-    valorTotal:   parseFloat(document.getElementById('esc-valor-total').value) || 0,
+    dataEscala:  data,
+    horaInicio:  toSeconds(horaInicio),
+    horaFim:     toSeconds(horaFim),
+    statusEscala: document.getElementById('esc-status').value,
+    observacoes: document.getElementById('esc-observacoes').value.trim(),
   };
 
   setBtnLoading('btn-salvar-escala', 'btn-esc-save-text', 'btn-esc-spinner', true);
 
   try {
     const id = document.getElementById('esc-id').value;
+    let escala;
     if (id) {
-      await EscalaAPI.atualizar(parseInt(id), dados);
-      showToast('Escala atualizada com sucesso!', 'success');
+      escala = await EscalaAPI.atualizar(parseInt(id), dados);
+      showToast('Escala atualizada!', 'success');
+      fecharModal('modal-escala');
     } else {
-      await EscalaAPI.criar(dados);
-      showToast('Escala cadastrada com sucesso!', 'success');
+      escala = await EscalaAPI.criar(dados);
+      showToast('Escala criada! Agora adicione os funcionários.', 'success');
+      fecharModal('modal-escala');
+      // Abre o modal de gerenciar funcionários automaticamente
+      setTimeout(() => abrirGerenciarFuncionarios(escala.id || escala), 300);
     }
-
-    fecharModal('modal-escala');
     await renderEscalas();
     updateDashboard();
     renderPagamentos();
@@ -782,9 +834,199 @@ async function salvarEscala() {
   }
 }
 
+// ── Abrir modal de GERENCIAR FUNCIONÁRIOS de uma escala ──
+async function abrirGerenciarFuncionarios(escalaId) {
+  // Salva o escalaId no modal
+  document.getElementById('modal-gf-escala-id').value = escalaId;
+
+  // Busca dados da escala para o header
+  try {
+    const list = await EscalaAPI.listar();
+    const e = list.find(e => e.id === escalaId || e.id === parseInt(escalaId));
+    if (e) {
+      const data = formatDate(e.dataEscala || e.data || '');
+      const hIni = (e.horaInicio||'').slice(0,5);
+      const hFim = (e.horaFim||'').slice(0,5);
+      document.getElementById('modal-gf-header').textContent = `${data} · ${hIni} – ${hFim}`;
+    }
+  } catch {}
+
+  // Popula selects de funcionários e setores
+  await populateGFSelects(escalaId);
+
+  // Renderiza a lista atual
+  await renderFuncionariosNaEscala(escalaId);
+
+  abrirModal('modal-gerenciar-funcionarios');
+}
+
+// ── Popula os selects do modal de funcionários ──
+async function populateGFSelects(escalaId) {
+  const [fls, setores] = await Promise.all([
+    FreelancerAPI.listar(),
+    SetorAPI.listar()
+  ]);
+
+  const ativos = fls.filter(f => f.status === 'ativo');
+
+  const selFl = document.getElementById('gf-freelancer');
+  selFl.innerHTML = '<option value="">Selecione o funcionário...</option>' +
+    ativos.map(f => `<option value="${f.id}" data-valor="${f.valorHora || 0}">${esc(f.nome)} — ${esc(f.especialidade||'')}</option>`).join('');
+
+  const selSt = document.getElementById('gf-setor');
+  selSt.innerHTML = '<option value="">Selecione o setor...</option>' +
+    setores.map(s => `<option value="${s.id}">${esc(s.nome)}</option>`).join('');
+
+  selFl.onchange = calcularGFValor;
+}
+
+// ── Calcula o valor estimado no modal de funcionários ──
+function calcularGFValor() {
+  const selFl  = document.getElementById('gf-freelancer');
+  const option = selFl.selectedOptions[0];
+  const vHora  = option ? parseFloat(option.dataset.valor || 0) : 0;
+
+  const escalaId = document.getElementById('modal-gf-escala-id').value;
+
+  // Tenta calcular pela duração da escala
+  EscalaAPI.listar().then(list => {
+    const e = list.find(e => e.id === parseInt(escalaId) || e.id === escalaId);
+    const dur = e ? calcularDuracao((e.horaInicio||'').slice(0,5), (e.horaFim||'').slice(0,5)) : null;
+    const total = dur && vHora ? (dur * vHora) : null;
+
+    document.getElementById('gf-valor-hora-display').textContent = vHora ? 'R$ ' + vHora.toFixed(2) : '—';
+    document.getElementById('gf-duracao-display').textContent    = dur ? dur + 'h' : '—';
+    document.getElementById('gf-total-display').textContent      = total ? 'R$ ' + total.toFixed(2) : '—';
+  }).catch(() => {});
+}
+
+// ── Adicionar funcionário à escala ──
+async function adicionarFuncionarioEscala() {
+  const escalaId   = parseInt(document.getElementById('modal-gf-escala-id').value);
+  const freelId    = document.getElementById('gf-freelancer').value;
+  const setorId    = document.getElementById('gf-setor').value;
+
+  if (!freelId) { showToast('Selecione o funcionário.', 'warning'); return; }
+  if (!setorId) { showToast('Selecione o setor.', 'warning'); return; }
+
+  const btn = document.getElementById('btn-adicionar-fn');
+  btn.disabled = true;
+  btn.innerHTML = '<i class="fa fa-spinner fa-spin"></i>';
+
+  try {
+    await EscalaFuncionarioAPI.adicionar(escalaId, {
+      freelancerId: parseInt(freelId),
+      setorId: parseInt(setorId)
+    });
+    showToast('Funcionário adicionado!', 'success');
+    document.getElementById('gf-freelancer').value = '';
+    document.getElementById('gf-setor').value = '';
+    document.getElementById('gf-valor-hora-display').textContent = '—';
+    document.getElementById('gf-duracao-display').textContent    = '—';
+    document.getElementById('gf-total-display').textContent      = '—';
+    await renderFuncionariosNaEscala(escalaId);
+    // Atualiza também o card na tela de escalas
+    const escalas = await EscalaAPI.listar();
+    const freelancers = await FreelancerAPI.listar();
+    const escala = escalas.find(e => e.id === escalaId);
+    if (escala) carregarFuncionariosNoCard(escala, freelancers);
+  } catch (err) {
+    showToast(err.message || 'Erro ao adicionar.', 'error');
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = '<i class="fa fa-plus"></i> Adicionar';
+  }
+}
+
+// ── Remover funcionário de uma escala ──
+async function removerFuncionarioEscala(escalaId, vinculoId) {
+  try {
+    await EscalaFuncionarioAPI.remover(escalaId, vinculoId);
+    showToast('Funcionário removido.', 'success');
+    await renderFuncionariosNaEscala(escalaId);
+    // Atualiza o card na tela
+    const escalas = await EscalaAPI.listar();
+    const freelancers = await FreelancerAPI.listar();
+    const escala = escalas.find(e => e.id === escalaId);
+    if (escala) carregarFuncionariosNoCard(escala, freelancers);
+  } catch (err) {
+    showToast(err.message || 'Erro ao remover.', 'error');
+  }
+}
+
+// ── Renderiza lista de funcionários DENTRO do modal de gerenciar ──
+async function renderFuncionariosNaEscala(escalaId) {
+  const container = document.getElementById('gf-lista');
+  if (!container) return;
+
+  container.innerHTML = '<div style="padding:12px;color:var(--text-muted);font-size:.85rem;"><i class="fa fa-spinner fa-spin"></i> Carregando...</div>';
+
+  let vincs = [];
+  try { vincs = await EscalaFuncionarioAPI.listar(escalaId); } catch {}
+
+  if (vincs.length === 0) {
+    container.innerHTML = `
+      <div class="empty-state" style="padding:24px;">
+        <div class="empty-icon">👥</div>
+        <h4>Nenhum funcionário ainda</h4>
+        <p>Use o formulário acima para adicionar.</p>
+      </div>`;
+    return;
+  }
+
+  // Agrupa por setor
+  const grupos = {};
+  let totalGeral = 0;
+  vincs.forEach(v => {
+    const setor = v.setorNome || 'Sem setor';
+    if (!grupos[setor]) grupos[setor] = [];
+    grupos[setor].push(v);
+    totalGeral += parseFloat(v.valorTotal || 0);
+  });
+
+  const setorColors = {
+    'Cozinha': '#2563EB', 'Garçom': '#16A34A', 'Atividades': '#9333EA',
+    'Bar': '#D97706', 'Recepção': '#0891B2'
+  };
+
+  container.innerHTML = Object.entries(grupos).map(([setor, lista]) => {
+    const cor = setorColors[setor] || '#6B7280';
+    return `
+      <div style="margin-bottom:16px;">
+        <div style="font-size:.72rem;font-weight:700;color:${cor};text-transform:uppercase;letter-spacing:.08em;margin-bottom:8px;padding:6px 12px;background:${cor}18;border-radius:6px;">
+          ${setor} — ${lista.length} funcionário${lista.length !== 1 ? 's' : ''}
+        </div>
+        ${lista.map(v => {
+          const nome  = v.freelancerNome || 'Funcionário';
+          const valor = parseFloat(v.valorTotal || 0).toFixed(2);
+          const dist  = v.freelancerDistancia != null ? `${v.freelancerDistancia} km` : '';
+          return `
+            <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 12px;background:var(--border-light);border-radius:8px;margin-bottom:6px;">
+              <div>
+                <div style="font-size:.88rem;font-weight:600;">${esc(nome)}</div>
+                ${dist ? `<div style="font-size:.75rem;color:var(--text-muted);">${dist} do Rancho</div>` : ''}
+              </div>
+              <div style="display:flex;align-items:center;gap:10px;">
+                <span style="font-size:.85rem;font-weight:700;color:var(--success);">R$ ${valor}</span>
+                <button onclick="removerFuncionarioEscala(${escalaId}, ${v.id})"
+                        style="width:28px;height:28px;border-radius:50%;border:none;background:var(--error-bg);color:var(--error);cursor:pointer;display:flex;align-items:center;justify-content:center;"
+                        title="Remover">
+                  <i class="fa fa-times" style="font-size:.75rem;"></i>
+                </button>
+              </div>
+            </div>`;
+        }).join('')}
+      </div>`;
+  }).join('') + `
+    <div style="padding:10px 12px;border-top:1px solid var(--border);margin-top:8px;display:flex;justify-content:space-between;font-size:.85rem;">
+      <span style="color:var(--text-muted);">${vincs.length} funcionário${vincs.length !== 1 ? 's' : ''} total</span>
+      <span style="font-weight:700;color:var(--primary);">Custo: R$ ${totalGeral.toFixed(2)}</span>
+    </div>`;
+}
+
 function confirmarExclusaoEscala(id) {
   document.getElementById('confirm-title').textContent = 'Excluir escala?';
-  document.getElementById('confirm-msg').textContent   = 'Esta ação não pode ser desfeita.';
+  document.getElementById('confirm-msg').textContent   = 'Todos os funcionários vinculados serão removidos. Esta ação não pode ser desfeita.';
 
   const btn = document.getElementById('btn-confirmar-delete');
   btn.onclick = async () => {
@@ -799,7 +1041,6 @@ function confirmarExclusaoEscala(id) {
       showToast(err.message || 'Erro ao excluir.', 'error');
     }
   };
-
   abrirModal('modal-confirmar');
 }
 

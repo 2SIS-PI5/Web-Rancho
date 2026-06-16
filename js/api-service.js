@@ -272,10 +272,6 @@ const EscalaAPI = {
 // ══════════════════════════════════════════════════════════════
 
 const PagamentoAPI = {
-  /**
-   * Listar pagamentos
-   * GET /api/pagamentos
-   */
   async listar() {
     try {
       const res = await fetch(`${API_BASE}/pagamentos`, { headers: authHeaders() });
@@ -286,10 +282,6 @@ const PagamentoAPI = {
     }
   },
 
-  /**
-   * Marcar como pago
-   * PUT /api/pagamentos/{id}/pagar
-   */
   async marcarPago(id) {
     try {
       const res = await fetch(`${API_BASE}/pagamentos/${id}/pagar`, {
@@ -303,6 +295,106 @@ const PagamentoAPI = {
         list = list.map(p => p.id === id ? { ...p, statusPagamento: 'pago', dataPagamento: new Date().toISOString() } : p);
         lsSet('rc_pagamentos', list);
         return { success: true };
+      }
+      throw err;
+    }
+  }
+};
+
+// ══════════════════════════════════════════════════════════════
+// ESCALA FUNCIONARIO API
+// Gerencia o vínculo entre funcionários e uma escala
+// ══════════════════════════════════════════════════════════════
+
+const EscalaFuncionarioAPI = {
+  /**
+   * Listar funcionários de uma escala
+   * GET /api/escalas/{escalaId}/funcionarios
+   */
+  async listar(escalaId) {
+    try {
+      const res = await fetch(`${API_BASE}/escalas/${escalaId}/funcionarios`, { headers: authHeaders() });
+      return handleResponse(res);
+    } catch (err) {
+      if (isDemoMode(err)) {
+        const all = lsGet('rc_escala_funcionarios');
+        return all.filter(ef => ef.escalaId === escalaId);
+      }
+      throw err;
+    }
+  },
+
+  /**
+   * Adicionar funcionário a uma escala
+   * POST /api/escalas/{escalaId}/funcionarios
+   * Body: { freelancerId, setorId }
+   */
+  async adicionar(escalaId, dados) {
+    try {
+      const res = await fetch(`${API_BASE}/escalas/${escalaId}/funcionarios`, {
+        method: 'POST',
+        headers: authJsonHeaders(),
+        body: JSON.stringify({ ...dados, escalaId })
+      });
+      return handleResponse(res);
+    } catch (err) {
+      if (isDemoMode(err)) {
+        const list = lsGet('rc_escala_funcionarios');
+        const novo = { ...dados, id: nextId(list), escalaId };
+        list.push(novo);
+        lsSet('rc_escala_funcionarios', list);
+        return novo;
+      }
+      throw err;
+    }
+  },
+
+  /**
+   * Remover funcionário de uma escala
+   * DELETE /api/escalas/{escalaId}/funcionarios/{id}
+   */
+  async remover(escalaId, vinculoId) {
+    try {
+      const res = await fetch(`${API_BASE}/escalas/${escalaId}/funcionarios/${vinculoId}`, {
+        method: 'DELETE',
+        headers: authHeaders()
+      });
+      return handleResponse(res);
+    } catch (err) {
+      if (isDemoMode(err)) {
+        let list = lsGet('rc_escala_funcionarios');
+        list = list.filter(ef => ef.id !== vinculoId);
+        lsSet('rc_escala_funcionarios', list);
+        return { success: true };
+      }
+      throw err;
+    }
+  }
+};
+
+// ══════════════════════════════════════════════════════════════
+// SETOR API
+// ══════════════════════════════════════════════════════════════
+
+const SetorAPI = {
+  /**
+   * Listar todos os setores
+   * GET /api/setores
+   */
+  async listar() {
+    try {
+      const res = await fetch(`${API_BASE}/setores`, { headers: authHeaders() });
+      return handleResponse(res);
+    } catch (err) {
+      if (isDemoMode(err)) {
+        // Setores padrão em modo demo
+        return lsGet('rc_setores', [
+          { id: 1, nome: 'Cozinha' },
+          { id: 2, nome: 'Garçom' },
+          { id: 3, nome: 'Atividades' },
+          { id: 4, nome: 'Bar' },
+          { id: 5, nome: 'Recepção' }
+        ]);
       }
       throw err;
     }
