@@ -1,0 +1,528 @@
+.headerFuncionarios {
+    width: 100%;
+    height: 20vh;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.headerFuncionarios .tituloFuncionarios {
+    display: flex;
+    flex-direction: column;
+    line-height: 37px;
+    width: 75%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: start;
+    justify-content: center;
+}
+
+.headerFuncionarios .tituloFuncionarios h1,
+.headerFuncionarios .tituloFuncionarios p {
+    margin-left: 4%;
+}
+
+.headerFuncionarios .tituloFuncionarios h1 {
+    font-weight: 550;
+    font-size: 27px;
+}
+
+.headerFuncionarios .tituloFuncionarios p {
+    font-weight: 380;
+    color: rgba(92, 92, 92, 0.823);
+}
+
+.btnAdicionarFuncionario {
+    width: 25%;
+    height: 100%;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+}
+
+.btnAdicionarFuncionario button {
+    width: 65%;
+    height: 30%;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    background-color: #eb4a0a;
+    border: 1px solid rgba(186, 184, 184, 0.553);
+    border-radius: 12px;
+    cursor: pointer;
+    color: white;
+    gap: 2%;
+}
+
+.btnAdicionarFuncionario button p {
+    display: flex;
+    font-size: 15px;
+    font-weight: 500;
+}
+
+.containerFuncionarios {
+    width: 100%;
+    height: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    align-items: center;
+    justify-content: start;
+}
+
+.inputPesquisa {
+    width: 94%;
+    height: 6.5vh;
+    background-color: white;
+    border: 1px solid rgb(225, 224, 224);
+    border-radius: 14px;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: start;
+}
+
+.inputPesquisa:focus-within {
+    outline: 2.3px solid #f56715;
+    outline-offset: 1px;
+    box-shadow: 0 0 0 2px rgba(245, 103, 21, 0.2);
+}
+
+.inputPesquisa svg {
+    width: 5%;
+    height: 50%;
+    color: #5c5c5d;
+}
+
+.inputPesquisa input {
+    width: 88%;
+    height: 100%;
+    border: none;
+    outline: none;
+    font-size: 16px;
+}
+
+.inputPesquisa input::placeholder {
+    font-size: 15px;
+}
+
+.areaFiltroFuncionarios {
+    width: 94%;
+    height: 12vh;
+    display: flex;
+    flex-direction: column;
+    align-items: start;
+    justify-content: start;
+}
+
+.areaFiltroFuncionarios p {
+    margin-top: 5px;
+    font-weight: 600;
+}
+
+.btnsFiltros {
+    width: 40%;
+    height: 60%;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: start;
+    gap: 3.7%;
+}
+
+.btnsFiltros button {
+    width: 20%;
+    height: 80%;
+    background-color: white;
+    border: 1px solid rgb(225, 224, 224);
+    border-radius: 10px;
+    margin-top: 12px;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    font-weight: 600;
+    font-size: 15px;
+    cursor: pointer;
+}
+
+.btnsFiltros button:hover {
+    background-color: #eaeaea4c;
+}
+
+.btnsFiltros button:nth-child(1) {
+    width: 28%;
+}
+
+.btnsFiltros button:nth-child(2) {
+    width: 19%;
+}
+
+.btnsFiltros button:nth-child(3) {
+    width: 16%;
+}
+
+.btnsFiltros button:nth-child(4) {
+    width: 22%;
+}
+
+.containerCardFuncionarios {
+    width: 94%;
+    height: auto;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+}
+
+.cardFuncionario {
+    width: 23.5%;
+    height: 41vh;
+    background-color: white;
+    border: 1px solid rgb(225, 224, 224);
+    border-radius: 14px;
+    display: flex;
+    flex-direction: column;
+    align-items: start;
+}
+
+.nomeAreaLocalizacao {
+    width: 100%;
+    height: 25%;
+    display: flex;
+    flex-direction: column;
+    align-items: start;
+    justify-content: center;
+    gap: 2px;
+}
+
+.nomeFuncionario {
+    font-size: 16px;
+    font-weight: 600;
+    margin-left: 23px;
+    margin-top: 23.4px;
+}
+
+.areaFuncionario {
+    font-weight: 400;
+    font-size: 13px;
+    color: #696969;
+    margin-left: 23px;
+}
+
+.distanciaFuncionario {
+    color: rgb(0, 76, 255);
+    font-size: 11px;
+    font-weight: 500;
+    margin-left: 16px;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+}
+
+.distanciaFuncionario svg {
+    transform: scale(0.6);
+}
+
+.estrelasFuncionario {
+    width: 100%;
+    height: 10%;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: start;
+    margin-top: 10px;
+}
+
+.estrelasFuncionario svg:nth-child(1) {
+    margin-left: 16px;
+}
+
+.estrelasFuncionario svg {
+    color: rgb(255, 234, 0);
+    fill: rgb(255, 234, 0);
+    transform: scale(0.7);
+}
+
+.estrelasFuncionario p {
+    margin-left: 6px;
+    font-size: 12px;
+}
+
+.infosFuncionario {
+    width: 84.7%;
+    height: 40%;
+    display: flex;
+    flex-direction: column;
+    align-items: start;
+    justify-content: center;
+    margin-left: 22px;
+    border-top: 1px solid rgb(222, 222, 222);
+    gap: 2%;
+    margin-top: 10px;
+}
+
+.infosFuncionario p {
+    font-size: 13px;
+    color: #696969;
+}
+
+.infosFuncionario p:nth-child(1) {
+    margin-top: 6px;
+}
+
+.infosFuncionario p span {
+    color: rgb(36, 36, 36);
+}
+
+.btnsCardFuncionario {
+    width: 100%;
+    height: 20%;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    gap: 5%;
+}
+
+.btnsCardFuncionario button {
+    height: 54%;
+    width: 41%;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    gap: 1%;
+    border-radius: 8px;
+    border: none;
+    transition: 0.1s ease-in-out;
+    cursor: pointer;
+    color: white;
+    margin-bottom: 7px;
+}
+
+.btnsCardFuncionario button:hover {
+    transform: scale(1.01);
+}
+
+
+.btnsCardFuncionario button:nth-child(1) {
+    background-color: rgb(56, 56, 236);
+}
+
+.btnsCardFuncionario button:nth-child(1):hover {
+    background-color: rgb(61, 61, 255);
+}
+
+.btnsCardFuncionario button:nth-child(2) {
+    background-color: rgb(234, 32, 32);
+}
+
+.btnsCardFuncionario button:nth-child(2):hover {
+    background-color: rgb(243, 47, 47);
+}
+
+.btnsCardFuncionario button p {
+    font-weight: 600;
+    font-size: 12px;
+    margin-right: 3px;
+}
+
+.btnsCardFuncionario button svg {
+    transform: scale(0.65);
+}
+
+.overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+}
+
+.modalAdicionarFuncionario {
+    width: 580px;
+    height: 67vh;
+    background-color: white;
+    border-radius: 16px;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: start;
+}
+
+.modalHeader {
+    width: 100%;
+    height: 13%;
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    border-bottom: 1px solid rgba(186, 184, 184, 0.553);
+}
+
+.tituloModalAddFunc {
+    width: 70%;
+    height: 100%;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: start;
+    gap: 4%;
+}
+
+.tituloModalAddFunc h2 {
+    font-size: 20px;
+    font-weight: 600;
+    margin-left: 6%;
+}
+
+.tituloModalAddFunc p {
+    font-size: 16px;
+    font-weight: 400;
+    color: rgb(99, 99, 99);
+    margin-top: 0.6%;
+}
+
+.btnFecharModal {
+    width: 30%;
+    height: 50%;
+    background: transparent;
+    border: none;
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+}
+
+.btnFecharModal svg {
+    width: 70%;
+    height: 70%;
+    margin-top: 2.5%;
+    margin-left: 53%;
+    cursor: pointer;
+}
+
+.painelCadastroInfos {
+    width: 100%;
+    height: 48vh;
+    display: flex;
+    flex-direction: column;
+    align-items: self-start;
+    justify-content: center;
+    gap: 1.4%;
+}
+
+.duplaInputs {
+    width: 100%;
+    height: 25%;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+}
+
+.duplaInputs .inputInfo {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: start;
+    justify-content: center;
+    gap: 10%;
+}
+
+.duplaInputs .inputInfo input {
+    width: 80%;
+    height: 22%;
+    border: none;
+    border-radius: 8px;
+    padding: 10px;
+    border: 1px solid rgba(186, 184, 184, 0.553);
+}
+
+.duplaInputs .inputInfo select {
+    width: 87%;
+    height: 46%;
+    border: none;
+    border-radius: 8px;
+    padding: 5px;
+    border: 1px solid rgba(186, 184, 184, 0.553);
+}
+
+.inputInfo input[type="number"] {
+    appearance: textfield;
+    -moz-appearance: textfield;
+}
+
+.inputInfo input[type="number"]::-webkit-inner-spin-button,
+.inputInfo input[type="number"]::-webkit-outer-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+
+.duplaInputs .inputInfo:nth-child(1) {
+    margin-left: 23px;
+}
+
+.inputCheck {
+    width: 65%;
+    height: 15%;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: start;
+    gap: 5%;
+}
+
+.inputCheck input {
+    margin-left: 27.4px;
+    transform: scale(1.7);
+}
+
+.inputCheck p {
+    margin-bottom: 3px;
+}
+
+.btnModalCadastro {
+    width: 100%;
+    height: 8vh;
+    display: flex;
+    flex-direction: row;
+    align-items: start;
+    justify-content: center;
+    gap: 5%;
+}
+
+.btnModalCadastro button {
+    width: 44%;
+    height: 94%;
+    border: none;
+    border-radius: 10px;
+    font-weight: 500;
+    font-size: 15px;
+    cursor: pointer;
+}
+
+.btnModalCadastro button:nth-child(1) {
+    border: 1px solid rgba(186, 184, 184, 0.553);
+    background-color: white;
+}
+
+.btnModalCadastro button:nth-child(2) {
+    background-color: #eb4a0a;
+    color: white;
+}

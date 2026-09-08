@@ -1,0 +1,18 @@
+.input p {
+    color: black;
+    font-weight: 550;
+    font-size: 16px;
+}
+
+.input input {
+    width: 84%;
+    height: 50%;
+    border-radius: 12px;
+    border: 1.3px solid rgba(0, 0, 0, 0.129);
+    padding-left: 15px;
+}
+
+.input input::placeholder {
+    font-weight: 480;
+    font-size: 15px;
+}
