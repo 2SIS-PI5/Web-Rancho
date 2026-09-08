@@ -9,54 +9,60 @@ import {
     LogOut
 } from "lucide-react";
 
-import "./css/SideBar.css";
+import style from "./css/SideBar.module.css";
 
 
 function Sidebar() {
     return (
-        <aside className="sidebar">
-            <div className="titulo-side-bar">
-                <div className="nome-perfil">
+        <aside className={style.sideBar}>
+            <div className={style.tituloSideBar}>
+                <div className={style.nomePerfil}>
                     <p>RS</p>
                 </div>
-                <div className="nome-restaurante">
+                <div className={style.nomeRestaurante}>
                     <h1>Rancho do Comanche</h1>
                     <p>Gestão de Pessoas</p>
                 </div>
             </div>
-            <nav className="menu">
-                <NavLink to="/visao-geral" className="menu_item">
+            <nav className={style.menu}>
+                <NavLink to="/visao-geral" className={({ isActive }) =>
+                    isActive ? style.menuActive : style.menuItem}>
                     <House />
                     <span>Visão Geral</span>
                 </NavLink>
 
-                <NavLink to="/escala" className="menu_item">
+                <NavLink to="/escala" className={({ isActive }) =>
+                    isActive ? style.menuActive : style.menuItem}>
                     <CalendarDays />
                     <span>Escala</span>
                 </NavLink>
 
-                <NavLink to="/pagamento" className="menu_item">
+                <NavLink to="/pagamento" className={({ isActive }) =>
+                    isActive ? style.menuActive : style.menuItem}>
                     <WalletCards />
                     <span>Pagamento</span>
                 </NavLink>
 
-                <NavLink to="/funcionarios" className="menu_item">
+                <NavLink to="/funcionarios" className={({ isActive }) =>
+                    isActive ? style.menuActive : style.menuItem}>
                     <Users />
                     <span>Funcionários</span>
                 </NavLink>
 
-                <NavLink to="/avaliacoes" className="menu_item">
+                <NavLink to="/avaliacoes" className={({ isActive }) =>
+                    isActive ? style.menuActive : style.menuItem}>
                     <Star />
                     <span>Avaliações</span>
                 </NavLink>
 
-                <NavLink to="/historico" className="menu_item">
+                <NavLink to="/historico" className={({ isActive }) =>
+                    isActive ? style.menuActive : style.menuItem}>
                     <History />
                     <span>Histórico</span>
                 </NavLink>
             </nav>
-            <div className="sidebar-footer">
-                <button className="botao-sair">
+            <div className={style.sideBarFooter}>
+                <button className={style.botaoSair}>
                     <LogOut />
                     <p>Sair</p>
                 </button>

@@ -1,8 +1,7 @@
-import "./css/Login.css";
-
-import Logo from "../assets/logo_rancho.png";
-import Input from "../components/Input";
-import Button from "../components/Button";
+import style from "./css/Login.module.css"
+import Logo from "../../assets/logo_rancho.png";
+import Input from "../../components/Input";
+import Button from "../../components/Button";
 
 function Login() {
     function Entrar() {
@@ -10,19 +9,19 @@ function Login() {
     }
 
     return (
-        <div className="container">
-            <div className="painel_login">
-                <div className="titulo_logo">
-                    <div className="logo">
+        <div className={style.container}>
+            <div className={style.painelLogin}>
+                <div className={style.tituloLogo}>
+                    <div className={style.logo}>
                         <img src={Logo} alt="" />
                     </div>
 
-                    <div className="titulo">
+                    <div className={style.titulo}>
                         <h1>Rancho do Comanche</h1>
                         <p>Sistema de Gestão de Pagamentos</p>
                     </div>
                 </div>
-                <div className="inputs_login">
+                <div className={style.inputsLogin}>
                     <Input
                         label="E-mail"
                         id="inpt_email"
@@ -37,12 +36,12 @@ function Login() {
                         placeholder="••••••••"
                     />
                 </div>
-                <div className="botao_mensagem">
+                <div className={style.botaoMensagem}>
                     <Button
                         label="Entrar"
                         acao={Entrar}
                     />
-                    <p className="mensagem_acesso">Acesso exclusivo para gestores</p>
+                    <p className={style.mensagemAcesso}>Acesso exclusivo para gestores</p>
                 </div>
             </div>
 

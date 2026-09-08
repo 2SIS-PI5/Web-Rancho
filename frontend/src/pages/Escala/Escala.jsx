@@ -1,5 +1,7 @@
 import style from "./css/Escala.module.css";
+
 import { CalendarDays, ChevronDown, ChevronUp, Plus, X, User, Search } from "lucide-react";
+
 import { useState } from "react";
 
 function Escala() {
@@ -13,6 +15,30 @@ function Escala() {
   function fecharModalAdicionar() {
     setModalAdicionar(null);
   }
+
+  const areas = [
+    { id: "cozinha", nome: "Cozinha" },
+    { id: "salao", nome: "Salão" },
+    { id: "atividades", nome: "Atividades" },
+  ];
+
+  const datas = [
+    {
+      id: "2026-08-22",
+      diaSemana: "Sábado",
+      data: "22/08/2026"
+    },
+    {
+      id: "2026-08-23",
+      diaSemana: "Domingo",
+      data: "23/08/2026"
+    },
+    {
+      id: "2026-08-24",
+      diaSemana: "Segunda",
+      data: "24/08/2026"
+    },
+  ];
 
   return (
     <>
@@ -365,7 +391,7 @@ function Escala() {
                 <Search />
                 <input type="text" placeholder="Buscar funcionário..." />
               </div>
-              
+
               <div className={style.listaFuncionarios}>
 
                 <label className={style.cardFuncionario}>
