@@ -2,43 +2,122 @@ import style from "./css/Escala.module.css";
 
 import { CalendarDays, ChevronDown, ChevronUp, Plus, X, User, Search } from "lucide-react";
 
-import { useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import { api } from "../../services/api";
+
+const AREAS = ["Cozinha", "Salão", "Atividades"];
+
+function hojeISO(offset = 0) {
+  const data = new Date();
+  data.setDate(data.getDate() + offset);
+  return data.toISOString().slice(0, 10);
+}
+
+function formatarData(iso) {
+  const [ano, mes, dia] = iso.split("-");
+  const diaSemana = new Date(Number(ano), Number(mes) - 1, Number(dia)).toLocaleDateString("pt-BR", { weekday: "long" });
+  return { diaSemana: diaSemana.charAt(0).toUpperCase() + diaSemana.slice(1), dataFormatada: `${dia}/${mes}/${ano}` };
+}
 
 function Escala() {
   const [datasAberta, setDatasAberta] = useState(false);
+  const [novaData, setNovaData] = useState("");
+  const [datas, setDatas] = useState([hojeISO(0), hojeISO(1)]);
+  const [funcionarios, setFuncionarios] = useState([]);
+  const [escalas, setEscalas] = useState([]);
   const [modalAdicionar, setModalAdicionar] = useState(null);
+  const [buscaFuncionario, setBuscaFuncionario] = useState("");
+  const [selecionados, setSelecionados] = useState([]);
+  const [erro, setErro] = useState("");
 
-  function abrirModalAdicionar(area, dia) {
-    setModalAdicionar({ area, dia });
+  useEffect(() => {
+    api.listarFuncionarios().then(setFuncionarios).catch((error) => setErro(error.message));
+  }, []);
+
+  const intervalo = useMemo(() => {
+    if (datas.length === 0) return null;
+    const ordenadas = [...datas].sort();
+    return { inicio: ordenadas[0], fim: ordenadas[ordenadas.length - 1] };
+  }, [datas]);
+
+  async function carregarEscalas() {
+    if (!intervalo) return setEscalas([]);
+    try {
+      setEscalas(await api.listarEscalas(intervalo.inicio, intervalo.fim));
+    } catch (error) {
+      setErro(error.message);
+    }
+  }
+
+  useEffect(() => { carregarEscalas(); }, [intervalo]);
+
+  function adicionarData() {
+    if (!novaData || datas.includes(novaData)) return;
+    setDatas([...datas, novaData].sort());
+    setNovaData("");
+  }
+
+  function removerData(data) {
+    setDatas(datas.filter((item) => item !== data));
+  }
+
+  function abrirModalAdicionar(area, data) {
+    setModalAdicionar({ area, data });
+    setBuscaFuncionario("");
+    setSelecionados([]);
   }
 
   function fecharModalAdicionar() {
     setModalAdicionar(null);
   }
 
-  const areas = [
-    { id: "cozinha", nome: "Cozinha" },
-    { id: "salao", nome: "Salão" },
-    { id: "atividades", nome: "Atividades" },
-  ];
+  function toggleSelecionado(id) {
+    setSelecionados((atual) => (atual.includes(id) ? atual.filter((item) => item !== id) : [...atual, id]));
+  }
 
-  const datas = [
-    {
-      id: "2026-08-22",
-      diaSemana: "Sábado",
-      data: "22/08/2026"
-    },
-    {
-      id: "2026-08-23",
-      diaSemana: "Domingo",
-      data: "23/08/2026"
-    },
-    {
-      id: "2026-08-24",
-      diaSemana: "Segunda",
-      data: "24/08/2026"
-    },
-  ];
+  function escalasDoSlot(data, area) {
+    return escalas.filter((escala) => escala.data === data && escala.area === area);
+  }
+
+  async function confirmarAdicionar() {
+    if (!modalAdicionar) return;
+    try {
+      await Promise.all(selecionados.map((funcionarioId) =>
+        api.criarEscala({ data: modalAdicionar.data, area: modalAdicionar.area, funcionarioId, status: "PLANEJADA" })
+      ));
+      await carregarEscalas();
+      fecharModalAdicionar();
+    } catch (error) {
+      setErro(error.message);
+    }
+  }
+
+  async function removerEscalado(escalaId) {
+    try {
+      await api.removerEscala(escalaId);
+      await carregarEscalas();
+    } catch (error) {
+      setErro(error.message);
+    }
+  }
+
+  async function confirmarDia(data) {
+    try {
+      const doDia = escalas.filter((escala) => escala.data === data);
+      await Promise.all(doDia.map((escala) => api.atualizarStatusEscala(escala.id, "CONFIRMADA")));
+      await carregarEscalas();
+    } catch (error) {
+      setErro(error.message);
+    }
+  }
+
+  const funcionariosDisponiveis = modalAdicionar
+    ? funcionarios.filter((funcionario) =>
+      funcionario.area === modalAdicionar.area &&
+      funcionario.nome.toLowerCase().includes(buscaFuncionario.toLowerCase()) &&
+      !escalasDoSlot(modalAdicionar.data, modalAdicionar.area).some((escala) => escala.funcionario.id === funcionario.id)
+    )
+    : [];
 
   return (
     <>
@@ -61,317 +140,90 @@ function Escala() {
         </div>
       </div>
 
+      {erro && <p>{erro}</p>}
+
       <div className={style.containerDatas}>
         {datasAberta && (
           <div className={style.modalGerenciarDatas}>
             <div className={style.inserirData}>
-              <input type="date" />
-              <button className={style.btnAdicionarData}>
+              <input type="date" value={novaData} onChange={(event) => setNovaData(event.target.value)} />
+              <button className={style.btnAdicionarData} onClick={adicionarData}>
                 <Plus />
                 <p>Adicionar</p>
               </button>
-              <button className={style.btnSabDomAtual}>
-                <CalendarDays />
-                <p>Sáb/Dom Atual</p>
-              </button>
             </div>
             <div className={style.datasEscolhidas}>
-              <div className={style.dataEscolhida}>
-                <p>sábado, 22/08</p>
-                <button className={style.btnRemoverDataEscolhida}>
-                  <X />
-                </button>
-              </div>
-              <div className={style.dataEscolhida}>
-                <p>domingo, 23/08</p>
-                <button className={style.btnRemoverDataEscolhida}>
-                  <X />
-                </button>
-              </div>
+              {datas.map((data) => (
+                <div className={style.dataEscolhida} key={data}>
+                  <p>{formatarData(data).diaSemana}, {formatarData(data).dataFormatada}</p>
+                  <button className={style.btnRemoverDataEscolhida} onClick={() => removerData(data)}>
+                    <X />
+                  </button>
+                </div>
+              ))}
             </div>
           </div>
         )}
-        <div className={style.cardEscala}>
-          <div className={style.tituloCard}>
-            <div className={style.informacoesData}>
-              <div className={style.bolinhaData}></div>
-              <p className={style.diaSemanaEscala}>
-                Sábado
-              </p>
-              <p className={style.dataEscala}>
-                22/08/2026
-              </p>
-            </div>
-            <div className={style.escaladosBtnConfirmar}>
-              <div className={style.qtdEscalados}>
-                <p>0 escalados</p>
+
+        {datas.map((data) => {
+          const { diaSemana, dataFormatada } = formatarData(data);
+          const escalasDoDia = escalas.filter((escala) => escala.data === data);
+          return (
+            <div className={style.cardEscala} key={data}>
+              <div className={style.tituloCard}>
+                <div className={style.informacoesData}>
+                  <div className={style.bolinhaData}></div>
+                  <p className={style.diaSemanaEscala}>{diaSemana}</p>
+                  <p className={style.dataEscala}>{dataFormatada}</p>
+                </div>
+                <div className={style.escaladosBtnConfirmar}>
+                  <div className={style.qtdEscalados}>
+                    <p>{escalasDoDia.length} escalados</p>
+                  </div>
+
+                  <button className={style.btnConfirmarEscala} onClick={() => confirmarDia(data)}>
+                    <p>Confirmar</p>
+                  </button>
+                </div>
               </div>
 
-              <button className={style.btnConfirmarEscala}>
-                <p>Confirmar</p>
-              </button>
-            </div>
-          </div>
+              <div className={style.areasEscala}>
+                {AREAS.map((area) => {
+                  const escaladosArea = escalasDoSlot(data, area);
+                  return (
+                    <div className={style.area} key={area}>
+                      <div className={style.tituloArea}>
+                        <div className={style.bolinhaArea}></div>
 
-          <div className={style.areasEscala}>
-            <div className={style.area}>
-              <div className={style.tituloArea}>
-                <div className={style.bolinhaArea}></div>
+                        <p className={style.areaEscala}>{area}</p>
 
-                <p className={style.areaEscala}>
-                  Cozinha
-                </p>
+                        <p className={style.qtdEscaladosArea}>({escaladosArea.length})</p>
+                      </div>
 
-                <p className={style.qtdEscaladosArea}>
-                  (0)
-                </p>
-              </div>
+                      <div className={style.painelEscalados}>
+                        {escaladosArea.map((escala) => (
+                          <div key={escala.id} className={style.escaladoItem}>
+                            <p>{escala.funcionario.nome}</p>
+                            <button onClick={() => removerEscalado(escala.id)}>
+                              <X size={14} />
+                            </button>
+                          </div>
+                        ))}
+                      </div>
 
-              <div className={style.painelEscalados}></div>
-
-              <div className={style.btnAdicionar}>
-                <button onClick={() => abrirModalAdicionar("Cozinha", "sábado, 22/08")}>
-                  <Plus />
-                  <p>Adicionar Cozinha</p>
-                </button>
-              </div>
-            </div>
-
-            <div className={style.area}>
-              <div className={style.tituloArea}>
-                <div className={style.bolinhaArea}></div>
-
-                <p className={style.areaEscala}>
-                  Salão
-                </p>
-
-                <p className={style.qtdEscaladosArea}>
-                  (0)
-                </p>
-              </div>
-
-              <div className={style.painelEscalados}></div>
-
-              <div className={style.btnAdicionar}>
-                <button>
-                  <Plus />
-                  <p>Adicionar Salão</p>
-                </button>
+                      <div className={style.btnAdicionar}>
+                        <button onClick={() => abrirModalAdicionar(area, data)}>
+                          <Plus />
+                          <p>Adicionar {area}</p>
+                        </button>
+                      </div>
+                    </div>
+                  );
+                })}
               </div>
             </div>
-            <div className={style.area}>
-              <div className={style.tituloArea}>
-                <div className={style.bolinhaArea}></div>
-
-                <p className={style.areaEscala}>
-                  Atividades
-                </p>
-
-                <p className={style.qtdEscaladosArea}>
-                  (0)
-                </p>
-              </div>
-
-              <div className={style.painelEscalados}></div>
-
-              <div className={style.btnAdicionar}>
-                <button>
-                  <Plus />
-                  <p>Adicionar Atividades</p>
-                </button>
-              </div>
-            </div>
-          </div>
-
-        </div>
-        <div className={style.cardEscala}>
-          <div className={style.tituloCard}>
-            <div className={style.informacoesData}>
-              <div className={style.bolinhaData}></div>
-              <p className={style.diaSemanaEscala}>
-                Sábado
-              </p>
-              <p className={style.dataEscala}>
-                22/08/2026
-              </p>
-            </div>
-            <div className={style.escaladosBtnConfirmar}>
-              <div className={style.qtdEscalados}>
-                <p>0 escalados</p>
-              </div>
-
-              <button className={style.btnConfirmarEscala}>
-                <p>Confirmar</p>
-              </button>
-            </div>
-          </div>
-
-          <div className={style.areasEscala}>
-            <div className={style.area}>
-              <div className={style.tituloArea}>
-                <div className={style.bolinhaArea}></div>
-
-                <p className={style.areaEscala}>
-                  Cozinha
-                </p>
-
-                <p className={style.qtdEscaladosArea}>
-                  (0)
-                </p>
-              </div>
-
-              <div className={style.painelEscalados}></div>
-
-              <div className={style.btnAdicionar}>
-                <button>
-                  <Plus />
-                  <p>Adicionar Cozinha</p>
-                </button>
-              </div>
-            </div>
-
-            <div className={style.area}>
-              <div className={style.tituloArea}>
-                <div className={style.bolinhaArea}></div>
-
-                <p className={style.areaEscala}>
-                  Salão
-                </p>
-
-                <p className={style.qtdEscaladosArea}>
-                  (0)
-                </p>
-              </div>
-
-              <div className={style.painelEscalados}></div>
-
-              <div className={style.btnAdicionar}>
-                <button>
-                  <Plus />
-                  <p>Adicionar Salão</p>
-                </button>
-              </div>
-            </div>
-            <div className={style.area}>
-              <div className={style.tituloArea}>
-                <div className={style.bolinhaArea}></div>
-
-                <p className={style.areaEscala}>
-                  Atividades
-                </p>
-
-                <p className={style.qtdEscaladosArea}>
-                  (0)
-                </p>
-              </div>
-
-              <div className={style.painelEscalados}></div>
-
-              <div className={style.btnAdicionar}>
-                <button>
-                  <Plus />
-                  <p>Adicionar Atividades</p>
-                </button>
-              </div>
-            </div>
-          </div>
-
-        </div>
-        <div className={style.cardEscala}>
-          <div className={style.tituloCard}>
-            <div className={style.informacoesData}>
-              <div className={style.bolinhaData}></div>
-              <p className={style.diaSemanaEscala}>
-                Domingo
-              </p>
-              <p className={style.dataEscala}>
-                23/08/2026
-              </p>
-            </div>
-            <div className={style.escaladosBtnConfirmar}>
-              <div className={style.qtdEscalados}>
-                <p>0 escalados</p>
-              </div>
-
-              <button className={style.btnConfirmarEscala}>
-                <p>Confirmar</p>
-              </button>
-            </div>
-          </div>
-
-          <div className={style.areasEscala}>
-            <div className={style.area}>
-              <div className={style.tituloArea}>
-                <div className={style.bolinhaArea}></div>
-
-                <p className={style.areaEscala}>
-                  Cozinha
-                </p>
-
-                <p className={style.qtdEscaladosArea}>
-                  (0)
-                </p>
-              </div>
-
-              <div className={style.painelEscalados}></div>
-
-              <div className={style.btnAdicionar}>
-                <button>
-                  <Plus />
-                  <p>Adicionar Cozinha</p>
-                </button>
-              </div>
-            </div>
-
-            <div className={style.area}>
-              <div className={style.tituloArea}>
-                <div className={style.bolinhaArea}></div>
-
-                <p className={style.areaEscala}>
-                  Salão
-                </p>
-
-                <p className={style.qtdEscaladosArea}>
-                  (0)
-                </p>
-              </div>
-
-              <div className={style.painelEscalados}></div>
-
-              <div className={style.btnAdicionar}>
-                <button>
-                  <Plus />
-                  <p>Adicionar Salão</p>
-                </button>
-              </div>
-            </div>
-
-            <div className={style.area}>
-              <div className={style.tituloArea}>
-                <div className={style.bolinhaArea}></div>
-
-                <p className={style.areaEscala}>
-                  Atividades
-                </p>
-
-                <p className={style.qtdEscaladosArea}>
-                  (0)
-                </p>
-              </div>
-
-              <div className={style.painelEscalados}></div>
-
-              <div className={style.btnAdicionar}>
-                <button>
-                  <Plus />
-                  <p>Adicionar Atividades</p>
-                </button>
-              </div>
-            </div>
-
-          </div>
-
-        </div>
+          );
+        })}
       </div>
       {modalAdicionar && (
         <div className={style.overlay} onClick={fecharModalAdicionar}>
@@ -380,7 +232,7 @@ function Escala() {
               <div className={style.tituloModalAddFuncArea}>
                 <div className={style.corArea}></div>
                 <h2>{modalAdicionar.area}</h2>
-                <p> - {modalAdicionar.dia}</p>
+                <p> - {formatarData(modalAdicionar.data).diaSemana}, {formatarData(modalAdicionar.data).dataFormatada}</p>
               </div>
               <button className={style.btnFecharModal} onClick={fecharModalAdicionar}>
                 <X />
@@ -389,108 +241,37 @@ function Escala() {
             <div className={style.painelFuncionariosArea}>
               <div className={style.inputPesquisa}>
                 <Search />
-                <input type="text" placeholder="Buscar funcionário..." />
+                <input
+                  type="text"
+                  placeholder="Buscar funcionário..."
+                  value={buscaFuncionario}
+                  onChange={(event) => setBuscaFuncionario(event.target.value)}
+                />
               </div>
 
               <div className={style.listaFuncionarios}>
+                {funcionariosDisponiveis.map((funcionario) => (
+                  <label className={style.cardFuncionario} key={funcionario.id}>
+                    <div className={style.fotoFuncionario}>
+                      <User />
+                    </div>
 
-                <label className={style.cardFuncionario}>
-                  <div className={style.fotoFuncionario}>
-                    <User />
-                  </div>
+                    <div className={style.infosFuncionario}>
+                      <p>{funcionario.nome}</p>
+                      <p>{funcionario.telefone || "-"}</p>
+                    </div>
 
-                  <div className={style.infosFuncionario}>
-                    <p>José Santos</p>
-                    <p>(11) 91077-0909</p>
-                  </div>
-
-                  <div className={style.btnFuncionarioSelecionado}>
-                    <input type="checkbox" />
-                  </div>
-                </label>
-
-
-                <label className={style.cardFuncionario}>
-                  <div className={style.fotoFuncionario}>
-                    <User />
-                  </div>
-
-                  <div className={style.infosFuncionario}>
-                    <p>Maria Rosa</p>
-                    <p>(11) 91077-0886</p>
-                  </div>
-
-                  <div className={style.btnFuncionarioSelecionado}>
-                    <input type="checkbox" />
-                  </div>
-                </label>
-
-
-                <label className={style.cardFuncionario}>
-                  <div className={style.fotoFuncionario}>
-                    <User />
-                  </div>
-
-                  <div className={style.infosFuncionario}>
-                    <p>Jenifer Santos</p>
-                    <p>(11) 91077-0886</p>
-                  </div>
-
-                  <div className={style.btnFuncionarioSelecionado}>
-                    <input type="checkbox" />
-                  </div>
-                </label>
-
-
-                <label className={style.cardFuncionario}>
-                  <div className={style.fotoFuncionario}>
-                    <User />
-                  </div>
-
-                  <div className={style.infosFuncionario}>
-                    <p>Larissa Amaral</p>
-                    <p>(11) 91077-0886</p>
-                  </div>
-
-                  <div className={style.btnFuncionarioSelecionado}>
-                    <input type="checkbox" />
-                  </div>
-                </label>
-
-
-                <label className={style.cardFuncionario}>
-                  <div className={style.fotoFuncionario}>
-                    <User />
-                  </div>
-
-                  <div className={style.infosFuncionario}>
-                    <p>Larissa Amaral</p>
-                    <p>(11) 91077-0886</p>
-                  </div>
-
-                  <div className={style.btnFuncionarioSelecionado}>
-                    <input type="checkbox" />
-                  </div>
-                </label>
-
-
-                <label className={style.cardFuncionario}>
-                  <div className={style.fotoFuncionario}>
-                    <User />
-                  </div>
-
-                  <div className={style.infosFuncionario}>
-                    <p>Larissa Amaral</p>
-                    <p>(11) 91077-0886</p>
-                  </div>
-
-                  <div className={style.btnFuncionarioSelecionado}>
-                    <input type="checkbox" />
-                  </div>
-                </label>
-
+                    <div className={style.btnFuncionarioSelecionado}>
+                      <input
+                        type="checkbox"
+                        checked={selecionados.includes(funcionario.id)}
+                        onChange={() => toggleSelecionado(funcionario.id)}
+                      />
+                    </div>
+                  </label>
+                ))}
               </div>
-              <button className={style.btnAddFuncionarioEscala}>
+              <button className={style.btnAddFuncionarioEscala} onClick={confirmarAdicionar}>
                 <p>Adicionar</p>
               </button>
             </div>

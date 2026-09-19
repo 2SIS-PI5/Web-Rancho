@@ -427,6 +427,24 @@
 .area .painelEscalados {
     width: 100%;
     height: 50%;
+    overflow-y: auto;
+}
+
+.escaladoItem {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 4px 8px;
+    font-size: 13px;
+}
+
+.escaladoItem button {
+    display: flex;
+    align-items: center;
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: rgb(150, 40, 40);
 }
 
 .area .btnAdicionar {

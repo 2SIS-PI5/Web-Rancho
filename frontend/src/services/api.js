@@ -24,6 +24,8 @@ export const api = {
   removerFuncionario: (id) => request(`/funcionarios/${id}`, { method: "DELETE" }),
   listarEscalas: (inicio, fim) => request(`/escalas?inicio=${inicio}&fim=${fim}`),
   criarEscala: (dados) => request("/escalas", { method: "POST", body: JSON.stringify(dados) }),
+  atualizarStatusEscala: (id, status) => request(`/escalas/${id}/status?status=${encodeURIComponent(status)}`, { method: "PATCH" }),
+  removerEscala: (id) => request(`/escalas/${id}`, { method: "DELETE" }),
   resumoDashboard: () => request("/dashboard/resumo"),
 };
 
