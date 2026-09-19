@@ -1,4 +1,4 @@
-import { Routes, Route } from "react-router-dom";
+import { Navigate, Routes, Route } from "react-router-dom";
 
 import Login from "./pages/Login";
 import VisaoGeral from "./pages/VisaoGeral";
@@ -13,6 +13,8 @@ import Funcionarios from "./pages/Funcionarios";
 function App() {
     return (
         <Routes>
+
+            <Route path="/" element={<Navigate to="/login" replace />} />
 
             {/* Login */}
             <Route path="/login" element={<Login />} />

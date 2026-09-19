@@ -1,6 +1,6 @@
 import "./css/Input.css";
 
-function Input({ label, id, type, placeholder }) {
+function Input({ label, id, type, placeholder, value, onChange }) {
     return (
         <div className="input">
             <p>{label}</p>
@@ -9,6 +9,8 @@ function Input({ label, id, type, placeholder }) {
                 id={id}
                 type={type}
                 placeholder={placeholder}
+                value={value}
+                onChange={onChange}
             />
         </div>
     );

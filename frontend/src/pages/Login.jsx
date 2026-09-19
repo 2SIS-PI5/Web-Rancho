@@ -3,14 +3,34 @@ import "./css/Login.css";
 import Logo from "../assets/logo_rancho.png";
 import Input from "../components/Input";
 import Button from "../components/Button";
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { api, salvarSessao } from "../services/api";
 
 function Login() {
-    function Entrar() {
-        console.log("Tentado fazer login...")
+    const navigate = useNavigate();
+    const [email, setEmail] = useState("");
+    const [senha, setSenha] = useState("");
+    const [erro, setErro] = useState("");
+    const [carregando, setCarregando] = useState(false);
+
+    async function Entrar(event) {
+        event?.preventDefault();
+        setErro("");
+        setCarregando(true);
+        try {
+            const sessao = await api.login(email, senha);
+            salvarSessao(sessao);
+            navigate("/visao-geral");
+        } catch (error) {
+            setErro(error.message);
+        } finally {
+            setCarregando(false);
+        }
     }
 
     return (
-        <div className="container">
+        <form className="container" onSubmit={Entrar}>
             <div className="painel_login">
                 <div className="titulo_logo">
                     <div className="logo">
@@ -28,6 +48,8 @@ function Login() {
                         id="inpt_email"
                         type="email"
                         placeholder="Digite o e-mail do usuário"
+                        value={email}
+                        onChange={(event) => setEmail(event.target.value)}
                     />
 
                     <Input
@@ -35,18 +57,18 @@ function Login() {
                         id="inpt_senha"
                         type="password"
                         placeholder="••••••••"
+                        value={senha}
+                        onChange={(event) => setSenha(event.target.value)}
                     />
                 </div>
                 <div className="botao_mensagem">
-                    <Button
-                        label="Entrar"
-                        acao={Entrar}
-                    />
+                    <Button label={carregando ? "Entrando..." : "Entrar"} acao={Entrar} />
+                    {erro && <p className="mensagem_acesso">{erro}</p>}
                     <p className="mensagem_acesso">Acesso exclusivo para gestores</p>
                 </div>
             </div>
 
-        </div>
+        </form>
     );
 }
 

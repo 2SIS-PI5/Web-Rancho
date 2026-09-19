@@ -85,15 +85,12 @@
             <scope>runtime</scope>
         </dependency>
 
-        <!-- H2 (banco em memória — alternativa para testes locais rápidos) -->
-        <!-- Descomente se não tiver MySQL instalado -->
-        <!--
+        <!-- H2 (banco em memória para desenvolvimento local e testes) -->
         <dependency>
             <groupId>com.h2database</groupId>
             <artifactId>h2</artifactId>
             <scope>runtime</scope>
         </dependency>
-        -->
 
         <!-- Lombok (getters/setters automáticos) — opcional -->
         <dependency>
