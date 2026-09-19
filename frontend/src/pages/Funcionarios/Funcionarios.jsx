@@ -1,7 +1,7 @@
 import style from "./css/Funcionarios.module.css";
 import { Plus, Search, Pencil, Trash2, Star, MapPin, X } from "lucide-react";
 import { useEffect, useState } from "react";
-import { api } from "../services/api";
+import { api } from "../../services/api";
 
 const formularioInicial = { nome: "", telefone: "", cep: "", chavePix: "", area: "Cozinha", valorDiaria: "", ajudaTransporte: false };
 

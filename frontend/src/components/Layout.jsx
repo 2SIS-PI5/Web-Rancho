@@ -1,14 +1,14 @@
 import { Outlet } from "react-router-dom";
 import SideBar from "./SideBar";
-import "./css/Layout.css";
+import style from "./css/Layout.module.css";
 
 
 function Layout() {
     return (
-        <div className="layout">
+        <div className={style.layout}>
             <SideBar />
 
-            <main className="main-content">
+            <main className={style.mainContent}>
                 <Outlet />
             </main>
         </div>

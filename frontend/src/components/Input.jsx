@@ -1,8 +1,8 @@
-import "./css/Input.css";
+import style from "./css/Input.module.css"
 
 function Input({ label, id, type, placeholder, value, onChange }) {
     return (
-        <div className="input">
+        <div className={style.input}>
             <p>{label}</p>
 
             <input

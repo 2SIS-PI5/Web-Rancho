@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { api } from "../services/api";
+import { api } from "../../services/api";
 
 function VisaoGeral() {
   const [resumo, setResumo] = useState({ funcionariosAtivos: 0, escalasFuturas: 0 });

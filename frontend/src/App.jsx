@@ -1,14 +1,14 @@
 import { Navigate, Routes, Route } from "react-router-dom";
 
-import Login from "./pages/Login";
-import VisaoGeral from "./pages/VisaoGeral";
-import Escala from "./pages/Escala";
-import Pagamento from "./pages/Pagamento";
-import Avaliacoes from "./pages/Avaliacoes";
-import Historico from "./pages/Historico";
+import Login from "./pages/Login/Login";
+import VisaoGeral from "./pages/VisaoGeral/VisaoGeral";
+import Escala from "./pages/Escala/Escala";
+import Pagamento from "./pages/Pagamento/Pagamento";
+import Avaliacoes from "./pages/Avaliacoes/Avaliacoes";
+import Historico from "./pages/Historico/Historico";
 
 import Layout from "./components/Layout";
-import Funcionarios from "./pages/Funcionarios";
+import Funcionarios from "./pages/Funcionarios/Funcionarios";
 
 function App() {
     return (
