@@ -1,0 +1,320 @@
+.headerAvaliacoes {
+    width: 100%;
+    height: 20vh;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.headerAvaliacoes .tituloAvaliacoes {
+    display: flex;
+    flex-direction: column;
+    line-height: 37px;
+    width: 94%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: start;
+    justify-content: center;
+}
+
+.headerAvaliacoes .tituloAvaliacoes h1 {
+    font-weight: 550;
+    font-size: 27px;
+}
+
+.headerAvaliacoes .tituloAvaliacoes p {
+    font-weight: 380;
+    color: rgba(92, 92, 92, 0.823);
+}
+
+.containerAvaliacoes {
+    width: 100%;
+    height: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    align-items: center;
+    justify-content: start;
+}
+
+.inputPesquisa {
+    width: 94%;
+    height: 6.5vh;
+    background-color: white;
+    border: 1px solid rgb(225, 224, 224);
+    border-radius: 14px;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: start;
+}
+
+.inputPesquisa:focus-within {
+    outline: 2.3px solid #f56715;
+    outline-offset: 1px;
+    box-shadow: 0 0 0 2px rgba(245, 103, 21, 0.2);
+}
+
+.inputPesquisa svg {
+    width: 5%;
+    height: 50%;
+    color: #5c5c5d;
+}
+
+.inputPesquisa input {
+    width: 88%;
+    height: 100%;
+    border: none;
+    outline: none;
+    font-size: 16px;
+}
+
+.inputPesquisa input::placeholder {
+    font-size: 15px;
+}
+
+.painelAvaliacoes {
+    width: 94%;
+    height: auto;
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 16px;
+    align-items: start;
+    padding-bottom: 28px;
+}
+
+.cardAvaliacao {
+    width: 100%;
+    height: 28vh;
+    background-color: white;
+    border: 1px solid rgb(225, 224, 224);
+    border-radius: 14px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: start;
+}
+
+.infoFunc {
+    width: 100%;
+    height: 31%;
+}
+
+.infoFunc p:nth-child(1) {
+    font-size: 17px;
+    margin-top: 20px;
+    margin-left: 25px;
+    font-weight: 500;
+}
+
+.infoFunc p:nth-child(2) {
+    font-size: 13px;
+    margin-left: 25px;
+    color: #3b3b3bc2;
+}
+
+.avaliacaoFunc {
+    width: 100%;
+    height: 19%;
+    margin-top: 2px;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: start;
+}
+
+.estrelas {
+    width: 54%;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    gap: 2%;
+    margin-top: 10px;
+    margin-left: 12px;
+}
+
+.estrelas svg {
+    color: rgb(255, 234, 0);
+    fill: rgb(255, 234, 0);
+}
+
+.avaliacaoFunc p {
+    margin-top: 10px;
+    font-size: 14px;
+    color: #3b3b3b;
+}
+
+.qtdAvaliacoes {
+    width: 100%;
+    height: 10%;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: start;
+    margin-left: 18%;
+    color: #5c5c5d;
+    font-size: 13px;
+    margin-top: 10px;
+}
+
+.btnAvaliarFunc {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    width: 87%;
+    height: 19%;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    background-color: #f75c28;
+    border: none;
+    margin-top: 13px;
+    border-radius: 10px;
+    color: white;
+    font-weight: 500;
+    font-size: 15px;
+    cursor: pointer;
+}
+
+.btnAvaliarFunc:hover {
+    background-color: rgba(245, 103, 21, 0.853)
+}
+
+.overlayModal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    background-color: rgba(0, 0, 0, 0.5);
+    z-index: 1000;
+}
+
+.modalAvaliacao {
+    width: 450px;
+    background-color: white;
+    border-radius: 12px;
+    padding: 25px;
+    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.2);
+}
+
+.headerModal {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 25px;
+}
+
+.headerModal h2 {
+    margin: 0;
+    font-size: 22px;
+}
+
+.headerModal p {
+    margin: 5px 0 0;
+    color: #666;
+}
+
+.headerModal button {
+    border: none;
+    background: transparent;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 23px;
+}
+
+.conteudoModal {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.conteudoModal>p {
+    margin: 0;
+    font-size: 15px;
+    font-weight: 500;
+}
+
+.estrelasModal {
+    display: flex;
+    gap: 8px;
+}
+
+.estrelasModal svg {
+    width: 30px;
+    height: 30px;
+    cursor: pointer;
+    color: #ccc;
+    fill: transparent;
+}
+
+.estrelaSelecionada {
+    color: rgb(255, 234, 0) !important;
+    fill: rgb(255, 234, 0) !important;
+}
+
+.conteudoModal textarea {
+    width: 100%;
+    min-height: 100px;
+    resize: vertical;
+
+    padding: 10px;
+    box-sizing: border-box;
+
+    border: 1px solid #ddd;
+    border-radius: 8px;
+
+    font-family: inherit;
+    font-size: 14px;
+
+    outline: none;
+}
+
+.conteudoModal textarea:focus {
+    border-color: #f56715;
+}
+
+.footerModal {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+
+    margin-top: 25px;
+}
+
+.footerModal button {
+    padding: 9px 18px;
+    border-radius: 7px;
+    cursor: pointer;
+    font-size: 14px;
+}
+
+.footerModal button:first-child {
+    background-color: white;
+    border: 1px solid rgba(186, 184, 184, 0.553);
+    font-weight: 500;
+}
+
+.footerModal button:last-child {
+    background-color: #eb4a0a;
+    color: white;
+    border: none;
+    font-weight: 500;
+}
+
+.footerModal button:last-child:hover {
+    background-color: #eb4a0adf;
+}

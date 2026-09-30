@@ -1,0 +1,558 @@
+.headerPagamento {
+    width: 100%;
+    height: 20vh;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.headerPagamento .tituloPagamento {
+    display: flex;
+    flex-direction: column;
+    line-height: 37px;
+    width: 94%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: start;
+    justify-content: center;
+}
+
+.headerPagamento .tituloPagamento h1 {
+    font-weight: 550;
+    font-size: 27px;
+}
+
+.headerPagamento .tituloPagamento p {
+    font-weight: 380;
+    color: rgba(92, 92, 92, 0.823);
+}
+
+.containerPagamento {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    align-items: center;
+    justify-content: start;
+    padding-bottom: 40px;
+}
+
+.cardResumoSemana {
+    width: 94%;
+    height: 17vh;
+    background-color: white;
+    border: 1px solid rgb(225, 224, 224);
+    border-radius: 15px;
+    display: flex;
+    flex-direction: column;
+    gap: 2.8%;
+    align-items: start;
+    justify-content: center;
+}
+
+.tituloCardResumo {
+    margin-left: 23px;
+    font-weight: 500;
+    margin-top: 10px;
+}
+
+.valoresPagamentos {
+    width: 100%;
+    height: 60%;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-around;
+}
+
+.totalEmTipoPagto {
+    display: flex;
+    flex-direction: row;
+    width: 30%;
+    height: 70%;
+    align-items: center;
+    justify-content: space-between;
+    background-color: white;
+    border-radius: 17px;
+    gap: 2%;
+}
+
+.totalEmTipoPagto:nth-child(1) {
+    color: #ea601c;
+    background-color: #fff4eb;
+}
+
+.totalEmTipoPagto:nth-child(2) {
+    color: #892cfa;
+    background-color: #f3ecff91;
+}
+
+.totalEmTipoPagto:nth-child(3) {
+    color: #0062ecdd;
+    background-color: #f2f7ff;
+}
+
+.totalEmTipoPagto {
+    font-weight: 500;
+}
+
+.totalEmTipoPagto svg {
+    margin-left: 15px;
+    transform: scale(0.88);
+}
+
+.tipoTotal {
+    margin-left: 1%;
+    width: 67%;
+    color: black;
+}
+
+.totalValor {
+    width: 10%;
+    margin-right: 28px;
+}
+
+.cardGerarPagto {
+    width: 94%;
+    height: 17vh;
+    background-color: white;
+    border: 1px solid rgb(225, 224, 224);
+    border-radius: 15px;
+    display: flex;
+    flex-direction: column;
+    gap: 2.8%;
+    align-items: center;
+    justify-content: center;
+}
+
+.headerCardGerarPagto {
+    width: 100%;
+    height: 40%;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.tituloSemanaPagto {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: start;
+    width: 80%;
+    gap: 1%;
+    margin-top: 15px;
+    margin-left: 22px;
+    font-size: 17.8px;
+    font-weight: 500;
+}
+
+.tituloSemanaPagto svg {
+    color: #ea601c;
+}
+
+.btnGerarPagto {
+    width: 15%;
+    height: 5.5vh;
+    margin-top: 28px;
+    margin-right: 22px;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    border-radius: 12px;
+    border: none;
+    color: white;
+    background-color: #f65317;
+    font-weight: 500;
+    font-size: 15px;
+    cursor: pointer;
+}
+
+.btnGerarPagto:hover {
+    background-color: #fc8346;
+}
+
+.footerCardGerarPagto {
+    width: 95.8%;
+    border-bottom: 1.5px solid rgb(225, 224, 224);
+    height: 50%;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: start;
+    margin-bottom: 17px;
+    gap: 1%;
+}
+
+.footerCardGerarPagto .fitroPagto {
+    margin-top: 1.1%;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    gap: 10%;
+    height: 80%;
+    width: 70px;
+    border: none;
+    font-weight: 500;
+    color: #5a5959;
+    background-color: transparent;
+    cursor: pointer;
+    font-size: 14px;
+}
+
+.filtroPagamentoAtivo {
+    margin-top: 1.1%;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    gap: 10%;
+    height: 80%;
+    width: 70px;
+    border: none;
+    font-weight: 500;
+    color: #5a5959;
+    background-color: transparent;
+    cursor: pointer;
+    font-size: 14px;
+    border-bottom: 2.3px solid #ec5113;
+}
+
+.footerCardGerarPagto button:hover {
+    color: black;
+}
+
+.footerCardGerarPagto button:nth-child(3) {
+    width: 12%;
+}
+
+.qtdPagtos {
+    width: 23%;
+    height: 45%;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    color: rgb(26, 26, 26);
+    font-size: 12px;
+    background-color: #e1e1e1ae;
+}
+
+.footerCardGerarPagto button:nth-child(1) .qtdPagtos {
+    width: 20px;
+}
+
+.footerCardGerarPagto button:nth-child(2) .qtdPagtos {
+    width: 20px;
+}
+
+.footerCardGerarPagto button:nth-child(3) .qtdPagtos {
+    width: 20px;
+}
+
+.filtroPagamentoAtivo .qtdPagtos {
+    width: 23%;
+    height: 45%;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    color: rgb(26, 26, 26);
+    font-size: 12px;
+    background-color: #fb8a1132;
+    color: #ca4300;
+}
+
+.areaFiltroFuncionarios {
+    width: 94%;
+    height: 7vh;
+    display: flex;
+    flex-direction: column;
+    align-items: start;
+    justify-content: start;
+}
+
+.btnsFiltros {
+    width: 40%;
+    height: 100%;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: start;
+    gap: 3.7%;
+}
+
+.btnsFiltros button {
+    width: 20%;
+    height: 80%;
+    background-color: white;
+    border: 1px solid rgb(225, 224, 224);
+    border-radius: 10px;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    font-weight: 600;
+    font-size: 15px;
+    cursor: pointer;
+    transition: 0.1s;
+    color: black;
+}
+
+.btnsFiltros button:hover {
+    background-color: #eaeaea4c;
+}
+
+.btnsFiltros button:nth-child(1) {
+    width: 16%;
+}
+
+.btnsFiltros button:nth-child(2) {
+    width: 19%;
+}
+
+.btnsFiltros button:nth-child(3) {
+    width: 16%;
+}
+
+.btnsFiltros button:nth-child(4) {
+    width: 22%;
+}
+
+.btnsFiltros button.filtroAtivo {
+    background-color: #fc4a0a;
+    color: #ffffff;
+}
+
+.containerPagtosFuncs {
+    width: 94%;
+    height: auto;
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 22px;
+    align-items: start;
+}
+
+.cardPagtoFun {
+    width: 100%;
+    height: 36vh;
+    background-color: white;
+    border: 1px solid rgb(225, 224, 224);
+    border-top: 7px solid rgba(242, 43, 43, 0.959);
+    border-radius: 14px;
+    display: flex;
+    flex-direction: column;
+    align-items: start;
+}
+
+.cardPagtoFuncPago {
+    width: 100%;
+    height: 36vh;
+    background-color: white;
+    border: 1px solid rgb(225, 224, 224);
+    border-top: 7px solid rgb(0, 191, 0);
+    border-radius: 14px;
+    display: flex;
+    flex-direction: column;
+    align-items: start;
+}
+
+.infosPessoais {
+    width: 100%;
+    height: 24%;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    gap: 1.5%;
+    margin-top: 2px;
+}
+
+.profileDefault {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    width: 17%;
+    height: 70%;
+    background-color: #f0f0f0;
+    border-radius: 50%;
+    margin-left: 6%;
+}
+
+.profileDefault svg {
+    color: #7c7b7b;
+}
+
+.nomeFormaPagto {
+    width: 75%;
+    height: 100%;
+    display: flex;
+    flex-direction: row;
+    justify-content: start;
+    align-items: center;
+}
+
+.nomeFunc {
+    width: 55%;
+    margin-left: 3%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+.nomeFunc p:nth-child(1) {
+    font-weight: 500;
+    font-size: 14px;
+}
+
+.nomeFunc p:nth-child(2) {
+    font-size: 12px;
+    color: #474747e1;
+}
+
+.pago {
+    margin-left: 21px;
+    margin-bottom: 17px;
+    background-color: rgba(43, 242, 100, 0.163);
+    border-radius: 12px;
+    width: 24%;
+    height: 28%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: green;
+    font-size: 12px;
+    font-weight: 700;
+}
+
+.pendente {
+    margin-bottom: 17px;
+    margin-left: 7px;
+    background-color: rgba(242, 43, 43, 0.163);
+    border-radius: 12px;
+    color: rgba(242, 43, 43, 0.959);
+    font-size: 12px;
+    font-weight: 700;
+    width: 32%;
+    height: 28%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.infosPagto {
+    width: 100%;
+    height: 53%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    margin-top: 5px;    
+}
+
+.tipoInformacao {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    width: 84%;
+    height: 24%;
+    font-size: 13.5px;
+    font-weight: 450;
+    color: #5e5d5d;
+}
+
+.infoFunc {
+    color: black;
+    font-weight: 500;
+}
+
+.infosPagto .tipoInformacao:nth-child(4) p {
+    color: rgba(242, 43, 43, 0.959);
+    font-weight: 700;
+}
+
+.formasPagto {
+    width: 100%;
+    height: 19%;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    gap: 3.5%;
+}
+
+.btnPagarEmPix,
+.btnPagarEmDinheiro {
+    width: 42.5%;
+    height: 70%;
+    border: none;
+    border-radius: 9px;
+    margin-bottom: 2%;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    gap: 2%;
+    cursor: pointer;
+}
+
+.formasPagto button svg {
+    transform: scale(0.8);
+}
+
+.btnPagarEmDinheiro:hover {
+    background-color: #ea611cd6;
+}
+
+.formasPagto button:nth-child(2):hover {
+    background-color: #892cfac1;
+}
+
+.btnPagarEmDinheiro {
+    background-color: #ea601c;
+    color: white;
+}
+
+.btnPagarEmPix {
+    background-color: #892cfa;
+    color: white;
+}
+
+.btnPagarEmPix svg {
+    transform: scale(0.7);
+}
+
+.formasPagto button p {
+    font-weight: 500;
+    font-size: 13px;
+}
+
+.btnPagarEmPix p {
+    margin-right: 3%;
+    font-size: 12px;
+}
+
+.btnPagoVia {
+    width: 87.7%;
+    background-color: rgba(3, 192, 3, 0.082);
+    height: 70%;
+    border: none;
+    border-radius: 9px;
+    margin-bottom: 3%;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    gap: 2%;
+    cursor: pointer;
+    color: green;
+}

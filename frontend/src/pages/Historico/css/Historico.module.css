@@ -1,0 +1,738 @@
+.headerHistorico {
+    width: 100%;
+    height: 20vh;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.headerHistorico .tituloHistorico {
+    display: flex;
+    flex-direction: column;
+    line-height: 37px;
+    width: 94%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: start;
+    justify-content: center;
+}
+
+.headerHistorico .tituloHistorico h1 {
+    font-weight: 550;
+    font-size: 27px;
+}
+
+.headerHistorico .tituloHistorico p {
+    font-weight: 380;
+    color: rgba(92, 92, 92, 0.823);
+}
+
+.containerHistorico {
+    width: 100%;
+    flex: 1 0 auto;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    align-items: center;
+    justify-content: start;
+    padding-bottom: 28px;
+}
+
+.containerHistorico>* {
+    flex-shrink: 0;
+}
+
+.manipularSemana {
+    width: 94%;
+    height: 10vh;
+    background-color: white;
+    border: 1px solid rgb(225, 224, 224);
+    border-radius: 15px;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    gap: 21.6%;
+}
+
+.btnAnterior,
+.btnProxima {
+    width: 9%;
+    height: 50%;
+    border-radius: 10px;
+    display: flex;
+    border: none;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 500;
+    background-color: rgba(234, 234, 234, 0.501);
+}
+
+.btnAnterior:hover,
+.btnProxima:hover {
+    background-color: rgba(232, 232, 232, 0.91);
+
+}
+
+.btnAnterior svg,
+.btnProxima svg {
+    transform: scale(0.6);
+}
+
+.btnAnterior p {
+    margin-right: 6px;
+}
+
+.btnProxima p {
+    margin-left: 5.7px;
+}
+
+.semanaEscolhida {
+    position: relative;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    width: 35%;
+    height: 65%;
+    gap: 6%;
+}
+
+.semanaEscolhida svg {
+    transform: scale(1.17);
+    color: #ea601c;
+}
+
+.semanaEscolhida .periodoEscolhido {
+    font-weight: 500;
+    font-size: 19px;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    gap: 2%;
+}
+
+.semanaEscolhida .periodoEscolhido svg {
+    color: black;
+    transform: scale(0.9);
+}
+
+.btnIrParaData {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    border-radius: 12px;
+    height: 80%;
+    width: 30%;
+    border: 1.4px solid #ea981c4e;
+    background-color: #fff9ebb9;
+    cursor: pointer;
+}
+
+.btnIrParaData:hover {
+    background-color: #ffeed7c5;
+}
+
+.btnIrParaData svg {
+    transform: scale(0.9);
+    color: #d14f0e;
+}
+
+.btnIrParaData p {
+    color: #d14f0e;
+    font-size: 14px;
+    font-weight: 500;
+}
+
+.infoSemana {
+    width: 94%;
+    height: 21vh;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.cardInfoSemana {
+    border: 1px solid rgb(225, 224, 224);
+    background-color: white;
+    border-radius: 15px;
+    width: 24%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: start;
+    justify-content: center;
+    gap: 5%;
+    position: relative;
+}
+
+.cardInfoSemana .iconeCard {
+    width: 14%;
+    height: 25%;
+    border-radius: 50%;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    background-color: rgba(220, 220, 220, 0.33);
+}
+
+.cardInfoSemana .iconeCard svg {
+    transform: scale(0.85);
+}
+
+.cardInfoSemana:nth-child(1) .iconeCard svg {
+    color: #ea601c;
+}
+
+.cardInfoSemana:nth-child(2) .iconeCard {
+    background-color: rgba(209, 128, 14, 0.108);
+}
+
+.cardInfoSemana:nth-child(2) .iconeCard svg {
+    color: #eb5013;
+}
+
+.cardInfoSemana:nth-child(3) .iconeCard {
+    background-color: rgba(114, 3, 205, 0.07);
+}
+
+.cardInfoSemana:nth-child(3) .iconeCard svg {
+    color: rgba(127, 9, 223, 0.919);
+}
+
+.cardInfoSemana:nth-child(4) .iconeCard svg {
+    transform: scale(0.8);
+    color: gray;
+}
+
+.cardInfoSemana p:nth-of-type(1) {
+    font-size: 14px;
+    color: gray;
+}
+
+.valorEmDinheiro {
+    color: #eb5013;
+}
+
+.valorEmPix {
+    color: rgba(127, 9, 223, 0.919);
+}
+
+.valorEmPix,
+.valorEmDinheiro,
+.valorMaoDeObra,
+.qtdFuncionarios {
+    font-size: 22px;
+    font-weight: 650;
+}
+
+.cardInfoSemana .iconeCard,
+.cardInfoSemana p:nth-of-type(1),
+.cardInfoSemana p:nth-of-type(2),
+.cardInfoSemana p:nth-of-type(3) {
+    margin-left: 20px;
+}
+
+.pagamentosSemana {
+    position: absolute;
+    bottom: 15px;
+    left: 116px;
+    font-size: 12px;
+    color: gray;
+    font-weight: 500;
+}
+
+.quemTrabalhou {
+    width: 94%;
+    background-color: white;
+    border-radius: 15px;
+    height: 9vh;
+    border: 1px solid rgb(225, 224, 224);
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    cursor: pointer;
+}
+
+.tituloCardQuemTrabalhou {
+    width: 40%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: start;
+}
+
+.tituloCardQuemTrabalhou svg {
+    margin-left: 15px;
+    color: #eb5013;
+}
+
+.tituloCardQuemTrabalhou p:nth-child(2) {
+    margin-left: 10px;
+    font-weight: 500;
+}
+
+.tituloCardQuemTrabalhou p:nth-child(3) {
+    margin-left: 10px;
+    font-weight: 500;
+    font-size: 15px;
+    color: rgba(75, 75, 75, 0.708);
+}
+
+.quemTrabalhou svg:nth-child(2) {
+    margin-right: 22px;
+    color: rgb(99, 98, 98);
+    cursor: pointer;
+}
+
+.tpList {
+    width: 94%;
+    display: flex;
+    flex-direction: column;
+    border: 1px solid #e5e7eb;
+    border-radius: 10px;
+    overflow: hidden;
+    background: #fff;
+}
+
+.tpWrap {
+    width: 100%;
+    box-sizing: border-box;
+    font-family: "Inter", -apple-system, "Segoe UI", Roboto, sans-serif;
+    background: #f8f9fb;
+    color: #0f172a;
+    border: 0;
+    border-radius: 0;
+}
+
+.tpWrap+.tpWrap {
+    border-top: 1px solid #e5e7eb;
+}
+
+.tpGroup {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    height: 18px;
+    background: #f8f9fb;
+}
+
+.tpDot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: #2563eb;
+    margin-left: 17px;
+    margin-top: 25px;
+}
+
+.tpGroupTitle {
+    font-size: 15px;
+    font-weight: 600;
+    color: #2563eb;
+    margin-top: 24px;
+    letter-spacing: 0.2px;
+}
+
+.tpGroupCount {
+    font-size: 14px;
+    margin-top: 24px;
+    color: #6b7280;
+}
+
+.tpHead,
+.tpRow {
+    display: grid;
+    grid-template-columns: 34% 19% 12% 14% 21%;
+    align-items: center;
+}
+
+.tpHead {
+    height: 40px;
+    padding: 10px 0 0 35px;
+    background: #f8f9fb;
+    font-size: 14px;
+    color: #6b7280;
+}
+
+.tpHead .valor {
+    text-align: right;
+    padding-right: 10px;
+}
+
+.tpHead .via {
+    padding-left: 10px;
+}
+
+.tpHead .status {
+    text-align: center;
+}
+
+.tpRow {
+    height: 63px;
+    padding-left: 26px;
+    background: #fff;
+    border-top: 1px solid #e5e7eb;
+    border-left: 0;
+    position: relative;
+}
+
+.tpRow::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 5px;
+}
+
+.tpFunc {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-left: 5px;
+}
+
+.tpAvatar {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    background: #f3f4f6;
+    color: #6b7280;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.tpNome {
+    font-size: 14px;
+    font-weight: 600;
+    color: #0b0f1a;
+}
+
+.tpDiasQtd {
+    font-size: 14px;
+    font-weight: 600;
+    color: #0b0f1a;
+    line-height: 1.2;
+}
+
+.tpDiasDatas {
+    font-size: 13px;
+    color: #6b7280;
+    margin-top: 3px;
+}
+
+.tpValor {
+    text-align: right;
+    padding-right: 10px;
+    font-size: 14px;
+    font-weight: 700;
+    color: red;
+    white-space: nowrap;
+}
+
+.tpVia {
+    padding-left: 10px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 14px;
+    font-weight: 500;
+    color: #f04a00;
+}
+
+.tpStatus {
+    display: flex;
+    height: 100%;
+    justify-content: center;
+    align-items: center;
+}
+
+.tpBadge {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    width: 27%;
+    height: 36%;
+    gap: 6px;
+    border-radius: 999px;
+    background: #dcfce7;
+    color: #15803d;
+    font-size: 13px;
+    font-weight: 600;
+    margin-top: 2px;
+}
+
+.tpTotal {
+    display: grid;
+    grid-template-columns: 34% 19% 12% 14% 21%;
+    align-items: center;
+    height: 44px;
+    padding-left: 26px;
+    background: #f8f9fb;
+    border-top: 1px solid #e5e7eb;
+}
+
+.tpTotalLabel {
+    grid-column: 1 / 3;
+    margin-left: 5px;
+    font-size: 13px;
+    font-weight: 600;
+    color: #6b7280;
+}
+
+.tpTotalValor {
+    grid-column: 3;
+    text-align: right;
+    padding-right: 10px;
+    font-size: 14px;
+    font-weight: 700;
+    color: #0b0f1a;
+    white-space: nowrap;
+}
+
+.areaDetalheDatas {
+    width: 94%;
+    height: auto;
+    border: 1px solid rgb(225, 224, 224);
+    background-color: white;
+    border-radius: 15px;
+    overflow: hidden;
+}
+
+.headerCardDetalheData {
+    width: 100%;
+    display: flex;
+    flex-direction: row;
+    height: 8.3vh;
+}
+
+.tituloCard {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: start;
+    width: 20%;
+    height: 100%;
+}
+
+.tituloCard p {
+    margin-left: 20px;
+    font-size: 18px;
+    font-weight: 500;
+}
+
+.filtrosCardDetalhe {
+    width: 80%;
+    height: 100%;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: end;
+}
+
+.inputPesquisa {
+    width: 20%;
+    height: 3.5vh;
+    background-color: white;
+    border: 1px solid rgb(225, 224, 224);
+    border-radius: 9px;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: start;
+    margin-right: 4.5%;
+}
+
+.inputData {
+    position: absolute;
+    bottom: 0;
+    right: 0;
+    width: 0;
+    height: 0;
+    opacity: 0;
+    pointer-events: none;
+}
+
+.inputPesquisa svg {
+    transform: scale(0.6);
+    color: #3d3d3e;
+    margin-left: 3px;
+}
+
+.inputPesquisa input {
+    width: 76%;
+    height: 100%;
+    border: none;
+    outline: none;
+    font-size: 13px;
+}
+
+.inputPesquisa input::placeholder {
+    font-size: 13px;
+}
+
+.cardDataDetalhe {
+    width: 100%;
+    height: 7.5vh;
+    border-top: 1px solid rgb(225, 224, 224);
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: start;
+    cursor: pointer;
+}
+
+.bolinhaLaranja {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background-color: #e4530bcd;
+    margin-left: 18.6px;
+}
+
+.tituloData {
+    width: 14.8%;
+    height: 100%;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: start;
+    gap: 10px;
+}
+
+.diaDaSemana {
+    font-size: 18px;
+    font-weight: 600;
+}
+
+.diaDaEscala {
+    color: rgb(117, 116, 116);
+    font-weight: 500;
+    font-size: 15px;
+}
+
+.qtdFuncDropDown {
+    width: 83%;
+    height: 100%;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: end;
+    gap: 0.9%;
+}
+
+.qtdFunc {
+    font-size: 13.6px;
+    font-weight: 500;
+    color: rgb(114, 112, 112);
+}
+
+.qtdFuncDropDown svg {
+    transform: scale(0.9);
+    color: rgb(99, 98, 98);
+    margin-right: 18.6px;
+    cursor: pointer;
+}
+
+.dataItem {
+    width: 100%;
+}
+
+.cardDataDetalhe {
+    width: 100%;
+    min-height: 8vh;
+    box-sizing: border-box;
+    border-top: 1px solid rgb(225, 224, 224);
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: start;
+}
+
+.tituloData {
+    margin-left: 16px;
+}
+
+.qtdFuncDropDown {
+    margin-left: auto;
+    margin-right: 22px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+    user-select: none;
+}
+
+.qtdFuncDropDown:hover {
+    opacity: 0.7;
+}
+
+.listaFuncData {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 24px;
+    align-items: start;
+    padding: 12px 28px 16px;
+    background: #f8f9fb;
+}
+
+.tituloSetor {
+    margin-top: 2px;
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    font-size: 13.5px;
+    font-weight: 500;
+    color: var(--cor);
+    text-transform: uppercase;
+}
+
+.pontoSetor {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--cor);
+}
+
+.chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 10px;
+}
+
+.chip {
+    padding: 4px 10px;
+    border-radius: 999px;
+    font-size: 13.5px;
+    font-weight: 500;
+    color: var(--cor);
+    background: color-mix(in srgb, var(--cor) 8%, white);
+    border: 1px solid color-mix(in srgb, var(--cor) 25%, white);
+}
+
+.diaDaSemana {
+    font-size: 18px;
+    font-weight: 600;
+}
+
+.diaDaEscala {
+    font-size: 15px;
+    font-weight: 600;
+    color: #6b7280;
+}
