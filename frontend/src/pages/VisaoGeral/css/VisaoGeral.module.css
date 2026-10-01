@@ -202,16 +202,9 @@
     min-height: 240px;
 }
 
-.grafico {
-    display: flex;
-    gap: 12px;
-    flex: 1;
-    min-height: 120px;
-}
-
 .vazio {
     flex: 1;
-    min-height: 140px;
+    min-height: 140px;      
     display: flex;
     align-items: center;
     justify-content: center;
@@ -220,86 +213,27 @@
     font-size: 16px;
 }
 
-.grafico {
-    display: flex;
-    gap: 12px;
+.grafico,
+.graficoSetores {
     flex: 1;
     min-height: 120px;
 }
 
-.eixoY {
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-    padding-bottom: 28px;
-    font-size: 13px;
-    color: #a1a1aa;
-}
-
-.areaBarras {
-    position: relative;
-    flex: 1;
-    padding-bottom: 28px;
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-}
-
-.linhaGrade {
-    border-top: 1px dashed #eef0f3;
-}
-
-.colunas {
-    position: absolute;
-    inset: 0;
-    display: grid;
-    grid-template-columns: repeat(7, 1fr);
-}
-
-.coluna {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: flex-end;
-    font-size: 14px;
-    color: #a1a1aa;
-}
-
-.trilhaBarra {
-    flex: 1;
-    width: 100%;
-    display: flex;
-    align-items: flex-end;
-    justify-content: center;
-}
-
-.barra {
-    width: 28px;
-    background: #f04a00;
-    border-radius: 6px 6px 0 0;
-    min-height: 0;
-}
-
-.coluna span {
-    height: 28px;
-    line-height: 28px;
-}
-
 .listaSetores {
     list-style: none;
-    margin: 0;
+    margin-top: 4px;
     padding: 0;
-    flex: 1;
     display: flex;
     flex-direction: column;
-    justify-content: space-evenly;
+    justify-content: flex-start;
+    gap: 18px; 
 }
 
 .setorTopo {
     display: flex;
     justify-content: space-between;
     align-items: baseline;
-    font-size: 14px;
+    font-size: 15px;
     line-height: 1.2;
     color: #0b0f1a;
 }
@@ -314,15 +248,21 @@
 
 .trilhaSetor {
     height: 8px;
-    margin: 6px 0 0;
+    margin: 7px 0 0; 
     background: #f1f2f4;
     border-radius: 999px;
     overflow: hidden;
 }
 
+.preenchimentoSetor {
+    height: 100%;
+    border-radius: 999px;
+    transition: width 0.3s;
+}
+
 .setorInfo {
     margin-left: 8px;
-    font-size: 11.5px;
+    font-size: 12px;
     font-weight: 400;
     color: #6b7280;
 }

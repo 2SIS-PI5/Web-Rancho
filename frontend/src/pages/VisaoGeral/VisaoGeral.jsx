@@ -2,6 +2,21 @@ import style from "./css/VisaoGeral.module.css";
 import { FileDown, DollarSign, Wallet, CreditCard, Users } from "lucide-react";
 import { useState } from "react";
 
+import {
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  ResponsiveContainer,
+  PieChart,
+  Pie,
+  Cell,
+  LabelList,
+} from "recharts";
+
+
 const periodos = [
   { id: "semanal", label: "Semanal" },
   { id: "mensal", label: "Mensal" },
@@ -49,13 +64,14 @@ function Painel({ titulo, className = "", children }) {
   );
 }
 
+const metodos = [
+  { nome: "Dinheiro", valor: 1270, cor: "#f04a00" },
+  { nome: "PIX", valor: 1270, cor: "#9333ea" },
+];
 
 function VisaoGeral() {
   const [periodo, setPeriodo] = useState("semanal");
-
   const totalGasto = setores.reduce((s, x) => s + x.valor, 0);
-  const teto = Math.max(4, Math.ceil(Math.max(...diasSemana.map((d) => d.valor))));
-  const marcas = Array.from({ length: 5 }, (_, i) => teto - (teto / 4) * i);
 
   return (
     <>
@@ -96,35 +112,30 @@ function VisaoGeral() {
 
           <Painel titulo="Dias da semana" className={style.painelAlto}>
             <div className={style.grafico}>
-              <div className={style.eixoY}>
-                {marcas.map((m) => (
-                  <span key={m}>R${Math.round(m)}</span>
-                ))}
-              </div>
-
-              <div className={style.areaBarras}>
-                {marcas.map((m) => (
-                  <div key={m} className={style.linhaGrade} />
-                ))}
-                <div className={style.colunas}>
-                  {diasSemana.map((d) => (
-                    <div key={d.dia} className={style.coluna}>
-                      <div className={style.trilhaBarra}>
-                        <div
-                          className={style.barra}
-                          style={{ height: `${(d.valor / teto) * 100}%` }}
-                        />
-                      </div>
-                      <span>{d.dia}</span>
-                    </div>
-                  ))}
-                </div>
-              </div>
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart data={diasSemana} margin={{ top: 8, right: 8, left: 0, bottom: 0 }}>
+                  <CartesianGrid strokeDasharray="4 4" vertical={false} stroke="#eef0f3" />
+                  <XAxis dataKey="dia" axisLine={false} tickLine={false} tick={{ fill: "#a1a1aa", fontSize: 13 }} />
+                  <YAxis axisLine={false} tickLine={false} tick={{ fill: "#a1a1aa", fontSize: 13 }}
+                    tickFormatter={(v) => `R$${v}`} />
+                  <Tooltip formatter={(v) => formatBRL(v)} cursor={{ fill: "#f8f9fb" }} />
+                  <Bar dataKey="valor" fill="#f04a00" radius={[6, 6, 0, 0]} maxBarSize={28} />
+                </BarChart>
+              </ResponsiveContainer>
             </div>
           </Painel>
 
           <Painel titulo="Método de pagamento" className={style.painelAlto}>
-            <p className={style.vazio}>Sem pagamentos no período</p>
+            <div className={style.grafico}>
+              <ResponsiveContainer width="100%" height="100%">
+                <PieChart>
+                  <Pie data={metodos} dataKey="valor" nameKey="nome" innerRadius="55%" outerRadius="80%" paddingAngle={2}>
+                    {metodos.map((m) => <Cell key={m.nome} fill={m.cor} />)}
+                  </Pie>
+                  <Tooltip formatter={(v) => formatBRL(v)} />
+                </PieChart>
+              </ResponsiveContainer>
+            </div>
           </Painel>
 
           <Painel titulo="Custo por funcionário">
@@ -146,6 +157,7 @@ function VisaoGeral() {
                       </span>
                       <strong>{formatBRL(s.valor)}</strong>
                     </div>
+
                     <div className={style.trilhaSetor}>
                       <div
                         className={style.preenchimentoSetor}
