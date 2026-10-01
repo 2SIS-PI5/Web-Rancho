@@ -1,0 +1,328 @@
+.headerVisaoGeral {
+    width: 100%;
+    height: 20vh;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    flex-shrink: 0;
+}
+
+.headerVisaoGeral .tituloVisaoGeral {
+    display: flex;
+    flex-direction: column;
+    line-height: 37px;
+    flex: 1;
+    height: 100%;
+    align-items: start;
+    justify-content: center;
+    margin-left: 3%;
+}
+
+.headerVisaoGeral .tituloVisaoGeral h1 {
+    font-weight: 550;
+    font-size: 27px;
+}
+
+.headerVisaoGeral .tituloVisaoGeral p {
+    font-weight: 380;
+    color: rgba(92, 92, 92, 0.823);
+}
+
+.containerVisaoGeral {
+    width: 100%;
+    flex: 1 0 auto;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    align-items: center;
+    justify-content: start;
+}
+
+.areaFiltros {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 12px;
+    height: 100%;
+    margin-right: 3%;
+    flex-shrink: 0;
+}
+
+.grupoPeriodo {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    padding: 3px;
+    background: #fff;
+    border: 1px solid #e5e7eb;
+    border-radius: 14px;
+}
+
+.btnPeriodo {
+    padding: 8px 18px;
+    border: none;
+    border-radius: 10px;
+    background: transparent;
+    color: #6b7280;
+    font-size: 15px;
+    font-weight: 500;
+    font-family: inherit;
+    cursor: pointer;
+    transition: background-color 0.15s, color 0.15s;
+}
+
+.btnPeriodo:hover {
+    color: #0b0f1a;
+}
+
+.btnPeriodoAtivo,
+.btnPeriodoAtivo:hover {
+    background: #f04a00;
+    color: #fff;
+    font-weight: 600;
+}
+
+.btnExportar {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10.65px 18px;
+    background: #fff;
+    border: 1px solid #e5e7eb;
+    border-radius: 14px;
+    color: #6b7280;
+    font-size: 14.8px;
+    font-weight: 600;
+    font-family: inherit;
+    cursor: pointer;
+    transition: background-color 0.15s;
+}
+
+.btnExportar:hover {
+    background: #f8f9fb;
+    color: #0b0f1a;
+}
+
+.gradeVisaoGeral {
+    width: 94%;
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    gap: 16px;
+}
+
+.linhaResumo {
+    grid-column: 1 / -1;
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 16px;
+}
+
+.cardResumo {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 16px;
+    padding: 16px 22px;
+    background: #fff;
+    border: 1px solid #e5e7eb;
+    border-radius: 15px;
+}
+
+.iconeResumo {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.iconeResumo.azul {
+    background: #eff6ff;
+    color: #2563eb;
+}
+
+.iconeResumo.laranja {
+    background: #fff4ea;
+    color: #f04a00;
+}
+
+.iconeResumo.roxo {
+    background: #faf5ff;
+    color: #9333ea;
+}
+
+.iconeResumo.verde {
+    background: #effcf3;
+    color: #16a34a;
+}
+
+.textoResumo {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.textoResumo p {
+    margin: 0;
+    font-size: 13.4px;
+    color: #6b7280;
+}
+
+.textoResumo strong {
+    font-size: 19px;
+    font-weight: 700;
+    color: #0b0f1a;
+}
+
+.painel {
+    display: flex;
+    flex-direction: column;
+    background: #fff;
+    border: 1px solid #e5e7eb;
+    border-radius: 15px;
+    padding: 16px 22px;
+    box-sizing: border-box;
+    min-width: 0;
+}
+
+.tituloPainel {
+    width: 100%;
+    margin: 0 0 10px;
+    font-size: 15px;
+    font-weight: 600;
+    line-height: 1.2;
+    text-transform: uppercase;
+    color: #6b7280;
+}
+
+.painelAlto {
+    min-height: 240px;
+}
+
+.grafico {
+    display: flex;
+    gap: 12px;
+    flex: 1;
+    min-height: 120px;
+}
+
+.vazio {
+    flex: 1;
+    min-height: 140px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0;
+    color: #6b7280;
+    font-size: 16px;
+}
+
+.grafico {
+    display: flex;
+    gap: 12px;
+    flex: 1;
+    min-height: 120px;
+}
+
+.eixoY {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    padding-bottom: 28px;
+    font-size: 13px;
+    color: #a1a1aa;
+}
+
+.areaBarras {
+    position: relative;
+    flex: 1;
+    padding-bottom: 28px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+.linhaGrade {
+    border-top: 1px dashed #eef0f3;
+}
+
+.colunas {
+    position: absolute;
+    inset: 0;
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+}
+
+.coluna {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-end;
+    font-size: 14px;
+    color: #a1a1aa;
+}
+
+.trilhaBarra {
+    flex: 1;
+    width: 100%;
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+}
+
+.barra {
+    width: 28px;
+    background: #f04a00;
+    border-radius: 6px 6px 0 0;
+    min-height: 0;
+}
+
+.coluna span {
+    height: 28px;
+    line-height: 28px;
+}
+
+.listaSetores {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-evenly;
+}
+
+.setorTopo {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    font-size: 14px;
+    line-height: 1.2;
+    color: #0b0f1a;
+}
+
+.setorTopo span {
+    font-weight: 600;
+}
+
+.setorTopo strong {
+    font-weight: 700;
+}
+
+.trilhaSetor {
+    height: 8px;
+    margin: 6px 0 0;
+    background: #f1f2f4;
+    border-radius: 999px;
+    overflow: hidden;
+}
+
+.setorInfo {
+    margin-left: 8px;
+    font-size: 11.5px;
+    font-weight: 400;
+    color: #6b7280;
+}

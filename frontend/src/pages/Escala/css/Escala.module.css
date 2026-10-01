@@ -335,8 +335,8 @@
     justify-content: center;
     text-align: center;
     border-radius: 15px;
-    background-color: rgba(0, 251, 0, 0.221);
-    border: 1px solid rgba(0, 222, 0, 0.836);
+    background-color: rgba(23, 165, 23, 0.851);
+    border: none;
     cursor: pointer;
     margin-right: 5%;
 }
@@ -344,7 +344,7 @@
 .btnConfirmarEscala p {
     font-weight: 500;
     font-size: 13px;
-    color: rgb(2, 172, 2);
+    color: white;
 }
 
 .areasEscala {

@@ -11,7 +11,7 @@ function CardFuncionario({ nome, area, distancia, telefone, cep, chavePix, valor
                 <p className={style.areaFuncionario}>{area}</p>
                 <p className={style.distanciaFuncionario}><MapPin />{distancia}</p>
             </div>
-            <div className={style.estrelasFuncionario}>
+            <div className={style.estrelasFuncionario}> 
                 <Star />
                 <Star />
                 <Star />

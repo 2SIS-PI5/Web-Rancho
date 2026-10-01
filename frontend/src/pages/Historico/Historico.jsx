@@ -1,59 +1,18 @@
 import style from "./css/Historico.module.css";
+
 import {
-  ArrowLeft,
-  ArrowRight,
-  CalendarDays,
-  CalendarSearch,
-  Minus,
-  Banknote,
-  DollarSign,
-  QrCode,
-  Users,
-  ChevronDown,
-  ChevronUp,
-  Wallet,
-  User,
-  Check,
-  Search
+  Banknote, DollarSign, QrCode, Users,
+  ChevronDown, ChevronUp, Search
 } from "lucide-react";
 
-import { useState, useRef } from "react";
+import SeletorSemana from "./components/SeletorSemana";
+import QuemTrabalhou from "./components/QuemTrabalhou";
+import DetalheDatas from "./components/DetalheDatas";
+
+import { useState } from "react";
 
 function Historico() {
-  const INICIO_SEMANA = 6;
-
-  const inicioDaSemana = (data) => {
-    const d = new Date(data);
-    d.setHours(0, 0, 0, 0);
-    const diferenca = (d.getDay() - INICIO_SEMANA + 7) % 7;
-    d.setDate(d.getDate() - diferenca);
-    return d;
-  };
-
   const [inicioSemana, setInicioSemana] = useState(new Date(2026, 8, 19));
-  const inputDataRef = useRef(null);
-
-  const abrirSeletor = () => {
-    const input = inputDataRef.current;
-    if (input?.showPicker) input.showPicker();
-    else input?.click();
-  };
-
-  const escolherData = (e) => {
-    if (!e.target.value) return;
-    const [ano, mes, dia] = e.target.value.split("-").map(Number);
-    setInicioSemana(inicioDaSemana(new Date(ano, mes - 1, dia)));
-  };
-
-  const somarDias = (data, dias) => {
-    const d = new Date(data);
-    d.setDate(d.getDate() + dias);
-    return d;
-  };
-
-  const formatarData = (d) =>
-    d.toLocaleDateString("pt-BR", { day: "2-digit", month: "2-digit", year: "2-digit" });
-  const [quemTrabalhouAberto, setQuemTrabalhouAberto] = useState(false);
 
   const grupos = [
     {
@@ -87,9 +46,6 @@ function Historico() {
       ],
     }
   ];
-
-  const formatBRL = (v) =>
-    "R$ " + v.toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 }).replace(",", ".");
 
   const [datasAbertas, setDatasAbertas] = useState([]);
 
@@ -176,36 +132,8 @@ function Historico() {
         <div className={style.tituloHistorico}><h1>Histórico de Escalas</h1><p>Resumo completo por semana - equipe, pagamentos e totais</p></div>
       </div>
       <div className={style.containerHistorico}>
-        <div className={style.manipularSemana}>
-          <button className={style.btnAnterior} onClick={() =>
-            setInicioSemana(somarDias(inicioSemana, -7))}>
-            <ArrowLeft />
-            <p>Anterior</p>
-          </button>
-          <div className={style.semanaEscolhida}>
-            <CalendarDays />
-            <p className={style.periodoEscolhido}>
-              {formatarData(inicioSemana)} <Minus /> {formatarData(somarDias(inicioSemana, 6))}
-            </p>
-            <button className={style.btnIrParaData} onClick={abrirSeletor}>
-              <CalendarSearch />
-              <p>Ir para data</p>
-            </button>
-            <input
-              ref={inputDataRef}
-              type="date"
-              className={style.inputData}
-              onChange={escolherData}
-            />
-          </div>
+        <SeletorSemana inicioSemana={inicioSemana} onChange={setInicioSemana} />
 
-          <button className={style.btnProxima}
-            onClick={() => setInicioSemana(somarDias(inicioSemana, 7))}
-          >
-            <p>Próxima</p>
-            <ArrowRight />
-          </button>
-        </div>
         <div className={style.infoSemana}>
           <div className={style.cardInfoSemana}>
             <div className={style.iconeCard}>
@@ -240,164 +168,8 @@ function Historico() {
             </p>
           </div>
         </div>
-        <div
-          className={style.quemTrabalhou}
-          onClick={() => setQuemTrabalhouAberto(!quemTrabalhouAberto)}
-        >
-          <div className={style.tituloCardQuemTrabalhou}>
-            <Users />
-            <p>Quem trabalhou esta semana</p>
-            <p>(10 funcionários)</p>
-          </div>
-
-          {quemTrabalhouAberto ? (
-            <ChevronUp />
-          ) : (
-            <ChevronDown />
-          )}
-        </div>
-
-        {quemTrabalhouAberto && (
-          <>
-            <div className={style.tpList}>
-              {grupos.map((grupo) => (
-                <section className={style.tpWrap} key={grupo.setor}>
-                  <div className={style.tpGroup}>
-                    <span
-                      className={style.tpDot}
-                      style={{ background: grupo.cor }}
-                    />
-
-                    <span
-                      className={style.tpGroupTitle}
-                      style={{ color: grupo.cor }}
-                    >
-                      {grupo.setor}
-                    </span>
-
-                    <span className={style.tpGroupCount}>
-                      ({grupo.itens.length})
-                    </span>
-                  </div>
-
-                  <div className={style.tpHead}>
-                    <div>Funcionário</div>
-                    <div>Dias / Datas</div>
-                    <div className={style.valor}>Valor</div>
-                    <div className={style.via}>Via</div>
-                    <div className={style.status}>Status</div>
-                  </div>
-
-                  {grupo.itens.map((item) => (
-                    <div className={style.tpRow} key={item.id}>
-                      <div className={style.tpFunc}>
-                        <span className={style.tpAvatar}>
-                          <User size={15} strokeWidth={1.75} />
-                        </span>
-
-                        <span className={style.tpNome}>
-                          {item.nome}
-                        </span>
-                      </div>
-
-                      <div>
-                        <div className={style.tpDiasQtd}>
-                          {item.dias.length}d
-                        </div>
-
-                        <div className={style.tpDiasDatas}>
-                          {item.dias.join(", ")}
-                        </div>
-                      </div>
-
-                      <div className={style.tpValor}>
-                        {formatBRL(item.valor)}
-                      </div>
-
-                      <div className={style.tpVia}>
-                        <Wallet size={17} strokeWidth={1.75} />
-                        {item.via}
-                      </div>
-
-                      <div className={style.tpStatus}>
-                        <span className={style.tpBadge}>
-                          <Check size={15} />
-                          {item.status}
-                        </span>
-                      </div>
-                    </div>
-                  ))}
-                  <div className={style.tpTotal}>
-                    <span className={style.tpTotalLabel}>
-                      Total {grupo.setor}:
-                    </span>
-                    <span className={style.tpTotalValor}>
-                      {formatBRL(grupo.itens.reduce((soma, item) => soma + item.valor, 0))}
-                    </span>
-                  </div>
-                </section>
-              )
-              )}
-            </div>
-            <div className={style.espacoFooter}></div>
-          </>
-        )}
-
-        <div className={style.areaDetalheDatas}>
-          <div className={style.headerCardDetalheData}>
-            <div className={style.tituloCard}>
-              <p>Detalhe por Data</p>
-            </div>
-            <div className={style.filtrosCardDetalhe}>
-              <div className={style.inputPesquisa}>
-                <Search />
-                <input type="text" placeholder="Filtrar por nome..." />
-              </div>
-            </div>
-          </div>
-          {datas.map((d) => (
-            <div className={style.dataItem} key={d.id}>
-              <div className={style.cardDataDetalhe} onClick={() => toggleData(d.id)}>
-                <div className={style.bolinhaLaranja}></div>
-
-                <div className={style.tituloData}>
-                  <p className={style.diaDaSemana}>{d.diaSemana}</p>
-                  <p className={style.diaDaEscala}>{d.data}</p>
-                </div>
-
-                <div className={style.qtdFuncDropDown}>
-                  <p className={style.qtdFunc}>{d.funcionarios.length} func.</p>
-                  {datasAbertas.includes(d.id) ? <ChevronUp /> : <ChevronDown />}
-                </div>
-              </div>
-
-              {datasAbertas.includes(d.id) && (
-                <div className={style.listaFuncData}>
-                  {agruparPorSetor(d.funcionarios).map(([setor, funcs]) => (
-                    <div
-                      className={style.colunaSetor}
-                      key={setor}
-                      style={{ "--cor": coresSetor[setor] || "#6b7280" }}
-                    >
-                      <div className={style.tituloSetor}>
-                        <span className={style.pontoSetor} />
-                        {setor} ({funcs.length})
-                      </div>
-
-                      <div className={style.chips}>
-                        {funcs.map((f) => (
-                          <span className={style.chip} key={f.id}>
-                            {f.nome}
-                          </span>
-                        ))}
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
-          ))}
-        </div>
+        <QuemTrabalhou grupos={grupos} />
+        <DetalheDatas datas={datas} />
       </div >
 
     </>
