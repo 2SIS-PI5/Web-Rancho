@@ -1,7 +1,9 @@
 import { X, Trash2 } from "lucide-react";
 import style from "../css/Funcionarios.module.css";
+import { useState } from "react";
 
 function ModalExcluirFuncionario({ aberto, onFechar, funcionario, onConfirmar }) {
+    const [erro, setErro] = useState("");
 
     if (!aberto || !funcionario) {
         return null;
@@ -54,12 +56,16 @@ function ModalExcluirFuncionario({ aberto, onFechar, funcionario, onConfirmar })
 
                     <button
                         className={style.btnConfirmarExclusao}
-                        onClick={onConfirmar}
+                        onClick={async () => {
+                            setErro("");
+                            try { await onConfirmar(); } catch (error) { setErro(error.response?.data?.message || error.response?.data || "Não foi possível desativar o funcionário."); }
+                        }}
                     >
                         Excluir
                     </button>
 
                 </div>
+                {erro && <p>{erro}</p>}
 
             </div>
 

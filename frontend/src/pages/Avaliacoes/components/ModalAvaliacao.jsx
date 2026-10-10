@@ -1,10 +1,37 @@
 import style from "../css/Avaliacoes.module.css";
 import { StarIcon, X } from "lucide-react";
 import { useState } from "react";
+import api from "../../../services/api";
 
-function ModalAvaliacao({ funcionario, onFechar }) {
+function ModalAvaliacao({ funcionario, onFechar, onSalvo }) {
 
     const [nota, setNota] = useState(0);
+    const [descricao, setDescricao] = useState("");
+    const [erro, setErro] = useState("");
+    const [salvando, setSalvando] = useState(false);
+
+    async function salvar() {
+        if (!Number.isInteger(nota) || nota < 1 || nota > 5) {
+            setErro("A nota deve ser um número inteiro entre 1 e 5.");
+            return;
+        }
+        if (!descricao.trim() || descricao.length > 255) {
+            setErro("A descrição é obrigatória e deve ter até 255 caracteres.");
+            return;
+        }
+        setSalvando(true);
+        setErro("");
+        try {
+            await api.post(`/avaliacao/${funcionario.funcionarioId}`, { nota: Number(nota), descricao });
+            await onSalvo();
+            onFechar();
+        } catch (error) {
+            const data = error.response?.data;
+            setErro(data?.message || (typeof data === "string" ? data : "Não foi possível salvar a avaliação."));
+        } finally {
+            setSalvando(false);
+        }
+    }
 
     return (
         <div className={style.overlayModal}>
@@ -42,7 +69,12 @@ function ModalAvaliacao({ funcionario, onFechar }) {
 
                     <textarea
                         placeholder="Escreva um comentário sobre o desempenho..."
+                        value={descricao}
+                        maxLength={255}
+                        onChange={(e) => setDescricao(e.target.value)}
                     />
+                    <p>{descricao.length}/255</p>
+                    {erro && <p>{erro}</p>}
 
                 </div>
 
@@ -52,8 +84,8 @@ function ModalAvaliacao({ funcionario, onFechar }) {
                         Cancelar
                     </button>
 
-                    <button>
-                        Avaliar
+                    <button disabled={salvando} onClick={salvar}>
+                        {salvando ? "Salvando..." : "Avaliar"}
                     </button>
 
                 </div>

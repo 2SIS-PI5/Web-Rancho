@@ -1,29 +1,28 @@
 import style from "../css/Funcionarios.module.css";
 
-import { MapPin, Star, Pencil, Trash2 } from "lucide-react";
+import { Star, Pencil, Trash2 } from "lucide-react";
+import { formatTelefone, formatCep, formatValorBRL } from "../../../utils/formatadores";
 
-function CardFuncionario({ nome, area, distancia, telefone, cep, chavePix, valorDiaria,
+function CardFuncionario({ nome, area, media, qtdAvaliacoes, telefone, cep, chavePix, valorDiaria,
     ajudaTransporte, onEditar, onExcluir }) {
+    const quantidade = Number(qtdAvaliacoes) || 0;
+    const mediaNumerica = Number(media) || 0;
+    const estrelasPreenchidas = Math.max(0, Math.min(5, Math.round(mediaNumerica)));
     return (
         <div className={style.cardFuncionario}>
             <div className={style.nomeAreaLocalizacao}>
                 <p className={style.nomeFuncionario}>{nome}</p>
                 <p className={style.areaFuncionario}>{area}</p>
-                <p className={style.distanciaFuncionario}><MapPin />{distancia}</p>
             </div>
             <div className={style.estrelasFuncionario}> 
-                <Star />
-                <Star />
-                <Star />
-                <Star />
-                <Star />
-                <p>4.7 (3 avaliações)</p>
+                {[1, 2, 3, 4, 5].map((estrela) => <Star key={estrela} fill={estrela <= estrelasPreenchidas ? "currentColor" : "none"} />)}
+                <p>{quantidade > 0 ? `${mediaNumerica.toFixed(1)} (${quantidade} ${quantidade === 1 ? "avaliação" : "avaliações"})` : "Sem avaliações"}</p>
             </div>
             <div className={style.infosFuncionario}>
-                <p>Telefone: <span className={style.telefoneFuncionario}>{telefone}</span></p>
-                <p>CEP: <span className={style.cepFuncionario}>{cep}</span></p>
+                <p>Telefone: <span className={style.telefoneFuncionario}>{formatTelefone(telefone)}</span></p>
+                <p>CEP: <span className={style.cepFuncionario}>{formatCep(cep)}</span></p>
                 <p>Chave PIX:: <span className={style.cepFuncionario}>{chavePix}</span></p>
-                <p>Valor Diária: <span className={style.valorDiariaFuncionario}>{valorDiaria}</span></p>
+                <p>Valor Diária: <span className={style.valorDiariaFuncionario}>{formatValorBRL(valorDiaria)}</span></p>
                 <p>
                     Ajuda Transporte:{" "}
                     <span className={ajudaTransporte ? style.transporteSim : style.transporteNao}>

@@ -7,77 +7,6 @@ import api from "../../services/api";
 import { Plus, Search } from "lucide-react";
 import { useEffect, useState } from "react";
 
-const funcionariosMock = [
-  {
-    id: 1,
-    nome: "Rosa Silva",
-    area: "Cozinha",
-    distancia: 5.2,
-    telefone: "(11) 91077-0886",
-    cep: "09750-000",
-    chavePix: "11910770886",
-    valorDiaria: 180,
-    ajudaTransporte: true
-  },
-  {
-    id: 2,
-    nome: "Fernando Santos",
-    area: "Atividades",
-    distancia: 8.7,
-    telefone: "(11) 98765-4321",
-    cep: "09810-000",
-    chavePix: "fernando@email.com",
-    valorDiaria: 150,
-    ajudaTransporte: false
-  },
-  {
-    id: 3,
-    nome: "Patricia Oliveira",
-    area: "Salão",
-    distancia: 3.4,
-    telefone: "(11) 91234-5678",
-    cep: "09720-000",
-    chavePix: "11912345678",
-    valorDiaria: 160,
-    ajudaTransporte: true
-  },
-  {
-    id: 4,
-    nome: "Rafael Souza",
-    area: "Cozinha",
-    distancia: 6.1,
-    telefone: "(11) 99876-5432",
-    cep: "09650-000",
-    chavePix: "rafael@email.com",
-    valorDiaria: 180,
-    ajudaTransporte: false
-  },
-  {
-    id: 5,
-    nome: "Mariana Costa",
-    area: "Salão",
-    distancia: 4.8,
-    telefone: "(11) 95555-4444",
-    cep: "09760-000",
-    chavePix: "11955554444",
-    valorDiaria: 160,
-    ajudaTransporte: true
-  },
-  {
-    id: 6,
-    nome: "Carlos Mendes",
-    area: "Atividades",
-    distancia: 10.3,
-    telefone: "(11) 94444-3333",
-    cep: "09820-000",
-    chavePix: "carlos@email.com",
-    valorDiaria: 150,
-    ajudaTransporte: false
-  }
-];
-
-const formularioInicial = { nome: "", telefone: "", cep: "", chavePix: "", area: "Cozinha", valorDiaria: "", ajudaTransporte: false };
-
 function Funcionarios() {
   function abrirModalExcluir(funcionario) {
     setFuncionarioExcluir(funcionario);
@@ -110,23 +39,42 @@ function Funcionarios() {
   const [funcionarioExcluir, setFuncionarioExcluir] = useState(null);
   const [modalExcluirAberto, setModalExcluirAberto] = useState(false);
 
-  const [funcionarios, setFuncionarios] = useState(funcionariosMock);
+  const [funcionarios, setFuncionarios] = useState([]);
+  const [setores, setSetores] = useState([]);
+  const [busca, setBusca] = useState("");
+  const [carregando, setCarregando] = useState(true);
+  const [erro, setErro] = useState("");
 
-  /* COM BANCO DE DADOS E JAVA
-    useEffect(() => {
-      buscarFuncionarios();
-    }, []);
+  function mapearFuncionario(funcionario) {
+    return { ...funcionario, area: funcionario.setor };
+  }
 
+  async function buscarDados() {
+    setCarregando(true);
+    setErro("");
+    try {
+      const [funcionariosResposta, setoresResposta] = await Promise.all([
+        api.get("/funcionarios"),
+        api.get("/setores")
+      ]);
+      setFuncionarios(funcionariosResposta.data.map(mapearFuncionario));
+      setSetores(setoresResposta.data);
+    } catch (error) {
+      setErro(error.response?.data?.message || error.response?.data || "Não foi possível carregar os funcionários.");
+    } finally {
+      setCarregando(false);
+    }
+  }
 
-    async function buscarFuncionarios() {
-      try {
-        const resposta = await api.get("/funcionarios");
+  useEffect(() => {
+    buscarDados();
+  }, []);
 
-        setFuncionarios(resposta.data);
-      } catch (erro) {
-        console.error("Erro ao buscar funcionários:", erro);
-      }
- } */
+  const funcionariosVisiveis = funcionarios.filter((funcionario) =>
+    funcionario.status !== "INATIVO" &&
+    (areaSelecionada === "Todas" || funcionario.area === areaSelecionada) &&
+    funcionario.nome.toLowerCase().includes(busca.toLowerCase())
+  );
 
   return (
     <>
@@ -137,7 +85,7 @@ function Funcionarios() {
       <div className={style.containerFuncionarios}>
         <div className={style.inputPesquisa}>
           <Search />
-          <input type="text" placeholder="Buscar funcionário por nome..." />
+          <input type="text" placeholder="Buscar funcionário por nome..." value={busca} onChange={(e) => setBusca(e.target.value)} />
         </div>
         <div className={style.areaFiltroFuncionarios}>
           <p>Filtrar por Área</p>
@@ -148,38 +96,22 @@ function Funcionarios() {
               Todas as Áreas
             </button>
 
-            <button
-              className={areaSelecionada === "Cozinha" ? style.filtroAtivo : ""}
-              onClick={() => setAreaSelecionada("Cozinha")}>
-              Cozinha
-            </button>
-
-            <button
-              className={areaSelecionada === "Salão" ? style.filtroAtivo : ""}
-              onClick={() => setAreaSelecionada("Salão")} >
-              Salão
-            </button>
-
-            <button
-              className={areaSelecionada === "Atividades" ? style.filtroAtivo : ""}
-              onClick={() => setAreaSelecionada("Atividades")} >
-              Atividades
-            </button>
+            {setores.map((setor) => <button key={setor.id} className={areaSelecionada === setor.nome ? style.filtroAtivo : ""} onClick={() => setAreaSelecionada(setor.nome)}>{setor.nome}</button>)}
           </div>
         </div>
         <div className={style.containerCardFuncionarios}>
-          {funcionarios.map((f, index) => (
-            <CardFuncionario key={f.id} nome={f.nome} area={f.area} distancia={f.distancia} telefone={f.telefone} cep={f.cep} chavePix={f.chavePix}
+          {carregando && <p>Carregando funcionários...</p>}
+          {!carregando && erro && <p>{erro}</p>}
+          {!carregando && !erro && funcionariosVisiveis.length === 0 && <p>Nenhum funcionário encontrado.</p>}
+          {!carregando && !erro && funcionariosVisiveis.map((f) => (
+            <CardFuncionario key={f.id} nome={f.nome} area={f.area} media={f.mediaAvaliacoes} qtdAvaliacoes={f.quantidadeAvaliacoes} telefone={f.telefone} cep={f.cep} chavePix={f.chavePix}
               valorDiaria={f.valorDiaria} ajudaTransporte={f.ajudaTransporte} onEditar={() => abrirModalEdicao(f)} onExcluir={() => abrirModalExcluir(f)} />
           ))}
         </div>
       </div>
-      <ModalFuncionario aberto={modalAberto} onFechar={fecharModal} funcionario={funcionarioSelecionado} />
+      <ModalFuncionario aberto={modalAberto} onFechar={fecharModal} funcionario={funcionarioSelecionado} setores={setores} onSalvo={buscarDados} />
       <ModalExcluirFuncionario aberto={modalExcluirAberto} onFechar={fecharModalExcluir} funcionario={funcionarioExcluir}
-        onConfirmar={() => {
-          alert("Funcionário excluído!");
-          fecharModalExcluir();
-        }}
+        onConfirmar={async () => { await api.put(`/funcionarios/${funcionarioExcluir.id}/desativar`); await buscarDados(); fecharModalExcluir(); }}
       />
     </>
   )

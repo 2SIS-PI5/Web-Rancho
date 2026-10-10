@@ -1,40 +1,42 @@
 import style from "./css/Avaliacoes.module.css";
 import { Search } from "lucide-react";
 import { useState } from "react";
+import { useEffect } from "react";
+import api from "../../services/api";
 import ModalAvaliacao from "./components/ModalAvaliacao";
 import CardAvaliacao from "./components/CardAvaliacao";
 
 function Avaliacoes() {
 
-  const funcionarios = [
-    {
-      nome: "Ryan Pina",
-      area: "Cozinha",
-      mediaAvaliacao: 4.8,
-      qtdAvaliacoes: 12,
-    },
-    {
-      nome: "Ana Silva",
-      area: "Salão",
-      mediaAvaliacao: 4.5,
-      qtdAvaliacoes: 8,
-    },
-    {
-      nome: "Lucas Santos",
-      area: "Atividades",
-      mediaAvaliacao: 4.2,
-      qtdAvaliacoes: 6,
-    },
-    {
-      nome: "Mariana Oliveira",
-      area: "Cozinha",
-      mediaAvaliacao: 5.0,
-      qtdAvaliacoes: 15,
-    },
-  ];
-
   const [modalAberto, setModalAberto] = useState(false);
   const [funcionarioSelecionado, setFuncionarioSelecionado] = useState(null);
+  const [busca, setBusca] = useState("");
+  const [funcionarios, setFuncionarios] = useState([]);
+  const [carregando, setCarregando] = useState(true);
+  const [erro, setErro] = useState("");
+
+  function mensagemErro(error, fallback) {
+    const data = error.response?.data;
+    return data?.message || (typeof data === "string" ? data : fallback);
+  }
+
+  async function buscarFuncionarios() {
+    setCarregando(true);
+    setErro("");
+    try {
+      const resposta = await api.get("/avaliacao", { params: busca ? { nome: busca } : {} });
+      setFuncionarios(resposta.data);
+    } catch (error) {
+      setErro(mensagemErro(error, "Não foi possível carregar as avaliações."));
+    } finally {
+      setCarregando(false);
+    }
+  }
+
+  useEffect(() => {
+    const temporizador = setTimeout(buscarFuncionarios, 300);
+    return () => clearTimeout(temporizador);
+  }, [busca]);
 
   function abrirModalAvaliacao(funcionario) {
     setFuncionarioSelecionado(funcionario);
@@ -54,12 +56,15 @@ function Avaliacoes() {
       <div className={style.containerAvaliacoes}>
         <div className={style.inputPesquisa}>
           <Search />
-          <input type="text" placeholder="Buscar funcionário por nome..." />
+          <input type="text" placeholder="Buscar funcionário por nome..." value={busca} onChange={(e) => setBusca(e.target.value)} />
         </div>
         <div className={style.painelAvaliacoes}>
-          {funcionarios.map((f, index) => (
-            <CardAvaliacao key={index} nome={f.nome} area={f.area} mediaAvaliacao={f.mediaAvaliacao}
-              qtdAvaliacoes={f.qtdAvaliacoes} onAvaliar={() => abrirModalAvaliacao(f)}/>
+          {carregando && <p>Carregando avaliações...</p>}
+          {!carregando && erro && <p>{erro}</p>}
+          {!carregando && !erro && funcionarios.length === 0 && <p>Nenhum funcionário encontrado.</p>}
+          {!carregando && !erro && funcionarios.map((f) => (
+            <CardAvaliacao key={f.funcionarioId} nome={f.nome} area={f.cargo} mediaAvaliacao={f.mediaAvaliacoes}
+              qtdAvaliacoes={f.quantidadeAvaliacoes} onAvaliar={() => abrirModalAvaliacao(f)}/>
           ))}
         </div>
       </div>
@@ -67,6 +72,7 @@ function Avaliacoes() {
         <ModalAvaliacao
           funcionario={funcionarioSelecionado}
           onFechar={fecharModalAvaliacao}
+          onSalvo={buscarFuncionarios}
         />
       )}
     </>

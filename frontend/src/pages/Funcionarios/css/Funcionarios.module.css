@@ -632,3 +632,8 @@
 .btnConfirmarExclusao:hover {
     background-color: #b31414;
 }
+
+.erroCampo {
+    color: #c62828;
+    font-size: 12px;
+}

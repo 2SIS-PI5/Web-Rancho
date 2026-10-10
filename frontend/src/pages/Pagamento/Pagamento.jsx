@@ -1,50 +1,79 @@
 import style from "./css/Pagamento.module.css";
 import { Banknote, DollarSign, QrCode, CalendarDays } from "lucide-react";
 import CardPgtoFunc from "./components/CardPgtoFunc";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import api from "../../services/api";
+import { formatBRL } from "../../utils/formatadores";
 
 function Pagamento() {
   const [areaSelecionada, setAreaSelecionada] = useState("Todas");
-  const [filtroPagamento, setFiltroPagamento] = useState("Geral");
+  const [filtroPagamento, setFiltroPagamento] = useState("Não Pagos");
+  const [pagamentos, setPagamentos] = useState([]);
+  const [setores, setSetores] = useState([]);
+  const [resumo, setResumo] = useState({ totalPagoDinheiro: 0, totalPagoPix: 0, custoTotalMO: 0 });
+  const [carregando, setCarregando] = useState(true);
+  const [processando, setProcessando] = useState(false);
+  const [pagandoId, setPagandoId] = useState(null);
+  const [erro, setErro] = useState("");
 
-  const funcionarios = [
-    {
-      nome: "Ryan Pina",
-      area: "Cozinha",
-      statusPagto: "Pago",
-      telefone: "(11) 99999-1111",
-      chavePix: "ryan@email.com",
-      diasTrabalhados: 2,
-      valorTotal: 200,
-    },
-    {
-      nome: "Ana Silva",
-      area: "Salão",
-      statusPagto: "Pendente",
-      telefone: "(11) 99999-2222",
-      chavePix: "11999992222",
-      diasTrabalhados: 2,
-      valorTotal: 240,
-    },
-    {
-      nome: "Lucas Santos",
-      area: "Atividades",
-      statusPagto: "Pago",
-      telefone: "(11) 99999-3333",
-      chavePix: "lucas@email.com",
-      diasTrabalhados: 1,
-      valorTotal: 120,
-    },
-    {
-      nome: "Mariana Oliveira",
-      area: "Cozinha",
-      statusPagto: "Pendente",
-      telefone: "(11) 99999-4444",
-      chavePix: "11999994444",
-      diasTrabalhados: 2,
-      valorTotal: 200,
-    },
-  ];
+  function mensagemErro(error, fallback) {
+    const data = error.response?.data;
+    return data?.message || (typeof data === "string" ? data : fallback);
+  }
+
+  async function buscarDados() {
+    setCarregando(true);
+    setErro("");
+    try {
+      const endpoint = filtroPagamento === "Pagos" ? "/pagamento/pagos" : filtroPagamento === "Não Pagos" ? "/pagamento/pendentes" : "/pagamento";
+      const parametros = areaSelecionada === "Todas" ? {} : { setor: areaSelecionada };
+      const [pagamentosResposta, resumoResposta, setoresResposta] = await Promise.all([
+        api.get(endpoint, { params: parametros }),
+        api.get("/pagamento/resumo"),
+        api.get("/setores")
+      ]);
+      setPagamentos(pagamentosResposta.data);
+      setResumo(resumoResposta.data);
+      setSetores(setoresResposta.data);
+    } catch (error) {
+      setErro(mensagemErro(error, "Não foi possível carregar os pagamentos."));
+    } finally {
+      setCarregando(false);
+    }
+  }
+
+  useEffect(() => { buscarDados(); }, [filtroPagamento, areaSelecionada]);
+
+  async function gerarPagamentos() {
+    if (!window.confirm("Deseja gerar os pagamentos?")) return;
+    setProcessando(true);
+    setErro("");
+    try {
+      await api.post("/pagamento/gerar");
+      await buscarDados();
+    } catch (error) {
+      setErro(mensagemErro(error, "Não foi possível gerar os pagamentos."));
+    } finally {
+      setProcessando(false);
+    }
+  }
+
+  async function pagar(id, formaPagamento) {
+    if (!Number.isFinite(Number(id))) {
+      setErro("Pagamento inválido.");
+      return;
+    }
+    setPagandoId(id);
+    setErro("");
+    try {
+      await api.put(`/pagamento/${id}/pagar`, { formaPagamento });
+      await buscarDados();
+    } catch (error) {
+      setErro(mensagemErro(error, "Não foi possível realizar o pagamento."));
+    } finally {
+      setPagandoId(null);
+    }
+  }
   return (
     <>
       <div className={style.headerPagamento}>
@@ -57,17 +86,17 @@ function Pagamento() {
             <div className={style.totalEmTipoPagto}>
               <Banknote />
               <p className={style.tipoTotal}>Dinheiro</p>
-              <p className={style.totalValor}>R$0,00</p>
+              <p className={style.totalValor}>{formatBRL(resumo.totalPagoDinheiro)}</p>
             </div>
             <div className={style.totalEmTipoPagto}>
               <QrCode />
               <p className={style.tipoTotal}>PIX</p>
-              <p className={style.totalValor}>R$0,00</p>
+              <p className={style.totalValor}>{formatBRL(resumo.totalPagoPix)}</p>
             </div>
             <div className={style.totalEmTipoPagto}>
               <DollarSign />
               <p className={style.tipoTotal}>Total Pagamento</p>
-              <p className={style.totalValor}>R$0,00</p>
+              <p className={style.totalValor}>{formatBRL(resumo.custoTotalMO)}</p>
             </div>
           </div>
         </div>
@@ -75,7 +104,7 @@ function Pagamento() {
           <div className={style.headerCardGerarPagto}>
             <p className={style.tituloSemanaPagto}><CalendarDays />
               Semana de 19/09/2026</p>
-            <button className={style.btnGerarPagto} onClick={() => alert("Gerando pagamentos")}>Gerar Pagamentos</button>
+            <button className={style.btnGerarPagto} disabled={processando} onClick={gerarPagamentos}>{processando ? "Gerando..." : "Gerar Pagamentos"}</button>
           </div>
           <div className={style.footerCardGerarPagto}>
             <button
@@ -87,7 +116,7 @@ function Pagamento() {
               onClick={() => setFiltroPagamento("Geral")}
             >
               <p>Geral</p>
-              <p className={style.qtdPagtos}>0</p>
+              <p className={style.qtdPagtos}>{filtroPagamento === "Geral" ? pagamentos.length : ""}</p>
             </button>
 
             <button
@@ -99,7 +128,7 @@ function Pagamento() {
               onClick={() => setFiltroPagamento("Pagos")}
             >
               <p>Pagos</p>
-              <p className={style.qtdPagtos}>20</p>
+              <p className={style.qtdPagtos}>{filtroPagamento === "Pagos" ? pagamentos.length : ""}</p>
             </button>
 
             <button
@@ -111,7 +140,7 @@ function Pagamento() {
               onClick={() => setFiltroPagamento("Não Pagos")}
             >
               <p>Não Pagos</p>
-              <p className={style.qtdPagtos}>0</p>
+              <p className={style.qtdPagtos}>{filtroPagamento === "Não Pagos" ? pagamentos.length : ""}</p>
             </button>
           </div>
         </div>
@@ -123,30 +152,14 @@ function Pagamento() {
               Todas
             </button>
 
-            <button
-              className={areaSelecionada === "Cozinha" ? style.filtroAtivo : ""}
-              onClick={() => setAreaSelecionada("Cozinha")}>
-              Cozinha
-            </button>
-
-            <button
-              className={areaSelecionada === "Salão" ? style.filtroAtivo : ""}
-              onClick={() => setAreaSelecionada("Salão")} >
-              Salão
-            </button>
-
-            <button
-              className={areaSelecionada === "Atividades" ? style.filtroAtivo : ""}
-              onClick={() => setAreaSelecionada("Atividades")} >
-              Atividades
-            </button>
+            {setores.map((setor) => <button key={setor.id} className={areaSelecionada === setor.nome ? style.filtroAtivo : ""} onClick={() => setAreaSelecionada(setor.nome)}>{setor.nome}</button>)}
           </div>
         </div>
         <div className={style.containerPagtosFuncs}>
-          {funcionarios.map((f, index) => (
-            <CardPgtoFunc key={index} nome={f.nome} area={f.area} statusPagto={f.statusPagto} telefone={f.telefone}
-              chavePix={f.chavePix} diasTrabalhados={f.diasTrabalhados} valorTotal={f.valorTotal} />
-          ))}
+          {carregando && <p>Carregando pagamentos...</p>}
+          {!carregando && erro && <p>{erro}</p>}
+          {!carregando && !erro && pagamentos.length === 0 && <p>{filtroPagamento === "Não Pagos" ? "Nenhum pagamento pendente. Clique em Gerar Pagamentos." : "Nenhum pagamento encontrado."}</p>}
+          {!carregando && !erro && pagamentos.map((pagamento) => <CardPgtoFunc key={pagamento.id} id={pagamento.id} nome={pagamento.funcionarioNome} area={pagamento.setor} statusPagto={pagamento.status} telefone={pagamento.telefone} chavePix={pagamento.chavePix} diasTrabalhados={pagamento.quantidadeDias} valorDiaria={pagamento.valorDiaria} valorTotal={pagamento.valorAPagar} onPagar={pagar} pagando={pagandoId === pagamento.id} />)}
         </div>
       </div>
     </>

@@ -3,8 +3,9 @@ import style from "../css/Escala.module.css";
 import { Plus, X, User, Search } from "lucide-react";
 
 import { useState } from "react";
+import { formatTelefone } from "../../../utils/formatadores";
 
-function AreaEscala({ area, diaSemana, data }) {
+function AreaEscala({ area, diaSemana, data, funcionarios, selecionados, onToggle, onRemover, escalaId, removendo, mutando }) {
     const [modalAdicionar, setModalAdicionar] = useState(null);
 
     function abrirModalAdicionar(area, dia) {
@@ -15,40 +16,7 @@ function AreaEscala({ area, diaSemana, data }) {
         setModalAdicionar(null);
     }
 
-    const funcionariosArea = [
-        {
-            id: 1,
-            nome: "Ryan",
-            telefone: "(11) 91077-0886"
-        },
-        {
-            id: 2,
-            nome: "Rafael",
-            telefone: "(11) 91077-0886"
-        },
-        {
-            id: 3,
-            nome: "Heloisa",
-            telefone: "(11) 91077-0886"
-        },
-        {
-            id: 4,
-            nome: "Felipe",
-            telefone: "(11) 91077-0886"
-        },
-        {
-            id: 5,
-            nome: "Samuel",
-            telefone: "(11) 91077-0886"
-        },
-        {
-            id: 6,
-            nome: "Laura",
-            telefone: "(11) 91077-0886"
-        },
-
-
-    ]
+    const funcionariosArea = funcionarios.filter((funcionario) => funcionario.setor === area.nome);
 
     return (
         <div className={style.area}>
@@ -61,7 +29,7 @@ function AreaEscala({ area, diaSemana, data }) {
             <div className={style.painelEscalados}>
                 {area.funcionarios.map((func, index) => (
                     <div
-                        key={index}
+                        key={func.id}
                         className={`${style.cardFuncEscalado} ${area.id === "cozinha"
                                 ? style.cozinha
                                 : area.id === "salao"
@@ -71,7 +39,7 @@ function AreaEscala({ area, diaSemana, data }) {
                     >
                         <p>{func.nome}</p>
 
-                        <button className={style.btnRemoverFunc}>
+                        <button className={style.btnRemoverFunc} disabled={mutando || removendo === `${escalaId}-${func.id}`} onClick={() => onRemover(func.id)}>
                             <X />
                         </button>
                     </div>
@@ -79,7 +47,7 @@ function AreaEscala({ area, diaSemana, data }) {
             </div>
 
             <div className={style.btnAdicionar}>
-                <button onClick={abrirModalAdicionar} className={style.btnAdicionarFuncArea}>
+                <button disabled={mutando} onClick={abrirModalAdicionar} className={style.btnAdicionarFuncArea}>
                     <Plus />
                     <p>Adicionar {area.nome}</p>
                 </button>
@@ -112,7 +80,7 @@ function AreaEscala({ area, diaSemana, data }) {
                             </div>
 
                             <div className={style.listaFuncionarios}>
-                                {funcionariosArea.map((f, index) => (
+                                {funcionariosArea.map((f) => (
                                     <label className={style.cardFuncionario} key={f.id}>
                                         <div className={style.fotoFuncionario}>
                                             <User />
@@ -120,11 +88,11 @@ function AreaEscala({ area, diaSemana, data }) {
 
                                         <div className={style.infosFuncionario}>
                                             <p>{f.nome}</p>
-                                            <p>{f.telefone}</p>
+                                            <p>{formatTelefone(f.telefone)}</p>
                                         </div>
 
                                         <div className={style.btnFuncionarioSelecionado}>
-                                            <input type="checkbox" />
+                                            <input type="checkbox" disabled={mutando} checked={selecionados.includes(f.id)} onChange={() => onToggle(f.id)} />
                                         </div>
                                     </label>
                                 ))}
@@ -132,10 +100,8 @@ function AreaEscala({ area, diaSemana, data }) {
 
                             <button
                                 className={style.btnAddFuncionarioEscala}
-                                onClick={() => {
-                                    alert("Cadastrado com sucesso!");
-                                    fecharModalAdicionar();
-                                }}>
+                                disabled={mutando}
+                                onClick={fecharModalAdicionar}>
                                 <p>Adicionar</p>
                             </button>
                         </div>

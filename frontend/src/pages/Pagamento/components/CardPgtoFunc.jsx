@@ -1,9 +1,10 @@
 import { Banknote, QrCode, User, Check } from "lucide-react";
 import style from "../css/Pagamento.module.css";
+import { formatBRL, formatTelefone } from "../../../utils/formatadores";
 
-function CardPgtoFunc({ index, nome, area, statusPagto, telefone, chavePix, diasTrabalhados, valorTotal }) {
+function CardPgtoFunc({ id, nome, area, statusPagto, telefone, chavePix, diasTrabalhados, valorDiaria, valorTotal, onPagar, pagando }) {
     return (
-        <div className={statusPagto === "Pago" ? style.cardPagtoFuncPago : style.cardPagtoFun} key={index}>
+        <div className={statusPagto === "PAGO" ? style.cardPagtoFuncPago : style.cardPagtoFun}>
             <div className={style.infosPessoais}>
                 <div className={style.profileDefault}>
                     <User />
@@ -13,32 +14,33 @@ function CardPgtoFunc({ index, nome, area, statusPagto, telefone, chavePix, dias
                         <p>{nome}</p>
                         <p>{area}</p>
                     </div>
-                    <p className={statusPagto === "Pago" ? style.pago : style.pendente}>
-                        {statusPagto}
+                    <p className={statusPagto === "PAGO" ? style.pago : style.pendente}>
+                        {statusPagto === "PAGO" ? "Pago" : "Pendente"}
                     </p>
                 </div>
             </div>
             <div className={style.infosPagto}>
-                <p className={style.tipoInformacao}>Telefone <p className={style.infoFunc}>{telefone}</p></p>
-                <p className={style.tipoInformacao}>Chave PIX <p className={style.infoFunc}>{chavePix}</p></p>
-                <p className={style.tipoInformacao}>Dias trabalhados<p className={style.infoFunc}>{diasTrabalhados}</p></p>
-                <p className={style.tipoInformacao}>Valor total <p className={style.infoFunc}>{valorTotal}</p></p>
+                <p className={style.tipoInformacao}>Telefone <span className={style.infoFunc}>{formatTelefone(telefone)}</span></p>
+                <p className={style.tipoInformacao}>Chave PIX <span className={style.infoFunc}>{chavePix}</span></p>
+                <p className={style.tipoInformacao}>Dias trabalhados <span className={style.infoFunc}>{diasTrabalhados}</span></p>
+                <p className={style.tipoInformacao}>Valor diária <span className={style.infoFunc}>{formatBRL(valorDiaria)}</span></p>
+                <p className={style.tipoInformacao}>Valor total <span className={style.infoFunc}>{formatBRL(valorTotal)}</span></p>
             </div>
             <div className={style.formasPagto}>
-                {statusPagto === "Pago" ? (
+                {statusPagto === "PAGO" ? (
                     <button disabled={true} className={style.btnPagoVia}>
                         <Check /><p>Pago via</p>
                     </button>
                 ) : (
                     <>
-                        <button className={style.btnPagarEmDinheiro}>
+                        <button className={style.btnPagarEmDinheiro} disabled={pagando} onClick={() => onPagar(id, "DINHEIRO")}>
                             <Banknote />
-                            <p>Dinheiro</p>
+                            <p>{pagando ? "Pagando..." : "Dinheiro"}</p>
                         </button>
 
-                        <button className={style.btnPagarEmPix}>
+                        <button className={style.btnPagarEmPix} disabled={pagando} onClick={() => onPagar(id, "PIX")}>
                             <QrCode />
-                            <p>PIX</p>
+                            <p>{pagando ? "Pagando..." : "PIX"}</p>
                         </button>
                     </>
                 )}
