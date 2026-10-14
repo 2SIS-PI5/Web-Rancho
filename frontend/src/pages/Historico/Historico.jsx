@@ -1,130 +1,92 @@
 import style from "./css/Historico.module.css";
-
-import {
-  Banknote, DollarSign, QrCode, Users,
-  ChevronDown, ChevronUp, Search
-} from "lucide-react";
-
+import { Banknote, DollarSign, QrCode, Users } from "lucide-react";
+import { useEffect, useState } from "react";
+import api from "../../services/api";
+import { inicioDaSemana, somarDias, formatarData } from "../../utils/datas";
+import { corDoSetor } from "../../utils/setores";
 import SeletorSemana from "./components/SeletorSemana";
 import QuemTrabalhou from "./components/QuemTrabalhou";
 import DetalheDatas from "./components/DetalheDatas";
+import { formatBRL } from "../../utils/formatadores";
 
-import { useState } from "react";
+function dataIso(data) {
+  const ano = data.getFullYear();
+  const mes = String(data.getMonth() + 1).padStart(2, "0");
+  const dia = String(data.getDate()).padStart(2, "0");
+  return `${ano}-${mes}-${dia}`;
+}
+
+function mensagemErro(error) {
+  const data = error.response?.data;
+  return data?.message || (typeof data === "string" ? data : "Não foi possível carregar o histórico.");
+}
+
+function mapearGrupos(funcionarios) {
+  return funcionarios.reduce((grupos, funcionario) => {
+    const grupo = grupos.find((item) => item.setor === funcionario.setor);
+    const pagamentos = funcionario.pagamentos || [];
+    const vias = [...new Set(pagamentos.map((pagamento) => pagamento.formaPagamento).filter(Boolean))];
+    const item = {
+      id: funcionario.funcionarioId,
+      nome: funcionario.nome,
+      dias: funcionario.diasTrabalhados ? [`${funcionario.diasTrabalhados} dia(s)`] : [],
+      valor: Number(funcionario.valorTotal || 0),
+      via: vias.join(", ") || "Pendente",
+      status: pagamentos.length ? "Pago" : "Pendente",
+    };
+    if (grupo) grupo.itens.push(item);
+    else grupos.push({ setor: funcionario.setor, cor: corDoSetor(funcionario.setor), itens: [item] });
+    return grupos;
+  }, []);
+}
+
+function mapearDatas(detalhes) {
+  return detalhes.map((detalhe) => ({
+    id: detalhe.dia,
+    diaSemana: detalhe.diaSemana,
+    data: formatarData(new Date(`${detalhe.dia}T00:00:00`)),
+    funcionarios: (detalhe.funcionarios || []).map((funcionario) => ({
+      id: funcionario.id,
+      nome: funcionario.nome,
+      setor: funcionario.setor,
+    })),
+  }));
+}
 
 function Historico() {
-  const [inicioSemana, setInicioSemana] = useState(new Date(2026, 8, 19));
+  const [inicioSemana, setInicioSemana] = useState(() => inicioDaSemana(new Date()));
+  const [resumo, setResumo] = useState(null);
+  const [grupos, setGrupos] = useState([]);
+  const [datas, setDatas] = useState([]);
+  const [carregando, setCarregando] = useState(true);
+  const [erro, setErro] = useState("");
+  const [tentativa, setTentativa] = useState(0);
+  const fimSemana = somarDias(inicioSemana, 6);
 
-  const grupos = [
-    {
-      setor: "Cozinha",
-      cor: "#2563eb",
-      itens: [
-        { id: 1, nome: "José Santos", dias: ["26/09", "27/09", "28/09"], valor: 540, via: "Dinheiro", status: "Pago" },
-        { id: 2, nome: "Maria Oliveira", dias: ["26/09", "27/09", "28/09"], valor: 510, via: "Dinheiro", status: "Pago" },
-        { id: 3, nome: "Pedro Lima", dias: ["26/09", "27/09", "28/09"], valor: 450, via: "Dinheiro", status: "Pago" },
-        { id: 4, nome: "Ana Costa", dias: ["26/09", "27/09", "28/09"], valor: 420, via: "Dinheiro", status: "Pago" },
-      ],
-    },
-    {
-      setor: "Salão",
-      cor: "  rgba(4, 161, 46, 0.77)",
-      itens: [
-        { id: 1, nome: "José Santos", dias: ["26/09", "27/09", "28/09"], valor: 540, via: "Dinheiro", status: "Pago" },
-        { id: 2, nome: "Maria Oliveira", dias: ["26/09", "27/09", "28/09"], valor: 510, via: "Dinheiro", status: "Pago" },
-        { id: 3, nome: "Pedro Lima", dias: ["26/09", "27/09", "28/09"], valor: 450, via: "Dinheiro", status: "Pago" },
-        { id: 4, nome: "Ana Costa", dias: ["26/09", "27/09", "28/09"], valor: 420, via: "Dinheiro", status: "Pago" },
-      ],
-    },
-    {
-      setor: "Atividades",
-      cor: "rgba(129, 7, 230, 0.86)",
-      itens: [
-        { id: 1, nome: "José Santos", dias: ["26/09", "27/09", "28/09"], valor: 540, via: "Dinheiro", status: "Pago" },
-        { id: 2, nome: "Maria Oliveira", dias: ["26/09", "27/09", "28/09"], valor: 510, via: "Dinheiro", status: "Pago" },
-        { id: 3, nome: "Pedro Lima", dias: ["26/09", "27/09", "28/09"], valor: 450, via: "Dinheiro", status: "Pago" },
-        { id: 4, nome: "Ana Costa", dias: ["26/09", "27/09", "28/09"], valor: 420, via: "Dinheiro", status: "Pago" },
-      ],
-    }
-  ];
+  useEffect(() => {
+    const controller = new AbortController();
+    const inicio = dataIso(inicioSemana);
+    const fim = dataIso(fimSemana);
+    setCarregando(true);
+    setErro("");
+    Promise.all([
+      api.get("/historico/resumo", { params: { inicio, fim }, signal: controller.signal }),
+      api.get("/historico/funcionariosPagamentos", { params: { inicio, fim }, signal: controller.signal }),
+      api.get("/historico/detalhesPeriodo", { params: { inicio, fim }, signal: controller.signal }),
+    ]).then(([resumoResposta, funcionariosResposta, detalhesResposta]) => {
+      setResumo(resumoResposta.data || null);
+      setGrupos(mapearGrupos(Array.isArray(funcionariosResposta.data) ? funcionariosResposta.data : []));
+      setDatas(mapearDatas(Array.isArray(detalhesResposta.data) ? detalhesResposta.data : []));
+    }).catch((error) => {
+      if (!controller.signal.aborted) setErro(mensagemErro(error));
+    }).finally(() => {
+      if (!controller.signal.aborted) setCarregando(false);
+    });
+    return () => controller.abort();
+  }, [inicioSemana, tentativa]);
 
-  const [datasAbertas, setDatasAbertas] = useState([]);
-
-  const toggleData = (id) => {
-    setDatasAbertas((prev) =>
-      prev.includes(id)
-        ? prev.filter((item) => item !== id)
-        : [...prev, id]
-    );
-  };
-
-  const datas = [
-    {
-      id: 1,
-      diaSemana: "Sábado",
-      data: "26/09/2026",
-      funcionarios: [
-        { id: 1, nome: "José Santos", setor: "Cozinha" },
-        { id: 2, nome: "Maria Oliveira", setor: "Cozinha" },
-        { id: 3, nome: "Pedro Lima", setor: "Cozinha" },
-        { id: 4, nome: "Ana Costa", setor: "Cozinha" },
-        { id: 5, nome: "Roberto Alves", setor: "Garçon" },
-        { id: 6, nome: "Carlos Silva", setor: "Garçon" },
-        { id: 7, nome: "Fernanda Souza", setor: "Garçon" },
-        { id: 8, nome: "Juliana Martins", setor: "Garçon" },
-        { id: 9, nome: "Larissa Ferreira", setor: "Atividades" },
-        { id: 10, nome: "Marcos Pereira", setor: "Atividades" },
-      ],
-    },
-    {
-      id: 2,
-      diaSemana: "Domingo",
-      data: "27/09/2026",
-      funcionarios: [
-        { id: 1, nome: "José Santos", setor: "Cozinha" },
-        { id: 2, nome: "Maria Oliveira", setor: "Cozinha" },
-        { id: 3, nome: "Pedro Lima", setor: "Cozinha" },
-        { id: 4, nome: "Ana Costa", setor: "Cozinha" },
-        { id: 5, nome: "Roberto Alves", setor: "Garçon" },
-        { id: 6, nome: "Carlos Silva", setor: "Garçon" },
-        { id: 7, nome: "Fernanda Souza", setor: "Garçon" },
-        { id: 8, nome: "Juliana Martins", setor: "Garçon" },
-        { id: 9, nome: "Larissa Ferreira", setor: "Atividades" },
-        { id: 10, nome: "Marcos Pereira", setor: "Atividades" },
-      ],
-    },
-    {
-      id: 3,
-      diaSemana: "Segunda",
-      data: "28/09/2026",
-      funcionarios: [
-        { id: 1, nome: "José Santos", setor: "Cozinha" },
-        { id: 2, nome: "Maria Oliveira", setor: "Cozinha" },
-        { id: 3, nome: "Pedro Lima", setor: "Cozinha" },
-        { id: 4, nome: "Ana Costa", setor: "Cozinha" },
-        { id: 5, nome: "Roberto Alves", setor: "Garçon" },
-        { id: 6, nome: "Carlos Silva", setor: "Garçon" },
-        { id: 7, nome: "Fernanda Souza", setor: "Garçon" },
-        { id: 8, nome: "Juliana Martins", setor: "Garçon" },
-        { id: 9, nome: "Larissa Ferreira", setor: "Atividades" },
-        { id: 10, nome: "Marcos Pereira", setor: "Atividades" },
-      ],
-    },
-  ];
-
-  const coresSetor = {
-    Cozinha: "#2563eb",
-    Garçon: "#16a34a",
-    Salão: "#16a34a",
-    Atividades: "#9333ea",
-  };
-
-  const agruparPorSetor = (funcionarios) =>
-    Object.entries(
-      funcionarios.reduce((acc, f) => {
-        (acc[f.setor] ||= []).push(f);
-        return acc;
-      }, {})
-    );
+  const quantidadeFuncionarios = Number(resumo?.quantidadeFuncionarios || 0);
+  const vazio = !grupos.length && !datas.length;
 
   return (
     <>
@@ -133,45 +95,20 @@ function Historico() {
       </div>
       <div className={style.containerHistorico}>
         <SeletorSemana inicioSemana={inicioSemana} onChange={setInicioSemana} />
-
-        <div className={style.infoSemana}>
-          <div className={style.cardInfoSemana}>
-            <div className={style.iconeCard}>
-              <DollarSign />
-            </div>
-            <p>Total Mão de Obra</p>
-            <p className={style.valorMaoDeObra}>R$2.790,00</p>
+        {carregando && <p>Carregando histórico...</p>}
+        {!carregando && erro && <div><p>{erro}</p><button type="button" onClick={() => setTentativa((valor) => valor + 1)}>Tentar novamente</button></div>}
+        {!carregando && !erro && vazio && <p>Sem registros no período.</p>}
+        {!carregando && !erro && !vazio && <>
+          <div className={style.infoSemana}>
+            <div className={style.cardInfoSemana}><div className={style.iconeCard}><DollarSign /></div><p>Total Mão de Obra</p><p className={style.valorMaoDeObra}>{formatBRL(resumo?.custoTotalMaoObra || 0)}</p></div>
+            <div className={style.cardInfoSemana}><div className={style.iconeCard}><Banknote /></div><p>Pago em Dinheiro</p><p className={style.valorEmDinheiro}>{formatBRL(resumo?.pagoDinheiro || 0)}</p></div>
+            <div className={style.cardInfoSemana}><div className={style.iconeCard}><QrCode /></div><p>Pago em PIX</p><p className={style.valorEmPix}>{formatBRL(resumo?.pagoPix || 0)}</p></div>
+            <div className={style.cardInfoSemana}><div className={style.iconeCard}><Users /></div><p>Equipe da Semana</p><p className={style.qtdFuncionarios}>{quantidadeFuncionarios} func.</p></div>
           </div>
-          <div className={style.cardInfoSemana}>
-            <div className={style.iconeCard}>
-              <Banknote />
-            </div>
-            <p>Pago em Dinheiro</p>
-            <p className={style.valorEmDinheiro}>R$1.270,00</p>
-          </div>
-          <div className={style.cardInfoSemana}>
-            <div className={style.iconeCard}>
-              <QrCode />
-            </div>
-            <p>Pago em PIX</p>
-            <p className={style.valorEmPix}>R$1.270,00</p>
-          </div>
-          <div className={style.cardInfoSemana}>
-            <div className={style.iconeCard}>
-              <Users />
-            </div>
-            <p>Equipe da Semana</p>
-            <p className={style.qtdFuncionarios}>10 func.</p>
-            <p className={style.pagamentosSemana}>
-              <span style={{ color: "green" }}>10 pagos</span> -
-              <span style={{ marginLeft: "2px", color: "red" }}>2 pendentes</span>
-            </p>
-          </div>
-        </div>
-        <QuemTrabalhou grupos={grupos} />
-        <DetalheDatas datas={datas} />
-      </div >
-
+          <QuemTrabalhou grupos={grupos} />
+          <DetalheDatas datas={datas} />
+        </>}
+      </div>
     </>
   );
 }
