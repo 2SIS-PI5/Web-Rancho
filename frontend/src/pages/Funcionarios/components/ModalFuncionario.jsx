@@ -20,30 +20,46 @@ function ModalFuncionario({ aberto, onFechar, funcionario, setores, onSalvo }) {
     const modoEdicao = !!funcionario;
 
     useEffect(() => {
-    setErro("");
-    setErros({});
-    if (funcionario) {
-        const valor = Number(String(funcionario.valorDiaria ?? "").replace(",", "."));
-        setNome(String(funcionario.nome ?? ""));
-        setTelefone(maskTelefone(funcionario.telefone));
-        setCep(maskCep(funcionario.cep ?? ""));
-        setChavePix(String(funcionario.chavePix ?? ""));
-        setArea(String(funcionario.setorId ?? ""));
-        setValorDiaria(Number.isFinite(valor) ? maskMoedaCentavos(String(Math.round(valor * 100))) : "");
-        setAjudaTransporte(Boolean(funcionario.ajudaTransporte));
-    } else {
-        setNome("");
-        setTelefone("");
-        setCep("");
-        setChavePix("");
-        setArea(setores[0]?.id ?? "");
-        setValorDiaria("");
-        setAjudaTransporte(false);
-    }
-}, [funcionario, aberto, setores]);
+        setErro("");
+        setErros({});
+        if (funcionario) {
+            const valor = Number(String(funcionario.valorDiaria ?? "").replace(",", "."));
+            setNome(String(funcionario.nome ?? ""));
+            setTelefone(maskTelefone(funcionario.telefone));
+            setCep(maskCep(funcionario.cep ?? ""));
+            setChavePix(String(funcionario.chavePix ?? ""));
+            setArea(String(funcionario.setorId ?? setores.find((setor) => setor.nome === funcionario.setor)?.id ?? ""));
+            setValorDiaria(Number.isFinite(valor) ? maskMoedaCentavos(String(Math.round(valor * 100))) : "");
+            setAjudaTransporte(Boolean(funcionario.ajudaTransporte));
+        } else {
+            setNome("");
+            setTelefone("");
+            setCep("");
+            setChavePix("");
+            setArea(setores[0]?.id ?? "");
+            setValorDiaria("");
+            setAjudaTransporte(false);
+        }
+    }, [funcionario, aberto, setores]);
 
     if (!aberto) {
         return null;
+    }
+
+    function alternarAjudaTransporte(ativar) {
+        const valorAtual = Number(onlyDigits(valorDiaria)) / 100;
+
+        if (ativar) {
+            setValorDiaria(
+                maskMoedaCentavos(String(Math.round((valorAtual + 11.90) * 100)))
+            );
+        } else {
+            setValorDiaria(
+                maskMoedaCentavos(String(Math.max(0, Math.round((valorAtual - 11.90) * 100))))
+            );
+        }
+
+        setAjudaTransporte(ativar);
     }
 
     function validar() {
@@ -159,7 +175,7 @@ function ModalFuncionario({ aberto, onFechar, funcionario, setores, onSalvo }) {
                         <div className={style.inputInfo}>
                             <p>Área de Atuação</p>
 
-                            <select name="areaFuncionario" id="areaFuncionario" 
+                            <select name="areaFuncionario" id="areaFuncionario"
                                 value={area}
                                 onChange={(e) => setArea(e.target.value)}
                             >
@@ -189,9 +205,7 @@ function ModalFuncionario({ aberto, onFechar, funcionario, setores, onSalvo }) {
                             <input
                                 type="checkbox"
                                 checked={ajudaTransporte}
-                                onChange={(e) =>
-                                    setAjudaTransporte(e.target.checked)
-                                }
+                                onChange={(e) => alternarAjudaTransporte(e.target.checked)}
                             />
                             <p>Possui ajuda de transporte</p>
                         </label>

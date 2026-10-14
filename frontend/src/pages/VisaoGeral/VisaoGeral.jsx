@@ -138,7 +138,7 @@ function VisaoGeral() {
             </div>
           </Painel>
 
-          <Painel titulo="Custo por funcionário">
+          <Painel titulo="Evolução de custos por setor">
             <p className={style.vazio}>Sem dados no período</p>
           </Painel>
 

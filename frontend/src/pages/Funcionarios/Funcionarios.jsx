@@ -52,15 +52,38 @@ function Funcionarios() {
   async function buscarDados() {
     setCarregando(true);
     setErro("");
+
     try {
       const [funcionariosResposta, setoresResposta] = await Promise.all([
         api.get("/funcionarios"),
-        api.get("/setores")
+        api.get("/funcionarios/setores")
       ]);
+
       setFuncionarios(funcionariosResposta.data.map(mapearFuncionario));
       setSetores(setoresResposta.data);
+
     } catch (error) {
-      setErro(error.response?.data?.message || error.response?.data || "Não foi possível carregar os funcionários.");
+      console.error("Erro ao carregar funcionários:", error);
+
+      if (error.response) {
+        const status = error.response.status;
+
+        if (status === 404) {
+          setErro(
+            `Endpoint não encontrado: ${error.response.data?.path || "verifique as rotas do backend"}.`
+          );
+        } else {
+          setErro(
+            error.response.data?.message ||
+            error.response.data?.error ||
+            `Erro ao carregar funcionários. Código HTTP: ${status}.`
+          );
+        }
+      } else if (error.request) {
+        setErro("Não foi possível obter uma resposta do servidor.");
+      } else {
+        setErro("Ocorreu um erro ao carregar os funcionários.");
+      }
     } finally {
       setCarregando(false);
     }
