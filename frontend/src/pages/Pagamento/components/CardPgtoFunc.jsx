@@ -2,7 +2,20 @@ import { Banknote, QrCode, User, Check } from "lucide-react";
 import style from "../css/Pagamento.module.css";
 import { formatBRL, formatTelefone } from "../../../utils/formatadores";
 
-function CardPgtoFunc({ id, nome, area, statusPagto, telefone, chavePix, diasTrabalhados, valorDiaria, valorTotal, onPagar, pagando }) {
+function CardPgtoFunc({
+    id,
+    nome,
+    area,
+    statusPagto,
+    formaPagamento,
+    telefone,
+    chavePix,
+    diasTrabalhados,
+    valorDiaria,
+    valorTotal,
+    onPagar,
+    pagando
+}) {
     return (
         <div className={statusPagto === "PAGO" ? style.cardPagtoFuncPago : style.cardPagtoFun}>
             <div className={style.infosPessoais}>
@@ -29,16 +42,26 @@ function CardPgtoFunc({ id, nome, area, statusPagto, telefone, chavePix, diasTra
             <div className={style.formasPagto}>
                 {statusPagto === "PAGO" ? (
                     <button disabled={true} className={style.btnPagoVia}>
-                        <Check /><p>Pago via</p>
+                        {formaPagamento === "PIX" ? <QrCode /> : <Banknote />}
+                        <p>Pago via {formaPagamento === "PIX" ? "PIX" : "Dinheiro"}</p>
+                        <Check />
                     </button>
                 ) : (
                     <>
-                        <button className={style.btnPagarEmDinheiro} disabled={pagando} onClick={() => onPagar(id, "DINHEIRO")}>
+                        <button
+                            className={style.btnPagarEmDinheiro}
+                            disabled={pagando}
+                            onClick={() => onPagar(id, "DINHEIRO")}
+                        >
                             <Banknote />
                             <p>{pagando ? "Pagando..." : "Dinheiro"}</p>
                         </button>
 
-                        <button className={style.btnPagarEmPix} disabled={pagando} onClick={() => onPagar(id, "PIX")}>
+                        <button
+                            className={style.btnPagarEmPix}
+                            disabled={pagando}
+                            onClick={() => onPagar(id, "PIX")}
+                        >
                             <QrCode />
                             <p>{pagando ? "Pagando..." : "PIX"}</p>
                         </button>

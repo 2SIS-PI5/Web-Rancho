@@ -1,8 +1,7 @@
 // src/utils/setores.js
 export const coresSetor = {
-  Cozinha: "#2563eb",
-  Garçon: "#16a34a",
-  Salão: "#16a34a",
+  Salão: "#2563eb",
+  Cozinha: "#16a34a",
   Atividades: "#9333ea",
 };
 

@@ -126,10 +126,6 @@
     font-size: 14px;
 }
 
-.inserirData input::-webkit-calendar-picker-indicator {
-    display: none;
-}
-
 .btnAdicionarData {
     width: 10.3%;
     height: 57%;
@@ -308,6 +304,40 @@
     gap: 4%;
 }
 
+.selectTurno {
+    position: relative;
+    width: 22%;
+    height: 54%;
+}
+
+.selectTurno select {
+    width: 100%;
+    height: 100%;
+    appearance: none;
+    -webkit-appearance: none;
+    background-color: white;
+    border: 1px solid rgb(225, 224, 224);
+    border-radius: 14px;
+    text-align: center;
+    text-align-last: center;
+    text-transform: uppercase;
+    padding: 0 12px 0 0;
+    cursor: pointer;
+}
+
+.selectTurno::after {
+    content: "";
+    position: absolute;
+    top: 50%;
+    right: 8px;
+    width: 6px;
+    height: 6px;
+    border-right: 2px solid #555;
+    border-bottom: 2px solid #555;
+    transform: translateY(-70%) rotate(45deg);
+    pointer-events: none;
+}
+
 .qtdEscalados {
     width: 25%;
     height: 54%;
@@ -315,7 +345,7 @@
     flex-direction: row;
     align-items: center;
     justify-content: center;
-    background-color: rgba(128, 128, 128, 0.085);
+    background-color: rgba(128, 128, 128, 0.056);
     border-radius: 15px;
     text-align: center;
 }
@@ -335,16 +365,33 @@
     justify-content: center;
     text-align: center;
     border-radius: 15px;
-    background-color: rgba(23, 165, 23, 0.851);
-    border: none;
+    background-color: rgba(128, 128, 128, 0.056);
+    color: #5c5c5d;
+    border: 1px solid #a5a5a570;
     cursor: pointer;
     margin-right: 5%;
+}
+
+.btnConfirmarEscala:hover {
+    background-color: rgba(128, 128, 128, 0.056);
+    color: #5c5c5d;
+
+}
+
+.modoEdicao {
+    background-color: rgba(22, 176, 22, 0.851);
+    color: #ffffff;
+}
+
+.modoEdicao:hover {
+    background-color: rgba(23, 165, 23, 0.682);
+    color: #ffffff;
+
 }
 
 .btnConfirmarEscala p {
     font-weight: 500;
     font-size: 13px;
-    color: white;
 }
 
 .areasEscala {
@@ -382,9 +429,9 @@
 }
 
 .bolinhaArea {
-    width: 2.8%;
+    width: 2.3%;
     height: 29%;
-    border-radius: 50%;
+    border-radius: 60%;
     margin-left: 5%;
 }
 
@@ -787,35 +834,36 @@
 }
 
 .cozinha {
-    background-color: rgba(5, 113, 245, 0.071);
-    border: 1px solid rgba(5, 93, 245, 0.297);
+    background-color: rgba(1, 208, 56, 0.085);
+    border: 1px solid rgba(0, 237, 63, 0.374);
 }
 
 .cozinha svg {
-    color: rgb(5, 93, 245);
+    color: rgba(0, 158, 42, 0.914);
 }
 
 .cozinha p {
     margin-left: 5px;
     font-size: 12px;
     font-weight: 500;
-    color: rgb(2, 80, 215);
+    color: rgba(1, 123, 33, 0.914);
+
 }
 
 .salao {
-    background-color: rgba(1, 208, 56, 0.085);
-    border: 1px solid rgba(0, 237, 63, 0.374);
+    background-color: rgba(5, 113, 245, 0.071);
+    border: 1px solid rgba(5, 93, 245, 0.297);
 }
 
 .salao svg {
-    color: rgba(0, 158, 42, 0.914);
+    color: rgb(5, 93, 245);
 }
 
 .salao p {
     margin-left: 5px;
     font-size: 12px;
     font-weight: 500;
-    color: rgba(1, 123, 33, 0.914);
+    color: rgb(2, 80, 215);
 }
 
 .atividades {
@@ -857,3 +905,116 @@
 .btnRemoverFunc:hover {
     color: #e53935;
 }
+
+.alertaSucesso {
+    position: fixed;
+    top: 24px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 9999;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    width: max-content;
+    max-width: calc(100vw - 48px);
+    box-sizing: border-box;
+    padding: 14px 16px;
+    background-color: #f0fdf4;
+    border: 1px solid #bbf7d0;
+    border-radius: 8px;
+    color: #15803d;
+    box-shadow: 0 4px 12px rgb(0 0 0 / 12%);
+    animation: aparecerAlerta 0.25s ease-out;
+}
+
+.alertaSucesso p {
+    flex: 1;
+    margin: 0;
+    font-size: 14px;
+    font-weight: 500;
+}
+
+.alertaSucesso button {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 4px;
+    border: none;
+    background: transparent;
+    color: inherit;
+    cursor: pointer;
+}
+
+.alertaSucesso button:hover {
+    opacity: 0.7;
+}
+
+.alertaAviso {
+    background-color: #fef2f2;
+    border-color: #fecaca;
+    color: #dc2626;
+}
+
+.alertaAviso button {
+    color: inherit;
+}
+
+.alertaAviso button:hover {
+    color: #991b1b;
+}
+
+@keyframes aparecerAlerta {
+    from {
+        opacity: 0;
+        transform: translate(-50%, -10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translate(-50%, 0);
+    }
+}
+
+.alertaAviso {
+    background-color: #fffbeb;
+    border-color: #fde68a;
+    color: #b45309;
+}
+
+.alertaAviso button {
+    color: #b45309;
+}
+
+.alertaAviso button:hover {
+    color: #92400e;
+}
+
+.selectDesabilitado {
+    background-color: #f3f4f6;
+    color: #9ca3af;
+    border-color: #d1d5db;
+    cursor: not-allowed;
+}
+
+.alertaSucesso {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    z-index: 9999;
+}
+
+
+.alertaAviso {
+    background-color: #fef2f2;
+    border-color: #fecaca;
+    color: #dc2626;
+}
+
+.alertaAviso button {
+    color: inherit;
+}
+
+.alertaAviso button:hover {
+    color: #991b1b;
+}
+

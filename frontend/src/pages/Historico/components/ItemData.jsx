@@ -10,7 +10,9 @@ function ItemData({ data, aberta, onToggle }) {
         <div className={style.bolinhaLaranja} />
 
         <div className={style.tituloData}>
-          <p className={style.diaDaSemana}>{data.diaSemana}</p>
+          <p className={style.diaDaSemana}>
+            {data.diaSemana.replace("-feira", "").replace(/^./, letra => letra.toUpperCase())}
+          </p>
           <p className={style.diaDaEscala}>{data.data}</p>
         </div>
 
@@ -22,9 +24,19 @@ function ItemData({ data, aberta, onToggle }) {
 
       {aberta && (
         <div className={style.listaFuncData}>
-          {agruparPorSetor(data.funcionarios).map(([setor, funcs]) => (
-            <ColunaSetor key={setor} setor={setor} funcionarios={funcs} />
-          ))}
+          {agruparPorSetor(data.funcionarios)
+            .sort(([setorA], [setorB]) => {
+              if (setorA === "Salão") return -1;
+              if (setorB === "Salão") return 1;
+              return 0;
+            })
+            .map(([setor, funcs]) => (
+              <ColunaSetor
+                key={setor}
+                setor={setor}
+                funcionarios={funcs}
+              />
+            ))}
         </div>
       )}
     </div>

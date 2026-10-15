@@ -1,10 +1,17 @@
 import style from "./css/Escala.module.css";
 
-import { CalendarDays, ChevronDown, ChevronUp, Plus } from "lucide-react";
+import {
+  CalendarDays,
+  ChevronDown,
+  ChevronUp,
+  Plus,
+  CheckCircle,
+  X
+} from "lucide-react";
 
 import { useState, useEffect } from "react";
 import api from "../../services/api";
-import { inicioDaSemana, somarDias, formatarData } from "../../utils/datas";
+import { inicioDaSemana, somarDias } from "../../utils/datas";
 import { agruparPorSetor } from "../../utils/setores";
 
 import CardEscala from "./components/CardEscala";
@@ -23,29 +30,53 @@ function mensagemErro(error, fallback) {
 
 function Escala() {
   const [datasAberta, setDatasAberta] = useState(false);
-  const semanaInicial = inicioDaSemana(new Date());
-  const semanaFinal = somarDias(semanaInicial, 6);
   const [dataNova, setDataNova] = useState("");
-  const [datasSelecionadas, setDatasSelecionadas] = useState(Array.from({ length: 7 }, (_, indice) => dataIso(somarDias(semanaInicial, indice))));
+  const [datasSelecionadas, setDatasSelecionadas] = useState(() => {
+    const hoje = new Date();
+    const diaSemana = hoje.getDay();
+
+    const segunda = new Date(hoje);
+    const diferenca = diaSemana === 0 ? -6 : 1 - diaSemana;
+    segunda.setDate(hoje.getDate() + diferenca);
+
+    const sabado = somarDias(segunda, 5);
+    const domingo = somarDias(segunda, 6);
+
+    return [
+      dataIso(sabado),
+      dataIso(domingo)
+    ];
+  });
+
   const [funcionarios, setFuncionarios] = useState([]);
   const [escalas, setEscalas] = useState([]);
   const [carregando, setCarregando] = useState(true);
   const [salvando, setSalvando] = useState(false);
   const [removendo, setRemovendo] = useState(null);
   const [erro, setErro] = useState("");
+  const [sucesso, setSucesso] = useState("");
+  const [dataPendenteExclusao, setDataPendenteExclusao] = useState(null);
 
   async function buscarDados() {
-    setCarregando(true);
     setErro("");
+
     try {
       const [funcionariosResposta, escalasResposta] = await Promise.all([
         api.get("/funcionarios"),
-        api.get("/escala", { params: { inicio: dataIso(semanaInicial), fim: dataIso(semanaFinal) } })
+        api.get("/escala")
       ]);
-      setFuncionarios(funcionariosResposta.data.filter((funcionario) => funcionario.status !== "INATIVO"));
+
+      setFuncionarios(
+        funcionariosResposta.data.filter(
+          (funcionario) => funcionario.status !== "INATIVO"
+        )
+      );
+
       setEscalas(escalasResposta.data);
     } catch (error) {
-      setErro(mensagemErro(error, "Não foi possível carregar a escala."));
+      setErro(
+        mensagemErro(error, "Não foi possível carregar a escala.")
+      );
     } finally {
       setCarregando(false);
     }
@@ -53,16 +84,65 @@ function Escala() {
 
   useEffect(() => { buscarDados(); }, []);
 
+  useEffect(() => {
+    if (carregando || erro) return;
+
+    setDatasSelecionadas((atuais) => {
+      const datasDoBanco = escalas.map(
+        (escala) => escala.dataEscala
+      );
+
+      return [
+        ...new Set([...atuais, ...datasDoBanco])
+      ].sort();
+    });
+  }, [escalas, carregando, erro]);
+
+  useEffect(() => {
+    if (!sucesso) return;
+
+    const temporizador = setTimeout(() => {
+      setSucesso("");
+    }, 3000);
+
+    return () => clearTimeout(temporizador);
+  }, [sucesso]);
+
   async function salvarEscala(escala) {
     setSalvando(true);
     setErro("");
+    setSucesso("");
+
     try {
-      const payload = { dataEscala: escala.dataEscala, turno: escala.turno, funcionariosIds: escala.funcionariosIds.map(Number) };
-      if (escala.id) await api.put(`/escala/${escala.id}`, payload);
-      else await api.post("/escala", payload);
+      const payload = {
+        dataEscala: escala.dataEscala,
+        turno: escala.turno,
+        funcionariosIds: escala.funcionariosIds.map(Number)
+      };
+
+      if (escala.id) {
+        await api.put(`/escala/${escala.id}`, payload);
+      } else {
+        await api.post("/escala", payload);
+      }
+
       await buscarDados();
+
+      setSucesso(
+        escala.id
+          ? "Escala atualizada com sucesso!"
+          : "Escala criada com sucesso!"
+      );
+
+      return true;
+
     } catch (error) {
-      setErro(mensagemErro(error, "Não foi possível salvar a escala."));
+      setErro(
+        mensagemErro(error, "Não foi possível salvar a escala.")
+      );
+
+      return false;
+
     } finally {
       setSalvando(false);
     }
@@ -87,14 +167,130 @@ function Escala() {
   }
 
   function adicionarData() {
-    if (dataNova && !datasSelecionadas.includes(dataNova)) setDatasSelecionadas((datas) => [...datas, dataNova].sort());
+    setErro("");
+    setSucesso("");
+
+    if (!dataNova) {
+      setErro("Selecione uma data antes de adicionar.");
+      return;
+    }
+
+    if (datasSelecionadas.includes(dataNova)) {
+      setErro("Essa data já foi adicionada.");
+      return;
+    }
+
+    setDatasSelecionadas((atuais) =>
+      [...atuais, dataNova].sort()
+    );
+
     setDataNova("");
+    setSucesso("Data adicionada com sucesso!");
+  }
+
+  function adicionarSabadoDomingoAtual() {
+    setErro("");
+    setSucesso("");
+
+    const hoje = new Date();
+    const diaSemana = hoje.getDay();
+
+    const sabado = new Date(hoje);
+    sabado.setDate(hoje.getDate() + (6 - diaSemana));
+
+    const domingo = new Date(sabado);
+    domingo.setDate(sabado.getDate() + 1);
+
+    const formatarDataISO = (data) => {
+      const ano = data.getFullYear();
+      const mes = String(data.getMonth() + 1).padStart(2, "0");
+      const dia = String(data.getDate()).padStart(2, "0");
+
+      return `${ano}-${mes}-${dia}`;
+    };
+
+    const dataSabado = formatarDataISO(sabado);
+    const dataDomingo = formatarDataISO(domingo);
+
+    const sabadoAdicionado = datasSelecionadas.includes(dataSabado);
+    const domingoAdicionado = datasSelecionadas.includes(dataDomingo);
+
+    if (sabadoAdicionado && domingoAdicionado) {
+      setErro("Sábado e domingo já adicionados.");
+      return;
+    }
+
+    setDatasSelecionadas((atuais) => {
+      const novasDatas = [dataSabado, dataDomingo].filter(
+        (data) => !atuais.includes(data)
+      );
+
+      return [...atuais, ...novasDatas].sort();
+    });
+
+    setSucesso(
+      sabadoAdicionado || domingoAdicionado
+        ? "A data que faltava foi adicionada."
+        : "Sábado e domingo adicionados com sucesso!"
+    );
+  }
+
+  function removerData(dataRemover) {
+    setErro("");
+    setSucesso("");
+
+    setDataPendenteExclusao(dataRemover);
+  }
+
+  async function confirmarRemocaoData() {
+    const dataRemover = dataPendenteExclusao;
+
+    if (!dataRemover) return;
+
+    const escalasDaData = escalas.filter(
+      (escala) => escala.dataEscala === dataRemover
+    );
+
+    setErro("");
+    setSucesso("");
+    setDataPendenteExclusao(null);
+
+    try {
+      for (const escala of escalasDaData) {
+        await api.delete(`/escala/${escala.id}`);
+      }
+
+      await buscarDados();
+
+      setDatasSelecionadas((atuais) =>
+        atuais.filter((data) => data !== dataRemover)
+      );
+
+      setSucesso("Escala excluída com sucesso!");
+    } catch (error) {
+      setErro(
+        mensagemErro(error, "Não foi possível excluir a escala.")
+      );
+
+      await buscarDados();
+    }
   }
 
   const setores = agruparPorSetor(funcionarios);
+
   const escalasVisiveis = datasSelecionadas.flatMap((dataEscala) => {
-    const existentes = escalas.filter((escala) => escala.dataEscala === dataEscala);
-    return existentes.length ? existentes : [{ id: null, dataEscala, turno: "DIA", funcionarios: [] }];
+    const existentes = escalas.filter(
+      (escala) => escala.dataEscala === dataEscala
+    );
+
+    return existentes.length
+      ? existentes
+      : [{
+        id: null,
+        dataEscala,
+        turno: "DIA",
+        funcionarios: []
+      }];
   });
 
   function areasDaEscala(escala) {
@@ -109,6 +305,58 @@ function Escala() {
 
   return (
     <>
+      {(erro || sucesso) && (
+        <div
+          className={`${style.alertaSucesso} ${erro ? style.alertaAviso : ""}`}
+          role={erro ? "alert" : "status"}
+          aria-live={erro ? "assertive" : "polite"}
+        >
+          {!erro && <CheckCircle size={20} />}
+
+          <p>{erro || sucesso}</p>
+
+          <button
+            type="button"
+            onClick={() => {
+              setErro("");
+              setSucesso("");
+            }}
+            aria-label="Fechar alerta"
+          >
+            <X size={18} />
+          </button>
+        </div>
+      )}
+
+      {dataPendenteExclusao && (
+        <div
+          className={`${style.alertaSucesso} ${style.alertaAviso}`}
+          role="alertdialog"
+        >          <CalendarDays size={20} />
+
+          <p>
+            Deseja excluir a escala do dia{" "}
+            {new Date(`${dataPendenteExclusao}T00:00:00`).toLocaleDateString(
+              "pt-BR"
+            )}
+            ?
+          </p>
+
+          <button
+            type="button"
+            onClick={() => setDataPendenteExclusao(null)}
+          >
+            Cancelar
+          </button>
+
+          <button
+            type="button"
+            onClick={confirmarRemocaoData}
+          >
+            Excluir
+          </button>
+        </div>
+      )}
       <div className={style.headerEscala}>
         <div className={style.tituloEscala}>
           <h1>Montagem de Escala</h1>
@@ -132,20 +380,71 @@ function Escala() {
         {datasAberta && (
           <div className={style.modalGerenciarDatas}>
             <div className={style.inserirData}>
-              <input type="date" value={dataNova} onChange={(e) => setDataNova(e.target.value)} />
-              <button className={style.btnAdicionarData} onClick={adicionarData}>
+              <input
+                type="date"
+                value={dataNova}
+                onChange={(e) => setDataNova(e.target.value)}
+              />
+
+              <button
+                type="button"
+                className={style.btnAdicionarData}
+                onClick={adicionarData}
+              >
                 <Plus />
                 <p>Adicionar</p>
               </button>
+
+              <button
+                type="button"
+                className={style.btnSabDomAtual}
+                onClick={adicionarSabadoDomingoAtual}
+              >
+                <CalendarDays />
+                <p>Sáb/Dom Atual</p>
+              </button>
             </div>
+
             <div className={style.datasEscolhidas}>
-              {datasSelecionadas.map((data) => <div className={style.dataEscolhida} key={data}><p>{formatarData(new Date(`${data}T00:00:00`))}</p></div>)}
+              {datasSelecionadas.map((data) => (
+                <div
+                  className={style.dataEscolhida}
+                  key={data}
+                >
+                  <p>
+                    {new Date(`${data}T00:00:00`)
+                      .toLocaleDateString("pt-BR", {
+                        weekday: "long",
+                        day: "2-digit",
+                        month: "2-digit"
+                      })
+                      .replace("-feira", "")}
+                  </p>
+
+                  <button
+                    type="button"
+                    className={style.btnRemoverDataEscolhida}
+                    onClick={() => removerData(data)}
+                    aria-label={`Remover data ${data} `}
+                  >
+                    <X />
+                  </button>
+                </div>
+              ))}
             </div>
           </div>
         )}
-        {carregando && <p>Carregando escala...</p>}
-        {!carregando && erro && <p>{erro}</p>}
-        {!carregando && !erro && escalasVisiveis.map((escala) => <CardEscala key={escala.id || escala.dataEscala} escala={escala} funcionarios={funcionarios} areas={areasDaEscala(escala)} onSalvar={salvarEscala} onRemover={(funcionarioId) => removerFuncionario(escala, funcionarioId)} removendo={removendo} salvando={salvando} />)}
+        {!carregando && escalasVisiveis.map((escala) => (
+          <CardEscala
+            key={escala.id ?? `${escala.dataEscala}-${escala.turno}`}
+            escala={escala}
+            funcionarios={funcionarios}
+            areas={areasDaEscala(escala)}
+            onSalvar={salvarEscala}
+            removendo={removendo}
+            salvando={salvando}
+          />
+        ))}
       </div>
     </>
   );

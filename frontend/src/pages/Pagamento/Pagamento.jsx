@@ -1,5 +1,14 @@
 import style from "./css/Pagamento.module.css";
-import { Banknote, DollarSign, QrCode, CalendarDays } from "lucide-react";
+import {
+  Banknote,
+  DollarSign,
+  QrCode,
+  CalendarDays,
+  X,
+  CheckCircle,
+  AlertTriangle
+} from "lucide-react";
+
 import CardPgtoFunc from "./components/CardPgtoFunc";
 import { useEffect, useState } from "react";
 import api from "../../services/api";
@@ -7,7 +16,7 @@ import { formatBRL } from "../../utils/formatadores";
 
 function Pagamento() {
   const [areaSelecionada, setAreaSelecionada] = useState("Todas");
-  const [filtroPagamento, setFiltroPagamento] = useState("Não Pagos");
+  const [filtroPagamento, setFiltroPagamento] = useState("Geral");
   const [pagamentos, setPagamentos] = useState([]);
   const [setores, setSetores] = useState([]);
   const [resumo, setResumo] = useState({ totalPagoDinheiro: 0, totalPagoPix: 0, custoTotalMO: 0 });
@@ -15,6 +24,16 @@ function Pagamento() {
   const [processando, setProcessando] = useState(false);
   const [pagandoId, setPagandoId] = useState(null);
   const [erro, setErro] = useState("");
+  const [alerta, setAlerta] = useState(null);
+  const [confirmacaoGerar, setConfirmacaoGerar] = useState(false);
+  const [periodoInicioSemana, setPeriodoInicioSemana] = useState(null);
+
+  function mostrarAlerta(mensagem, tipo = "sucesso") {
+    setAlerta({
+      mensagem,
+      tipo
+    });
+  }
 
   function mensagemErro(error, fallback) {
     const data = error.response?.data;
@@ -22,21 +41,60 @@ function Pagamento() {
   }
 
   async function buscarDados() {
-    setCarregando(true);
     setErro("");
+
     try {
-      const endpoint = filtroPagamento === "Pagos" ? "/pagamento/pagos" : filtroPagamento === "Não Pagos" ? "/pagamento/pendentes" : "/pagamento";
-      const parametros = areaSelecionada === "Todas" ? {} : { setor: areaSelecionada };
-      const [pagamentosResposta, resumoResposta, setoresResposta] = await Promise.all([
+      const endpoint =
+        filtroPagamento === "Pagos"
+          ? "/pagamento/pagos"
+          : filtroPagamento === "Não Pagos"
+            ? "/pagamento/pendentes"
+            : "/pagamento";
+
+      const parametros =
+        areaSelecionada === "Todas"
+          ? {}
+          : { setor: areaSelecionada };
+
+      const [
+        pagamentosResposta,
+        resumoResposta,
+        setoresResposta,
+        todosPagamentosResposta
+      ] = await Promise.all([
         api.get(endpoint, { params: parametros }),
         api.get("/pagamento/resumo"),
-        api.get("/setores")
+        api.get("/funcionarios/setores"),
+        api.get("/pagamento", { params: parametros })
       ]);
+
       setPagamentos(pagamentosResposta.data);
       setResumo(resumoResposta.data);
       setSetores(setoresResposta.data);
+
+      const todosPagamentos = todosPagamentosResposta.data;
+
+      if (todosPagamentos.length > 0) {
+        const pagamentosOrdenados = [...todosPagamentos].sort(
+          (a, b) => new Date(a.periodoInicio) - new Date(b.periodoInicio)
+        );
+
+        setPeriodoInicioSemana(pagamentosOrdenados[0].periodoInicio);
+      }
+
+      setQuantidades({
+        geral: todosPagamentos.length,
+        pagos: todosPagamentos.filter(
+          (pagamento) => pagamento.status === "PAGO"
+        ).length,
+        naoPagos: todosPagamentos.filter(
+          (pagamento) => pagamento.status === "PENDENTE"
+        ).length
+      });
+
     } catch (error) {
-      setErro(mensagemErro(error, "Não foi possível carregar os pagamentos."));
+      console.error("Erro ao carregar pagamentos:", error);
+      setPagamentos([]);
     } finally {
       setCarregando(false);
     }
@@ -44,17 +102,53 @@ function Pagamento() {
 
   useEffect(() => { buscarDados(); }, [filtroPagamento, areaSelecionada]);
 
+  const [quantidades, setQuantidades] = useState({
+    geral: 0,
+    pagos: 0,
+    naoPagos: 0
+  });
+
   async function gerarPagamentos() {
-    if (!window.confirm("Deseja gerar os pagamentos?")) return;
     setProcessando(true);
     setErro("");
+    setAlerta(null);
+    setConfirmacaoGerar(false);
+
     try {
-      await api.post("/pagamento/gerar");
+      const resposta = await api.post("/pagamento/gerar");
+
+      const quantidadeGerada = resposta.data.quantidadeGerada;
+
+      if (quantidadeGerada === 0) {
+        mostrarAlerta(
+          "Todos os pagamentos já foram gerados!",
+          "aviso"
+        );
+        return;
+      }
+
       await buscarDados();
+
+      mostrarAlerta(
+        `${quantidadeGerada} pagamento(s) gerado(s) com sucesso!`,
+        "sucesso"
+      );
     } catch (error) {
-      setErro(mensagemErro(error, "Não foi possível gerar os pagamentos."));
+      mostrarAlerta(
+        mensagemErro(error, "Não foi possível gerar os pagamentos."),
+        "aviso"
+      );
     } finally {
       setProcessando(false);
+    }
+  }
+
+  async function buscarResumo() {
+    try {
+      const resposta = await api.get("/pagamento/resumo");
+      setResumo(resposta.data);
+    } catch (error) {
+      console.error("Erro ao atualizar o resumo:", error);
     }
   }
 
@@ -63,19 +157,126 @@ function Pagamento() {
       setErro("Pagamento inválido.");
       return;
     }
+
     setPagandoId(id);
     setErro("");
+
     try {
       await api.put(`/pagamento/${id}/pagar`, { formaPagamento });
-      await buscarDados();
+
+      setPagamentos((pagamentosAtuais) =>
+        pagamentosAtuais.map((pagamento) =>
+          pagamento.id === id
+            ? {
+              ...pagamento,
+              status: "PAGO",
+              formaPagamento: formaPagamento
+            }
+            : pagamento
+        )
+      );
+
+      setQuantidades((quantidadesAtuais) => ({
+        ...quantidadesAtuais,
+        pagos: quantidadesAtuais.pagos + 1,
+        naoPagos: Math.max(0, quantidadesAtuais.naoPagos - 1)
+      }));
+
+      await buscarResumo();
     } catch (error) {
       setErro(mensagemErro(error, "Não foi possível realizar o pagamento."));
     } finally {
       setPagandoId(null);
     }
   }
+
+  function obterPeriodoSemana(dataEscala) {
+    if (!dataEscala) return "Semana não identificada";
+
+    const data = new Date(`${dataEscala}T00:00:00`);
+
+    const diaSemana = data.getDay();
+    const diferenca = diaSemana === 0 ? -6 : 1 - diaSemana;
+
+    const segunda = new Date(data);
+    segunda.setDate(data.getDate() + diferenca);
+
+    function formatarData(data) {
+      return data.toLocaleDateString("pt-BR", {
+        day: "2-digit",
+        month: "2-digit",
+        year: "numeric"
+      });
+    }
+
+    return `${formatarData(segunda)}`;
+  }
+
   return (
     <>
+      {alerta && (
+        <div
+          className={`${style.alertaSucesso} ${alerta.tipo === "aviso" ? style.alertaAviso : ""
+            }`}
+          role="alert"
+        >
+          {alerta.tipo === "sucesso" ? (
+            <CheckCircle size={20} />
+          ) : (
+            <AlertTriangle size={20} />
+          )}
+
+          <p>{alerta.mensagem}</p>
+
+          <button
+            type="button"
+            onClick={() => setAlerta(null)}
+            aria-label="Fechar alerta"
+          >
+            <X size={18} />
+          </button>
+        </div>
+      )}
+
+      {confirmacaoGerar && (
+        <div className={style.fundoConfirmacao}>
+          <div
+            className={style.cardConfirmacao}
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="tituloConfirmacao"
+          >
+            <CalendarDays size={32} />
+
+            <h2 id="tituloConfirmacao">Gerar pagamentos?</h2>
+
+            <p>
+              Deseja gerar os pagamentos das escalas que ainda não foram
+              vinculadas a um pagamento?
+            </p>
+
+            <div className={style.botoesConfirmacao}>
+              <button
+                type="button"
+                className={style.btnCancelarConfirmacao}
+                onClick={() => setConfirmacaoGerar(false)}
+                disabled={processando}
+              >
+                Cancelar
+              </button>
+
+              <button
+                type="button"
+                className={style.btnConfirmarConfirmacao}
+                onClick={gerarPagamentos}
+                disabled={processando}
+              >
+                {processando ? "Gerando..." : "Confirmar"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
       <div className={style.headerPagamento}>
         <div className={style.tituloPagamento}><h1>Gestão de Pagamentos</h1><p>Realize os pagamentos da operação</p></div>
       </div>
@@ -102,9 +303,17 @@ function Pagamento() {
         </div>
         <div className={style.cardGerarPagto}>
           <div className={style.headerCardGerarPagto}>
-            <p className={style.tituloSemanaPagto}><CalendarDays />
-              Semana de 19/09/2026</p>
-            <button className={style.btnGerarPagto} disabled={processando} onClick={gerarPagamentos}>{processando ? "Gerando..." : "Gerar Pagamentos"}</button>
+            <p className={style.tituloSemanaPagto}>
+              <CalendarDays />
+              Semana de {obterPeriodoSemana(periodoInicioSemana)}
+            </p>
+            <button
+              className={style.btnGerarPagto}
+              disabled={processando}
+              onClick={() => setConfirmacaoGerar(true)}
+            >
+              {processando ? "Gerando..." : "Gerar Pagamentos"}
+            </button>
           </div>
           <div className={style.footerCardGerarPagto}>
             <button
@@ -116,7 +325,7 @@ function Pagamento() {
               onClick={() => setFiltroPagamento("Geral")}
             >
               <p>Geral</p>
-              <p className={style.qtdPagtos}>{filtroPagamento === "Geral" ? pagamentos.length : ""}</p>
+              <p className={style.qtdPagtos}>{quantidades.geral}</p>
             </button>
 
             <button
@@ -128,7 +337,7 @@ function Pagamento() {
               onClick={() => setFiltroPagamento("Pagos")}
             >
               <p>Pagos</p>
-              <p className={style.qtdPagtos}>{filtroPagamento === "Pagos" ? pagamentos.length : ""}</p>
+              <p className={style.qtdPagtos}>{quantidades.pagos}</p>
             </button>
 
             <button
@@ -140,7 +349,7 @@ function Pagamento() {
               onClick={() => setFiltroPagamento("Não Pagos")}
             >
               <p>Não Pagos</p>
-              <p className={style.qtdPagtos}>{filtroPagamento === "Não Pagos" ? pagamentos.length : ""}</p>
+              <p className={style.qtdPagtos}>{quantidades.naoPagos}</p>
             </button>
           </div>
         </div>
@@ -159,7 +368,23 @@ function Pagamento() {
           {carregando && <p>Carregando pagamentos...</p>}
           {!carregando && erro && <p>{erro}</p>}
           {!carregando && !erro && pagamentos.length === 0 && <p>{filtroPagamento === "Não Pagos" ? "Nenhum pagamento pendente. Clique em Gerar Pagamentos." : "Nenhum pagamento encontrado."}</p>}
-          {!carregando && !erro && pagamentos.map((pagamento) => <CardPgtoFunc key={pagamento.id} id={pagamento.id} nome={pagamento.funcionarioNome} area={pagamento.setor} statusPagto={pagamento.status} telefone={pagamento.telefone} chavePix={pagamento.chavePix} diasTrabalhados={pagamento.quantidadeDias} valorDiaria={pagamento.valorDiaria} valorTotal={pagamento.valorAPagar} onPagar={pagar} pagando={pagandoId === pagamento.id} />)}
+          {!carregando && !erro && pagamentos.map((pagamento) => (
+            <CardPgtoFunc
+              key={pagamento.id}
+              id={pagamento.id}
+              nome={pagamento.funcionarioNome}
+              area={pagamento.setor}
+              statusPagto={pagamento.status}
+              formaPagamento={pagamento.formaPagamento}
+              telefone={pagamento.telefone}
+              chavePix={pagamento.chavePix}
+              diasTrabalhados={pagamento.quantidadeDias}
+              valorDiaria={pagamento.valorDiaria}
+              valorTotal={pagamento.valorAPagar}
+              onPagar={pagar}
+              pagando={pagandoId === pagamento.id}
+            />
+          ))}
         </div>
       </div>
     </>

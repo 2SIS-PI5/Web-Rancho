@@ -1,45 +1,151 @@
 import style from "../css/Escala.module.css";
-
 import { Plus, X, User, Search } from "lucide-react";
-
 import { useState } from "react";
 import { formatTelefone } from "../../../utils/formatadores";
 
-function AreaEscala({ area, diaSemana, data, funcionarios, selecionados, onToggle, onRemover, escalaId, removendo, mutando }) {
-    const [modalAdicionar, setModalAdicionar] = useState(null);
+function AreaEscala({
+    area,
+    diaSemana,
+    data,
+    funcionarios,
+    selecionados,
+    onToggle,
+    onAtualizarSelecionados,
+    onAviso,
+    mutando,
+    selecionadosTemporarios,
+    setSelecionadosTemporarios,
+    editando
+}) {
 
-    function abrirModalAdicionar(area, dia) {
-        setModalAdicionar({ area, dia });
+    const [modalAdicionar, setModalAdicionar] = useState(false);
+    const [pesquisaFuncionario, setPesquisaFuncionario] = useState("");
+
+    function abrirModalAdicionar() {
+        if (mutando) return;
+
+        if (!editando) {
+            onAviso();
+            return;
+        }
+
+        setSelecionadosTemporarios([...selecionados]);
+        setModalAdicionar(true);
     }
 
     function fecharModalAdicionar() {
-        setModalAdicionar(null);
+        setModalAdicionar(false);
+        setSelecionadosTemporarios(null);
     }
 
-    const funcionariosArea = funcionarios.filter((funcionario) => funcionario.setor === area.nome);
+    function alternarFuncionarioTemporario(id) {
+        if (!editando || mutando) return;
+
+        setSelecionadosTemporarios((atuais) => {
+            const selecionadosAtuais = atuais ?? [];
+
+            return selecionadosAtuais.includes(id)
+                ? selecionadosAtuais.filter((atual) => atual !== id)
+                : [...selecionadosAtuais, id];
+        });
+    }
+
+    function confirmarAdicao() {
+        if (!editando || mutando) return;
+
+        onAtualizarSelecionados(selecionadosTemporarios ?? []);
+
+        fecharModalAdicionar();
+    }
+
+    function removerFuncionario(id) {
+        if (mutando) return;
+
+        if (!editando) {
+            onAviso();
+            return;
+        }
+
+        onToggle(id);
+    }
+
+    const funcionariosArea = funcionarios.filter(
+        (funcionario) => funcionario.setor === area.nome
+    );
+
+    const funcionariosFiltrados = funcionariosArea.filter((f) => {
+        const pesquisa = pesquisaFuncionario.toLowerCase().trim();
+
+        return (
+            f.nome?.toLowerCase().includes(pesquisa) ||
+            f.telefone?.includes(pesquisa)
+        );
+    });
+
+    const funcionariosEscalados = funcionariosArea
+        .filter((funcionario) => selecionados.includes(funcionario.id))
+        .map((funcionario) => ({
+            id: funcionario.id,
+            nome: funcionario.nome
+        }));
+
+    const funcionariosEscaladosExibidos = funcionariosArea
+        .filter((funcionario) =>
+            (selecionadosTemporarios ?? []).includes(funcionario.id)
+        )
+        .map((funcionario) => ({
+            id: funcionario.id,
+            nome: funcionario.nome
+        }));
+
+    const funcionariosExibidos = modalAdicionar
+        ? funcionariosEscaladosExibidos
+        : funcionariosEscalados;
 
     return (
         <div className={style.area}>
             <div className={style.tituloArea}>
                 <div className={style.bolinhaArea}></div>
+
                 <p className={style.areaEscala}>{area.nome}</p>
-                <p className={style.qtdEscaladosArea}>({area.funcionarios.length})</p>
+
+                <p className={style.qtdEscaladosArea}>
+                    ({funcionariosExibidos.length})
+                </p>
             </div>
 
             <div className={style.painelEscalados}>
-                {area.funcionarios.map((func, index) => (
-                    <div
-                        key={func.id}
-                        className={`${style.cardFuncEscalado} ${area.id === "cozinha"
-                                ? style.cozinha
-                                : area.id === "salao"
-                                    ? style.salao
-                                    : style.atividades
+                {funcionariosExibidos.map((func) => (
+                    <div key={func.id}
+                        className={`${style.cardFuncEscalado} ${area.nome === "Cozinha"
+                            ? style.cozinha
+                            : area.nome === "Salão"
+                                ? style.salao
+                                : style.atividades
                             }`}
                     >
-                        <p>{func.nome}</p>
+                        <p>
+                            {func.nome.split(" ")[0]}
 
-                        <button className={style.btnRemoverFunc} disabled={mutando || removendo === `${escalaId}-${func.id}`} onClick={() => onRemover(func.id)}>
+                            {funcionariosEscalados.filter(
+                                (f) =>
+                                    f.nome.split(" ")[0] ===
+                                    func.nome.split(" ")[0]
+                            ).length > 1 &&
+                                ` ${func.nome.split(" ")[1]?.charAt(0)}.`}
+                        </p>
+
+                        <button
+                            type="button"
+                            className={style.btnRemoverFunc}
+                            disabled={mutando}
+                            onClick={() => removerFuncionario(func.id)}
+                            title={
+                                !editando
+                                    ? "Clique em Editar para realizar alterações"
+                                    : "Remover funcionário da escala"
+                            }
+                        >
                             <X />
                         </button>
                     </div>
@@ -47,13 +153,18 @@ function AreaEscala({ area, diaSemana, data, funcionarios, selecionados, onToggl
             </div>
 
             <div className={style.btnAdicionar}>
-                <button disabled={mutando} onClick={abrirModalAdicionar} className={style.btnAdicionarFuncArea}>
+                <button
+                    type="button"
+                    disabled={mutando}
+                    onClick={abrirModalAdicionar}
+                    className={style.btnAdicionarFuncArea}
+                >
                     <Plus />
                     <p>Adicionar {area.nome}</p>
                 </button>
             </div>
 
-            {modalAdicionar && (
+            {modalAdicionar && editando && (
                 <div className={style.overlay} onClick={fecharModalAdicionar}>
                     <div className={style.modalAdicionarFuncionario} onClick={(e) => e.stopPropagation()}>
                         <div className={style.modalHeader}>
@@ -65,7 +176,11 @@ function AreaEscala({ area, diaSemana, data, funcionarios, selecionados, onToggl
                                 <p> - {diaSemana}, {data}</p>
                             </div>
 
-                            <button className={style.btnFecharModal} onClick={fecharModalAdicionar}>
+                            <button
+                                type="button"
+                                className={style.btnFecharModal}
+                                onClick={fecharModalAdicionar}
+                            >
                                 <X />
                             </button>
                         </div>
@@ -73,14 +188,17 @@ function AreaEscala({ area, diaSemana, data, funcionarios, selecionados, onToggl
                         <div className={style.painelFuncionariosArea}>
                             <div className={style.inputPesquisa}>
                                 <Search />
+
                                 <input
                                     type="text"
                                     placeholder="Buscar funcionário..."
+                                    value={pesquisaFuncionario}
+                                    onChange={(e) => setPesquisaFuncionario(e.target.value)}
                                 />
                             </div>
 
                             <div className={style.listaFuncionarios}>
-                                {funcionariosArea.map((f) => (
+                                {funcionariosFiltrados.map((f) => (
                                     <label className={style.cardFuncionario} key={f.id}>
                                         <div className={style.fotoFuncionario}>
                                             <User />
@@ -92,16 +210,29 @@ function AreaEscala({ area, diaSemana, data, funcionarios, selecionados, onToggl
                                         </div>
 
                                         <div className={style.btnFuncionarioSelecionado}>
-                                            <input type="checkbox" disabled={mutando} checked={selecionados.includes(f.id)} onChange={() => onToggle(f.id)} />
+                                            <input
+                                                type="checkbox"
+                                                disabled={!editando || mutando}
+                                                checked={(selecionadosTemporarios ?? []).includes(f.id)}
+                                                onChange={() => alternarFuncionarioTemporario(f.id)}
+                                            />
                                         </div>
                                     </label>
                                 ))}
+
+                                {funcionariosFiltrados.length === 0 && (
+                                    <p className={style.mensagemVazia}>
+                                        Nenhum funcionário encontrado.
+                                    </p>
+                                )}
                             </div>
 
                             <button
+                                type="button"
                                 className={style.btnAddFuncionarioEscala}
-                                disabled={mutando}
-                                onClick={fecharModalAdicionar}>
+                                disabled={!editando || mutando}
+                                onClick={confirmarAdicao}
+                            >
                                 <p>Adicionar</p>
                             </button>
                         </div>
