@@ -64,7 +64,8 @@ function Avaliacoes() {
           {!carregando && !erro && funcionarios.length === 0 && <p>Nenhum funcionário encontrado.</p>}
           {!carregando && !erro && funcionarios.map((f) => (
             <CardAvaliacao key={f.funcionarioId} nome={f.nome} area={f.cargo} mediaAvaliacao={f.mediaAvaliacoes}
-              qtdAvaliacoes={f.quantidadeAvaliacoes} onAvaliar={() => abrirModalAvaliacao(f)}/>
+              qtdAvaliacoes={f.quantidadeAvaliacoes} ultimaDescricao={f.ultimaDescricao}
+              onAvaliar={() => abrirModalAvaliacao(f)}/>
           ))}
         </div>
       </div>

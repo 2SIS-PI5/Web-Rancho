@@ -56,7 +56,7 @@ function Funcionarios() {
     try {
       const [funcionariosResposta, setoresResposta] = await Promise.all([
         api.get("/funcionarios"),
-        api.get("/funcionarios/setores")
+        api.get("/setores")
       ]);
 
       setFuncionarios(funcionariosResposta.data.map(mapearFuncionario));

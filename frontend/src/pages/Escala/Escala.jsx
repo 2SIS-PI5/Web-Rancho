@@ -61,9 +61,12 @@ function Escala() {
     setErro("");
 
     try {
+      const datas = [...datasSelecionadas].sort();
+      const inicio = datas[0] || dataIso(new Date());
+      const fim = datas[datas.length - 1] || inicio;
       const [funcionariosResposta, escalasResposta] = await Promise.all([
         api.get("/funcionarios"),
-        api.get("/escala")
+        api.get("/escala", { params: { inicio, fim } })
       ]);
 
       setFuncionarios(

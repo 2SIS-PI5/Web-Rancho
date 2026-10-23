@@ -15,14 +15,17 @@ function ModalAvaliacao({ funcionario, onFechar, onSalvo }) {
             setErro("A nota deve ser um número inteiro entre 1 e 5.");
             return;
         }
-        if (!descricao.trim() || descricao.length > 255) {
-            setErro("A descrição é obrigatória e deve ter até 255 caracteres.");
+        if (descricao.length > 255) {
+            setErro("A descrição deve ter até 255 caracteres.");
             return;
         }
         setSalvando(true);
         setErro("");
         try {
-            await api.post(`/avaliacao/${funcionario.funcionarioId}`, { nota: Number(nota), descricao });
+            const payload = { nota: Number(nota) };
+            const descricaoTratada = descricao.trim();
+            if (descricaoTratada) payload.descricao = descricaoTratada;
+            await api.post(`/avaliacao/${funcionario.funcionarioId}`, payload);
             await onSalvo();
             onFechar();
         } catch (error) {

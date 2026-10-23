@@ -64,7 +64,7 @@ function Pagamento() {
       ] = await Promise.all([
         api.get(endpoint, { params: parametros }),
         api.get("/pagamento/resumo"),
-        api.get("/funcionarios/setores"),
+        api.get("/setores"),
         api.get("/pagamento", { params: parametros })
       ]);
 

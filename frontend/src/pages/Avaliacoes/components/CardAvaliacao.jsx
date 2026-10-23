@@ -1,7 +1,7 @@
 import style from "../css/Avaliacoes.module.css";
 import { StarIcon } from "lucide-react";
 
-function CardAvaliacao({ index, nome, area, mediaAvaliacao, qtdAvaliacoes, onAvaliar }) {
+function CardAvaliacao({ index, nome, area, mediaAvaliacao, qtdAvaliacoes, ultimaDescricao, onAvaliar }) {
     const quantidade = Number(qtdAvaliacoes) || 0;
     const media = Number(mediaAvaliacao) || 0;
     const estrelasPreenchidas = Math.max(0, Math.min(5, Math.round(media)));
@@ -19,6 +19,7 @@ function CardAvaliacao({ index, nome, area, mediaAvaliacao, qtdAvaliacoes, onAva
             </div>
             <div className={style.qtdAvaliacoes}>
                 <p>{quantidade > 0 ? `${quantidade} ${quantidade === 1 ? "avaliação" : "avaliações"}` : "Sem avaliações"}</p>
+                {ultimaDescricao && <p>{ultimaDescricao}</p>}
             </div>
             <button className={style.btnAvaliarFunc} onClick={onAvaliar}>
                 <p>Avaliar</p>
@@ -28,4 +29,3 @@ function CardAvaliacao({ index, nome, area, mediaAvaliacao, qtdAvaliacoes, onAva
 }
 
 export default CardAvaliacao;
-
