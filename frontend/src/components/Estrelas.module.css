@@ -1,0 +1,6 @@
+.estrelas { display: inline-flex; align-items: center; gap: 3px; }
+.estrela { position: relative; display: inline-block; flex: 0 0 auto; }
+.vazia { color: #d1d5db; fill: #d1d5db; }
+.cheia { position: absolute; inset: 0 auto 0 0; overflow: hidden; color: #f5b301; }
+.cheia svg { display: block; fill: #f5b301; }
+.interativo .estrela { cursor: pointer; }

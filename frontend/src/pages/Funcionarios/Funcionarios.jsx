@@ -127,7 +127,7 @@ function Funcionarios() {
           {!carregando && erro && <p>{erro}</p>}
           {!carregando && !erro && funcionariosVisiveis.length === 0 && <p>Nenhum funcionário encontrado.</p>}
           {!carregando && !erro && funcionariosVisiveis.map((f) => (
-            <CardFuncionario key={f.id} nome={f.nome} area={f.area} media={f.mediaAvaliacoes} qtdAvaliacoes={f.quantidadeAvaliacoes} telefone={f.telefone} cep={f.cep} chavePix={f.chavePix}
+            <CardFuncionario key={f.id} nome={f.nome} area={f.area} telefone={f.telefone} cep={f.cep} chavePix={f.chavePix}
               valorDiaria={f.valorDiaria} ajudaTransporte={f.ajudaTransporte} onEditar={() => abrirModalEdicao(f)} onExcluir={() => abrirModalExcluir(f)} />
           ))}
         </div>

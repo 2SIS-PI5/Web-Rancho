@@ -5,11 +5,13 @@ import { useEffect } from "react";
 import api from "../../services/api";
 import ModalAvaliacao from "./components/ModalAvaliacao";
 import CardAvaliacao from "./components/CardAvaliacao";
+import ModalAvaliacoes from "./components/ModalAvaliacoes";
 
 function Avaliacoes() {
 
   const [modalAberto, setModalAberto] = useState(false);
   const [funcionarioSelecionado, setFuncionarioSelecionado] = useState(null);
+  const [modalAvaliacoes, setModalAvaliacoes] = useState(null);
   const [busca, setBusca] = useState("");
   const [funcionarios, setFuncionarios] = useState([]);
   const [carregando, setCarregando] = useState(true);
@@ -64,7 +66,8 @@ function Avaliacoes() {
           {!carregando && !erro && funcionarios.length === 0 && <p>Nenhum funcionário encontrado.</p>}
           {!carregando && !erro && funcionarios.map((f) => (
             <CardAvaliacao key={f.funcionarioId} nome={f.nome} area={f.cargo} mediaAvaliacao={f.mediaAvaliacoes}
-              qtdAvaliacoes={f.quantidadeAvaliacoes} ultimaDescricao={f.ultimaDescricao}
+              qtdAvaliacoes={f.quantidadeAvaliacoes}
+              onVerAvaliacoes={() => setModalAvaliacoes(f)}
               onAvaliar={() => abrirModalAvaliacao(f)}/>
           ))}
         </div>
@@ -76,6 +79,7 @@ function Avaliacoes() {
           onSalvo={buscarFuncionarios}
         />
       )}
+      {modalAvaliacoes && <ModalAvaliacoes funcionario={modalAvaliacoes} onFechar={() => setModalAvaliacoes(null)} />}
     </>
   );
 }

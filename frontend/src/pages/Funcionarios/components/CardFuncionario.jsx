@@ -1,22 +1,15 @@
 import style from "../css/Funcionarios.module.css";
 
-import { Star, Pencil, Trash2 } from "lucide-react";
+import { Pencil, Trash2 } from "lucide-react";
 import { formatTelefone, formatCep, formatValorBRL } from "../../../utils/formatadores";
 
-function CardFuncionario({ nome, area, media, qtdAvaliacoes, telefone, cep, chavePix, valorDiaria,
+function CardFuncionario({ nome, area, telefone, cep, chavePix, valorDiaria,
     ajudaTransporte, onEditar, onExcluir }) {
-    const quantidade = Number(qtdAvaliacoes) || 0;
-    const mediaNumerica = Number(media) || 0;
-    const estrelasPreenchidas = Math.max(0, Math.min(5, Math.round(mediaNumerica)));
     return (
         <div className={style.cardFuncionario}>
             <div className={style.nomeAreaLocalizacao}>
                 <p className={style.nomeFuncionario}>{nome}</p>
                 <p className={style.areaFuncionario}>{area}</p>
-            </div>
-            <div className={style.estrelasFuncionario}> 
-                {[1, 2, 3, 4, 5].map((estrela) => <Star key={estrela} fill={estrela <= estrelasPreenchidas ? "currentColor" : "none"} />)}
-                <p>{quantidade > 0 ? `${mediaNumerica.toFixed(1)} (${quantidade} ${quantidade === 1 ? "avaliação" : "avaliações"})` : "Sem avaliações"}</p>
             </div>
             <div className={style.infosFuncionario}>
                 <p>Telefone: <span className={style.telefoneFuncionario}>{formatTelefone(telefone)}</span></p>

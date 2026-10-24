@@ -1,7 +1,8 @@
 import style from "../css/Avaliacoes.module.css";
-import { StarIcon, X } from "lucide-react";
+import { X } from "lucide-react";
 import { useState } from "react";
 import api from "../../../services/api";
+import Estrelas from "../../../components/Estrelas";
 
 function ModalAvaliacao({ funcionario, onFechar, onSalvo }) {
 
@@ -9,6 +10,7 @@ function ModalAvaliacao({ funcionario, onFechar, onSalvo }) {
     const [descricao, setDescricao] = useState("");
     const [erro, setErro] = useState("");
     const [salvando, setSalvando] = useState(false);
+    const [notaHover, setNotaHover] = useState(0);
 
     async function salvar() {
         if (!Number.isInteger(nota) || nota < 1 || nota > 5) {
@@ -56,16 +58,9 @@ function ModalAvaliacao({ funcionario, onFechar, onSalvo }) {
 
                     <p>Como você avalia o desempenho?</p>
 
-                    <div className={style.estrelasModal}>
-
-                        {[1, 2, 3, 4, 5].map((estrela) => (
-                            <StarIcon
-                                key={estrela}
-                                onClick={() => setNota(estrela)}
-                                className={estrela <= nota ? style.estrelaSelecionada : ""}
-                            />
-                        ))}
-
+                    <div className={style.estrelasModal} onMouseLeave={() => setNotaHover(0)}
+                        onMouseMove={(event) => setNotaHover(Math.ceil((event.nativeEvent.offsetX / event.currentTarget.offsetWidth) * 5))}>
+                        <Estrelas valor={nota} valorVisual={notaHover || nota} tamanho={30} interativo onSelecionar={setNota} />
                     </div>
 
                     <p>Nota: {nota}</p>
