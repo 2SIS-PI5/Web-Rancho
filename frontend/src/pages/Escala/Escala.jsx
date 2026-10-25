@@ -23,6 +23,10 @@ function dataIso(data) {
   return `${ano}-${mes}-${dia}`;
 }
 
+function dataHojeIso() {
+  return dataIso(new Date());
+}
+
 function mensagemErro(error, fallback) {
   const data = error.response?.data;
   return data?.message || (typeof data === "string" ? data : fallback);
@@ -93,10 +97,13 @@ function Escala() {
     setDatasSelecionadas((atuais) => {
       const datasDoBanco = escalas.map(
         (escala) => escala.dataEscala
-      );
+      ).filter((data) => data >= dataHojeIso());
 
       return [
-        ...new Set([...atuais, ...datasDoBanco])
+        ...new Set([
+          ...atuais.filter((data) => data >= dataHojeIso()),
+          ...datasDoBanco
+        ])
       ].sort();
     });
   }, [escalas, carregando, erro]);
@@ -281,7 +288,11 @@ function Escala() {
 
   const setores = agruparPorSetor(funcionarios);
 
-  const escalasVisiveis = datasSelecionadas.flatMap((dataEscala) => {
+  const datasParaExibir = datasSelecionadas.filter(
+    (data) => data >= dataHojeIso()
+  );
+
+  const escalasVisiveis = datasParaExibir.flatMap((dataEscala) => {
     const existentes = escalas.filter(
       (escala) => escala.dataEscala === dataEscala
     );
@@ -409,7 +420,7 @@ function Escala() {
             </div>
 
             <div className={style.datasEscolhidas}>
-              {datasSelecionadas.map((data) => (
+              {datasParaExibir.map((data) => (
                 <div
                   className={style.dataEscolhida}
                   key={data}
