@@ -266,3 +266,34 @@
     font-weight: 400;
     color: #6b7280;
 }
+
+.btnExportar:disabled {
+    opacity: .65;
+    cursor: wait;
+}
+
+.erroExportacao {
+    width: 94%;
+    margin: 0 auto 16px;
+    padding: 10px 14px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    box-sizing: border-box;
+    border: 1px solid #fecaca;
+    border-radius: 10px;
+    background: #fff1f2;
+    color: #991b1b;
+    font-size: 13px;
+}
+
+.erroExportacao button {
+    border: 0;
+    border-radius: 8px;
+    padding: 7px 11px;
+    background: #f04a00;
+    color: white;
+    cursor: pointer;
+    font-weight: 600;
+}

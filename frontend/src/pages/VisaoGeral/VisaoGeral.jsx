@@ -69,6 +69,8 @@ function VisaoGeral() {
   const [carregando, setCarregando] = useState(true);
   const [erro, setErro] = useState("");
   const [tentativa, setTentativa] = useState(0);
+  const [gerandoPdf, setGerandoPdf] = useState(false);
+  const [erroPdf, setErroPdf] = useState("");
 
   useEffect(() => {
     const controller = new AbortController();
@@ -105,6 +107,32 @@ function VisaoGeral() {
   ];
   const valorOuVazio = (valor) => Number(valor || 0) > 0 ? formatBRL(valor) : "Sem dados no período";
 
+  async function exportarPdf() {
+    setGerandoPdf(true);
+    setErroPdf("");
+    try {
+      const resposta = await api.get("/relatorio/pdf", { params: { periodo: PERIODOS[periodo] }, responseType: "blob" });
+      const disposicao = resposta.headers["content-disposition"] || "";
+      const nomeArquivo = disposicao.match(/filename="?([^";]+)"?/i)?.[1] || `relatorio-rancho-${PERIODOS[periodo].toLowerCase()}.pdf`;
+      const url = URL.createObjectURL(resposta.data);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = nomeArquivo;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      URL.revokeObjectURL(url);
+    } catch (error) {
+      let mensagem = error.response?.data?.message;
+      if (!mensagem && error.response?.data instanceof Blob) {
+        try { mensagem = JSON.parse(await error.response.data.text()).message; } catch { mensagem = ""; }
+      }
+      setErroPdf(mensagem || "Não foi possível gerar o relatório.");
+    } finally {
+      setGerandoPdf(false);
+    }
+  }
+
   return (
     <>
       <div className={style.headerVisaoGeral}>
@@ -127,12 +155,13 @@ function VisaoGeral() {
             ))}
           </div>
 
-          <button type="button" className={style.btnExportar}>
+          <button type="button" className={style.btnExportar} disabled={gerandoPdf} aria-busy={gerandoPdf} onClick={exportarPdf}>
             <FileDown size={16} />
-            Exportar PDF
+            {gerandoPdf ? "Gerando relatório..." : "Exportar PDF"}
           </button>
         </div>
       </div>
+      {erroPdf && <div className={style.erroExportacao} role="alert"><span>{erroPdf}</span><button type="button" onClick={exportarPdf}>Tentar novamente</button></div>}
       <div className={style.containerVisaoGeral}>
         {carregando && <p>Carregando visão geral...</p>}
         {!carregando && erro && <div><p>{erro}</p><button type="button" onClick={() => setTentativa((valor) => valor + 1)}>Tentar novamente</button></div>}
@@ -170,10 +199,6 @@ function VisaoGeral() {
                 </PieChart>
               </ResponsiveContainer>
             </div> : <p className={style.vazio}>Sem dados no período</p>}
-          </Painel>
-
-          <Painel titulo="Evolução de custos por setor">
-            <p className={style.vazio}>Sem dados no período</p>
           </Painel>
 
           <Painel titulo="Gastos por setor">
