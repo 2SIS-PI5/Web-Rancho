@@ -3,7 +3,7 @@ import { corDoSetor } from "../../../utils/setores";
 
 function ColunaSetor({ setor, funcionarios }) {
   return (
-    <div className={style.colunaSetor} style={{ "--cor": corDoSetor(setor) }}>
+    <div className={style.colunaSetor} style={{ "--cor-setor": corDoSetor(setor) }}>
       <div className={style.tituloSetor}>
         <span className={style.pontoSetor} />
         {setor} ({funcionarios.length})

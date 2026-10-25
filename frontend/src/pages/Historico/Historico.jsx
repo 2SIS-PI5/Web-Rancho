@@ -1,5 +1,5 @@
 import style from "./css/Historico.module.css";
-import { Banknote, DollarSign, QrCode, Users, Search } from "lucide-react";
+import { Banknote, CalendarDays, DollarSign, QrCode, Users, Search, AlertCircle } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import api from "../../services/api";
 import { inicioDaSemana, somarDias, formatarData } from "../../utils/datas";
@@ -33,6 +33,8 @@ function mapearGrupos(funcionarios) {
       previsto: Number(funcionario.valorPrevisto ?? 0),
       via: funcionario.formaPagamento || vias.join(", ") || null,
       status: funcionario.statusPagamento || (pagamentos.length ? "PAGO" : "A_GERAR"),
+      setor: funcionario.setor,
+      cor: corDoSetor(funcionario.setor),
     };
     if (grupo) grupo.itens.push(item);
     else grupos.push({ setor: funcionario.setor, cor: corDoSetor(funcionario.setor), itens: [item] });
@@ -100,30 +102,48 @@ function Historico() {
       return nomeOk && statusOk && diaOk;
     })
   })).filter((grupo) => grupo.itens.length), [grupos, busca, filtroStatus, diaAtivo]);
+  const hoje = dataIso(new Date());
+  const estaSemana = hoje >= dataIso(inicioSemana) && hoje <= dataIso(fimSemana);
+  const itensEquipe = grupos.flatMap((grupo) => grupo.itens);
+  const pagos = itensEquipe.filter((item) => item.status === "PAGO").length;
+  const pendentes = itensEquipe.filter((item) => item.status !== "PAGO").length;
+  const totalPrevisto = Number(resumo?.totalPrevisto ?? resumo?.custoTotalMaoObra ?? 0);
+  const totalPago = Number(resumo?.totalPago ?? 0);
+  const progressoPago = totalPrevisto > 0 ? Math.min(100, (totalPago / totalPrevisto) * 100) : 0;
+  const contagensStatus = {
+    TODOS: itensEquipe.length,
+    PAGOS: pagos,
+    PENDENTES: pendentes,
+    A_GERAR: itensEquipe.filter((item) => item.status === "A_GERAR").length,
+  };
+  const filtrosAtivos = Boolean(busca || filtroStatus !== "TODOS" || diaAtivo);
+  const iniciais = (nome) => nome.split(" ").filter(Boolean).slice(0, 2).map((parte) => parte[0]).join("").toUpperCase();
 
   return (
-    <>
+    <div className={style.paginaHistorico}>
       <div className={style.headerHistorico}>
         <div className={style.tituloHistorico}><h1>Histórico de Escalas</h1><p>Resumo completo por semana - equipe, pagamentos e totais</p></div>
       </div>
       <div className={style.containerHistorico}>
-        <SeletorSemana inicioSemana={inicioSemana} onChange={setInicioSemana} />
-        {carregando && <p>Carregando histórico...</p>}
-        {!carregando && erro && <div><p>{erro}</p><button type="button" onClick={() => setTentativa((valor) => valor + 1)}>Tentar novamente</button></div>}
-        {!carregando && !erro && vazio && <p>Sem registros no período.</p>}
+        <SeletorSemana inicioSemana={inicioSemana} onChange={setInicioSemana} estaSemana={estaSemana} />
+        {carregando && <div className={style.estadoHistorico}><div className={style.skeletonKpis}><span /><span /><span /><span /></div><div className={style.skeletonTabela}><span /><span /><span /><span /></div></div>}
+        {!carregando && erro && <div className={style.estadoHistorico}><AlertCircle /><p>{erro}</p><button type="button" onClick={() => setTentativa((valor) => valor + 1)}>Tentar novamente</button></div>}
+        {!carregando && !erro && vazio && <div className={style.estadoHistorico}><CalendarDays /><strong>Sem registros neste período</strong><p>Escolha outra semana para consultar o histórico.</p></div>}
         {!carregando && !erro && !vazio && <>
           <div className={style.infoSemana}>
-            <div className={style.cardInfoSemana}><div className={style.iconeCard}><DollarSign /></div><p>Total Mão de Obra</p><p className={style.valorMaoDeObra}>{formatBRL(resumo?.totalPrevisto ?? resumo?.custoTotalMaoObra ?? 0)}</p><div className={style.resumoValores}><span className={style.valorPago}><strong>Valor Pago</strong><b>{formatBRL(resumo?.totalPago || 0)}</b></span><span className={style.valorPendente}><strong>Valor Pendente</strong><b>{formatBRL(resumo?.totalPendente || 0)}</b></span></div></div>
+            <div className={`${style.cardInfoSemana} ${style.cardHero}`}><div className={style.iconeCard}><DollarSign /></div><p>Total Mão de Obra</p><p className={style.valorMaoDeObra}>{formatBRL(totalPrevisto)}</p><div className={style.progresso}><span style={{ width: `${progressoPago}%` }} /></div><div className={style.resumoValores}><span className={style.valorPago}><strong><i />Pago</strong><b>{formatBRL(totalPago)}</b></span><span className={style.valorPendente}><strong><i />Pendente</strong><b>{formatBRL(resumo?.totalPendente || Math.max(0, totalPrevisto - totalPago))}</b></span></div></div>
             <div className={style.cardInfoSemana}><div className={style.iconeCard}><Banknote /></div><p>Pago em Dinheiro</p><p className={style.valorEmDinheiro}>{formatBRL(resumo?.pagoDinheiro || 0)}</p></div>
             <div className={style.cardInfoSemana}><div className={style.iconeCard}><QrCode /></div><p>Pago em PIX</p><p className={style.valorEmPix}>{formatBRL(resumo?.pagoPix || 0)}</p></div>
-            <div className={style.cardInfoSemana}><div className={style.iconeCard}><Users /></div><p>Equipe da Semana</p><p className={style.qtdFuncionarios}>{quantidadeFuncionarios} func.</p></div>
+            <div className={`${style.cardInfoSemana} ${style.cardEquipe}`}><div className={style.iconeCard}><Users /></div><p>Equipe da Semana</p><p className={style.qtdFuncionarios}>{quantidadeFuncionarios} func.</p><div className={style.avatarStack}>{itensEquipe.slice(0, 4).map((item) => <span key={item.id} style={{ "--cor-setor": corDoSetor(item.setor) }}>{iniciais(item.nome)}</span>)}{itensEquipe.length > 4 && <span className={style.avatarMais}>+{itensEquipe.length - 4}</span>}</div><small><b className={style.dotPago} />{pagos} pagos <b className={style.dotPendente} />{pendentes} pendentes</small></div>
           </div>
-          <div className={style.faixaDias}>{datas.map((dia) => <button className={diaAtivo === dia.id ? style.diaAtivo : ""} key={dia.id} onClick={() => setDiaAtivo(diaAtivo === dia.id ? null : dia.id)}>{dia.diaSemana.slice(0, 3)} {dia.data.slice(0, 5)}<small>{dia.funcionarios.length} func.</small></button>)}</div>
-          <div className={style.toolbarHistorico}><div className={style.inputHistorico}><Search size={16} /><input placeholder="Buscar funcionário..." value={busca} onChange={(e) => setBusca(e.target.value)} /></div>{["TODOS", "PAGOS", "PENDENTES", "A_GERAR"].map((status) => <button className={filtroStatus === status ? style.filtroAtivo : ""} key={status} onClick={() => setFiltroStatus(status)}>{status === "TODOS" ? "Todos" : status === "A_GERAR" ? "A gerar" : status[0] + status.slice(1).toLowerCase()}</button>)}<button onClick={() => { setBusca(""); setFiltroStatus("TODOS"); setDiaAtivo(null); }}>Limpar filtros</button></div>
-          {gruposFiltrados.length ? <div className={style.tpList}>{gruposFiltrados.map((grupo) => <TabelaSetor key={grupo.setor} grupo={grupo} />)}</div> : <p>Nenhum resultado para os filtros.</p>}
+          <div className={style.filtrosHistorico}>
+            <div className={style.faixaDias}>{datas.map((dia) => <button aria-pressed={diaAtivo === dia.id} className={diaAtivo === dia.id ? style.diaAtivo : ""} key={dia.id} onClick={() => setDiaAtivo(diaAtivo === dia.id ? null : dia.id)}><strong>{dia.diaSemana.slice(0, 3)} {dia.data.slice(0, 5)}</strong><small>{dia.funcionarios.length} func.</small><span className={style.diaSetores}>{[...new Set(dia.funcionarios.map((funcionario) => funcionario.setor))].slice(0, 4).map((setor) => <i key={setor} style={{ "--cor-setor": corDoSetor(setor) }} />)}</span></button>)}</div>
+            <div className={style.toolbarHistorico}><div className={style.inputHistorico}><Search size={16} /><input aria-label="Buscar funcionário" placeholder="Buscar funcionário..." value={busca} onChange={(e) => setBusca(e.target.value)} /></div>{["TODOS", "PAGOS", "PENDENTES", "A_GERAR"].map((status) => <button aria-pressed={filtroStatus === status} className={filtroStatus === status ? style.filtroAtivo : ""} key={status} onClick={() => setFiltroStatus(status)}>{status === "TODOS" ? "Todos" : status === "A_GERAR" ? "A gerar" : status[0] + status.slice(1).toLowerCase()} <span>{contagensStatus[status]}</span></button>)}{filtrosAtivos && <button className={style.btnLimpar} onClick={() => { setBusca(""); setFiltroStatus("TODOS"); setDiaAtivo(null); }}>Limpar filtros</button>}</div>
+          </div>
+          {gruposFiltrados.length ? <div className={style.tpList}>{gruposFiltrados.map((grupo) => <TabelaSetor key={grupo.setor} grupo={grupo} />)}</div> : <div className={style.estadoFiltrado}><Search /><p>Nenhum resultado para os filtros</p><button onClick={() => { setBusca(""); setFiltroStatus("TODOS"); setDiaAtivo(null); }}>Limpar filtros</button></div>}
         </>}
       </div>
-    </>
+    </div>
   );
 }
 

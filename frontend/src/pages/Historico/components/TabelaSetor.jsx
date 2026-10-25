@@ -5,16 +5,20 @@ import { formatBRL } from "../../../utils/formatadores";
 function TabelaSetor({ grupo }) {
   const totalPago = grupo.itens.reduce((soma, item) => soma + (item.status === "PAGO" ? item.valor : 0), 0);
   const totalPendente = grupo.itens.reduce((soma, item) => soma + (item.status === "PAGO" ? 0 : item.previsto), 0);
+  const total = totalPago + totalPendente;
+  const progresso = total > 0 ? (totalPago / total) * 100 : 0;
 
   return (
     <section className={style.tpWrap}>
-      <div className={style.tpGroup}>
-        <span className={style.tpDot} style={{ background: grupo.cor }} />
-        <span className={style.tpGroupTitle} style={{ color: grupo.cor }}>
+      <div className={style.tpGroup} style={{ "--cor-setor": grupo.cor }}>
+        <span className={style.tpDot} />
+        <span className={style.tpGroupTitle}>
           {grupo.setor}
         </span>
         <span className={style.tpGroupCount}>({grupo.itens.length})</span>
+        <span className={style.tpGroupTotal}>{formatBRL(total)}</span>
       </div>
+      <div className={style.tpProgress}><span style={{ width: `${progresso}%` }} /></div>
 
       <div className={style.tpHead}>
         <div>Funcionário</div>

@@ -6,7 +6,7 @@ import { agruparPorSetor } from "../../../utils/setores";
 function ItemData({ data, aberta, onToggle }) {
   return (
     <div className={style.dataItem}>
-      <div className={style.cardDataDetalhe} onClick={onToggle}>
+      <div className={style.cardDataDetalhe} role="button" tabIndex={0} aria-expanded={aberta} onClick={onToggle} onKeyDown={(event) => (event.key === "Enter" || event.key === " ") && onToggle()}>
         <div className={style.bolinhaLaranja} />
 
         <div className={style.tituloData}>

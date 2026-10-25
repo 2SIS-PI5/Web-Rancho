@@ -3,7 +3,7 @@ import { ArrowLeft, ArrowRight, CalendarDays, CalendarSearch, Minus } from "luci
 import style from "../css/Historico.module.css";
 import { inicioDaSemana, somarDias, formatarData } from "../../../utils/datas";
 
-function SeletorSemana({ inicioSemana, onChange }) {
+function SeletorSemana({ inicioSemana, onChange, estaSemana }) {
     const inputDataRef = useRef(null);
 
     const abrirSeletor = () => {
@@ -21,6 +21,7 @@ function SeletorSemana({ inicioSemana, onChange }) {
     return (
         <div className={style.manipularSemana}>
             <button
+                type="button"
                 className={style.btnAnterior}
                 onClick={() => onChange(somarDias(inicioSemana, -7))}
             >
@@ -33,8 +34,9 @@ function SeletorSemana({ inicioSemana, onChange }) {
                 <p className={style.periodoEscolhido}>
                     {formatarData(inicioSemana)} <Minus /> {formatarData(somarDias(inicioSemana, 6))}
                 </p>
+                {estaSemana && <span className={style.chipSemanaAtual}>Esta semana</span>}
 
-                <button className={style.btnIrParaData} onClick={abrirSeletor}>
+                <button type="button" className={style.btnIrParaData} onClick={abrirSeletor}>
                     <CalendarSearch />
                     <p>Ir para data</p>
                 </button>
@@ -47,7 +49,7 @@ function SeletorSemana({ inicioSemana, onChange }) {
                 />
             </div>
 
-            <button className={style.btnProxima} onClick={() => onChange(somarDias(inicioSemana, 7))}>
+            <button type="button" className={style.btnProxima} onClick={() => onChange(somarDias(inicioSemana, 7))}>
                 <p>Próxima</p>
                 <ArrowRight />
             </button>
