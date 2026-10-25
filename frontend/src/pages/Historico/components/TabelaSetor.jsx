@@ -3,7 +3,8 @@ import LinhaPagamento from "./LinhaPagamento";
 import { formatBRL } from "../../../utils/formatadores";
 
 function TabelaSetor({ grupo }) {
-  const total = grupo.itens.reduce((soma, item) => soma + item.valor, 0);
+  const totalPago = grupo.itens.reduce((soma, item) => soma + (item.status === "PAGO" ? item.valor : 0), 0);
+  const totalPendente = grupo.itens.reduce((soma, item) => soma + (item.status === "PAGO" ? 0 : item.previsto), 0);
 
   return (
     <section className={style.tpWrap}>
@@ -17,7 +18,7 @@ function TabelaSetor({ grupo }) {
 
       <div className={style.tpHead}>
         <div>Funcionário</div>
-        <div>Dias / Datas</div>
+        <div>Dias trabalhados</div>
         <div className={style.valor}>Valor</div>
         <div className={style.via}>Via</div>
         <div className={style.status}>Status</div>
@@ -28,8 +29,11 @@ function TabelaSetor({ grupo }) {
       ))}
 
       <div className={style.tpTotal}>
-        <span className={style.tpTotalLabel}>Total {grupo.setor}:</span>
-        <span className={style.tpTotalValor}>{formatBRL(total)}</span>
+        <span className={style.tpTotalLabel}>Total {grupo.setor}</span>
+        <div className={style.tpTotalValor}>
+          <span className={style.totalPendente}>Valor a Pagar: <strong>{formatBRL(totalPendente)}</strong></span>
+          <span className={style.totalPago}>Valor Pago: <strong>{formatBRL(totalPago)}</strong></span>
+        </div>
       </div>
     </section>
   );

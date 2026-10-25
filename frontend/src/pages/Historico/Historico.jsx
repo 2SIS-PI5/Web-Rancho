@@ -1,13 +1,12 @@
 import style from "./css/Historico.module.css";
-import { Banknote, DollarSign, QrCode, Users } from "lucide-react";
-import { useEffect, useState } from "react";
+import { Banknote, DollarSign, QrCode, Users, Search } from "lucide-react";
+import { useEffect, useMemo, useState } from "react";
 import api from "../../services/api";
 import { inicioDaSemana, somarDias, formatarData } from "../../utils/datas";
 import { corDoSetor } from "../../utils/setores";
 import SeletorSemana from "./components/SeletorSemana";
-import QuemTrabalhou from "./components/QuemTrabalhou";
-import DetalheDatas from "./components/DetalheDatas";
 import { formatBRL } from "../../utils/formatadores";
+import TabelaSetor from "./components/TabelaSetor";
 
 function dataIso(data) {
   const ano = data.getFullYear();
@@ -29,10 +28,11 @@ function mapearGrupos(funcionarios) {
     const item = {
       id: funcionario.funcionarioId,
       nome: funcionario.nome,
-      dias: funcionario.diasTrabalhados ? [`${funcionario.diasTrabalhados} dia(s)`] : [],
-      valor: Number(funcionario.valorTotal || 0),
-      via: vias.join(", ") || "Pendente",
-      status: pagamentos.length ? "Pago" : "Pendente",
+      dias: (funcionario.datas || []).map((data) => data),
+      valor: Number(funcionario.valorPago ?? funcionario.valorTotal ?? 0),
+      previsto: Number(funcionario.valorPrevisto ?? 0),
+      via: funcionario.formaPagamento || vias.join(", ") || null,
+      status: funcionario.statusPagamento || (pagamentos.length ? "PAGO" : "A_GERAR"),
     };
     if (grupo) grupo.itens.push(item);
     else grupos.push({ setor: funcionario.setor, cor: corDoSetor(funcionario.setor), itens: [item] });
@@ -87,6 +87,19 @@ function Historico() {
 
   const quantidadeFuncionarios = Number(resumo?.quantidadeFuncionarios || 0);
   const vazio = !grupos.length && !datas.length;
+  const [busca, setBusca] = useState("");
+  const [filtroStatus, setFiltroStatus] = useState("TODOS");
+  const [diaAtivo, setDiaAtivo] = useState(null);
+  const gruposFiltrados = useMemo(() => grupos.map((grupo) => ({
+    ...grupo,
+    itens: grupo.itens.filter((item) => {
+      const nomeOk = item.nome.toLowerCase().includes(busca.toLowerCase());
+      const statusOk = filtroStatus === "TODOS" || (filtroStatus === "PENDENTES" && item.status !== "PAGO")
+        || (filtroStatus === "A_GERAR" && item.status === "A_GERAR") || (filtroStatus === "PAGOS" && item.status === "PAGO");
+      const diaOk = !diaAtivo || item.dias.some((dia) => dia.data === diaAtivo);
+      return nomeOk && statusOk && diaOk;
+    })
+  })).filter((grupo) => grupo.itens.length), [grupos, busca, filtroStatus, diaAtivo]);
 
   return (
     <>
@@ -100,13 +113,14 @@ function Historico() {
         {!carregando && !erro && vazio && <p>Sem registros no período.</p>}
         {!carregando && !erro && !vazio && <>
           <div className={style.infoSemana}>
-            <div className={style.cardInfoSemana}><div className={style.iconeCard}><DollarSign /></div><p>Total Mão de Obra</p><p className={style.valorMaoDeObra}>{formatBRL(resumo?.custoTotalMaoObra || 0)}</p></div>
+            <div className={style.cardInfoSemana}><div className={style.iconeCard}><DollarSign /></div><p>Total Mão de Obra</p><p className={style.valorMaoDeObra}>{formatBRL(resumo?.totalPrevisto ?? resumo?.custoTotalMaoObra ?? 0)}</p><div className={style.resumoValores}><span className={style.valorPago}><strong>Valor Pago</strong><b>{formatBRL(resumo?.totalPago || 0)}</b></span><span className={style.valorPendente}><strong>Valor Pendente</strong><b>{formatBRL(resumo?.totalPendente || 0)}</b></span></div></div>
             <div className={style.cardInfoSemana}><div className={style.iconeCard}><Banknote /></div><p>Pago em Dinheiro</p><p className={style.valorEmDinheiro}>{formatBRL(resumo?.pagoDinheiro || 0)}</p></div>
             <div className={style.cardInfoSemana}><div className={style.iconeCard}><QrCode /></div><p>Pago em PIX</p><p className={style.valorEmPix}>{formatBRL(resumo?.pagoPix || 0)}</p></div>
             <div className={style.cardInfoSemana}><div className={style.iconeCard}><Users /></div><p>Equipe da Semana</p><p className={style.qtdFuncionarios}>{quantidadeFuncionarios} func.</p></div>
           </div>
-          <QuemTrabalhou grupos={grupos} />
-          <DetalheDatas datas={datas} />
+          <div className={style.faixaDias}>{datas.map((dia) => <button className={diaAtivo === dia.id ? style.diaAtivo : ""} key={dia.id} onClick={() => setDiaAtivo(diaAtivo === dia.id ? null : dia.id)}>{dia.diaSemana.slice(0, 3)} {dia.data.slice(0, 5)}<small>{dia.funcionarios.length} func.</small></button>)}</div>
+          <div className={style.toolbarHistorico}><div className={style.inputHistorico}><Search size={16} /><input placeholder="Buscar funcionário..." value={busca} onChange={(e) => setBusca(e.target.value)} /></div>{["TODOS", "PAGOS", "PENDENTES", "A_GERAR"].map((status) => <button className={filtroStatus === status ? style.filtroAtivo : ""} key={status} onClick={() => setFiltroStatus(status)}>{status === "TODOS" ? "Todos" : status === "A_GERAR" ? "A gerar" : status[0] + status.slice(1).toLowerCase()}</button>)}<button onClick={() => { setBusca(""); setFiltroStatus("TODOS"); setDiaAtivo(null); }}>Limpar filtros</button></div>
+          {gruposFiltrados.length ? <div className={style.tpList}>{gruposFiltrados.map((grupo) => <TabelaSetor key={grupo.setor} grupo={grupo} />)}</div> : <p>Nenhum resultado para os filtros.</p>}
         </>}
       </div>
     </>

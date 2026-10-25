@@ -54,13 +54,22 @@ function Funcionarios() {
     setErro("");
 
     try {
-      const [funcionariosResposta, setoresResposta] = await Promise.all([
+      const [funcionariosResultado, setoresResultado] = await Promise.allSettled([
         api.get("/funcionarios"),
-        api.get("/setores")
+        api.get("/funcionarios/setores")
       ]);
 
-      setFuncionarios(funcionariosResposta.data.map(mapearFuncionario));
-      setSetores(setoresResposta.data);
+      if (funcionariosResultado.status === "fulfilled") {
+        setFuncionarios(funcionariosResultado.value.data.map(mapearFuncionario));
+      } else {
+        throw funcionariosResultado.reason;
+      }
+      if (setoresResultado.status === "fulfilled") {
+        setSetores(setoresResultado.value.data);
+      } else {
+        console.error("Erro ao carregar setores:", setoresResultado.reason);
+        setSetores([]);
+      }
 
     } catch (error) {
       console.error("Erro ao carregar funcionários:", error);

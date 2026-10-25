@@ -56,21 +56,30 @@ function Pagamento() {
           ? {}
           : { setor: areaSelecionada };
 
-      const [
-        pagamentosResposta,
-        resumoResposta,
-        setoresResposta,
-        todosPagamentosResposta
-      ] = await Promise.all([
+      const resultados = await Promise.allSettled([
         api.get(endpoint, { params: parametros }),
         api.get("/pagamento/resumo"),
-        api.get("/setores"),
+        api.get("/funcionarios/setores"),
         api.get("/pagamento", { params: parametros })
       ]);
+      const [pagamentosResultado, resumoResultado, setoresResultado, todosPagamentosResultado] = resultados;
+      if (pagamentosResultado.status === "rejected"
+        || resumoResultado.status === "rejected"
+        || todosPagamentosResultado.status === "rejected") {
+        throw pagamentosResultado.reason || resumoResultado.reason || todosPagamentosResultado.reason;
+      }
+      const pagamentosResposta = pagamentosResultado.value;
+      const resumoResposta = resumoResultado.value;
+      const todosPagamentosResposta = todosPagamentosResultado.value;
 
       setPagamentos(pagamentosResposta.data);
       setResumo(resumoResposta.data);
-      setSetores(setoresResposta.data);
+      if (setoresResultado.status === "fulfilled") {
+        setSetores(setoresResultado.value.data);
+      } else {
+        console.error("Erro ao carregar setores:", setoresResultado.reason);
+        setSetores([]);
+      }
 
       const todosPagamentos = todosPagamentosResposta.data;
 
