@@ -60,19 +60,30 @@ function Pagamento() {
         api.get(endpoint, { params: parametros }),
         api.get("/pagamento/resumo"),
         api.get("/funcionarios/setores"),
-        api.get("/pagamento", { params: parametros })
+        api.get("/pagamento", { params: parametros }),
+        api.get("/pagamento/pendentes", { params: parametros })
       ]);
-      const [pagamentosResultado, resumoResultado, setoresResultado, todosPagamentosResultado] = resultados;
+      const [
+        pagamentosResultado,
+        resumoResultado,
+        setoresResultado,
+        todosPagamentosResultado,
+        pendentesResultado
+      ] = resultados;
       if (pagamentosResultado.status === "rejected"
         || resumoResultado.status === "rejected"
-        || todosPagamentosResultado.status === "rejected") {
-        throw pagamentosResultado.reason || resumoResultado.reason || todosPagamentosResultado.reason;
+        || todosPagamentosResultado.status === "rejected"
+        || pendentesResultado.status === "rejected") {
+        throw pagamentosResultado.reason
+          || resumoResultado.reason
+          || todosPagamentosResultado.reason
+          || pendentesResultado.reason;
       }
       const pagamentosResposta = pagamentosResultado.value;
       const resumoResposta = resumoResultado.value;
       const todosPagamentosResposta = todosPagamentosResultado.value;
+      const pagamentosPendentesResposta = pendentesResultado.value;
 
-      setPagamentos(pagamentosResposta.data);
       setResumo(resumoResposta.data);
       if (setoresResultado.status === "fulfilled") {
         setSetores(setoresResultado.value.data);
@@ -81,10 +92,23 @@ function Pagamento() {
         setSetores([]);
       }
 
-      const todosPagamentos = todosPagamentosResposta.data;
+      const pagamentosDoUltimoPeriodo = todosPagamentosResposta.data;
+      const pagamentosPendentes = pagamentosPendentesResposta.data;
+      const pagamentosPorId = new Map(
+        [...pagamentosDoUltimoPeriodo, ...pagamentosPendentes].map(
+          (pagamento) => [pagamento.id, pagamento]
+        )
+      );
+      const todosPagamentos = [...pagamentosPorId.values()];
 
-      if (todosPagamentos.length > 0) {
-        const pagamentosOrdenados = [...todosPagamentos].sort(
+      setPagamentos(
+        filtroPagamento === "Geral"
+          ? todosPagamentos
+          : pagamentosResposta.data
+      );
+
+      if (pagamentosDoUltimoPeriodo.length > 0) {
+        const pagamentosOrdenados = [...pagamentosDoUltimoPeriodo].sort(
           (a, b) => new Date(a.periodoInicio) - new Date(b.periodoInicio)
         );
 
