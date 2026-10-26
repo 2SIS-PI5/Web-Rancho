@@ -4,8 +4,9 @@ import ModalFuncionario from "./components/ModalFuncionario";
 import ModalExcluirFuncionario from "./components/ModalExcluirFuncionario";
 import api from "../../services/api";
 
-import { Plus, Search } from "lucide-react";
-import { useEffect, useState } from "react";
+import { Plus, Search, X, Users, AlertCircle, RefreshCw, Filter } from "lucide-react";
+import { useEffect, useMemo, useState } from "react";
+import { corDoSetor } from "../../utils/setores";
 
 function Funcionarios() {
   function abrirModalExcluir(funcionario) {
@@ -105,38 +106,42 @@ function Funcionarios() {
   const funcionariosVisiveis = funcionarios.filter((funcionario) =>
     funcionario.status !== "INATIVO" &&
     (areaSelecionada === "Todas" || funcionario.area === areaSelecionada) &&
-    funcionario.nome.toLowerCase().includes(busca.toLowerCase())
+    String(funcionario.nome ?? "").toLowerCase().includes(busca.toLowerCase())
   );
+  const setoresFiltro = useMemo(() => setores.length ? setores : [...new Set(funcionarios.map((funcionario) => funcionario.area).filter(Boolean))].map((nome) => ({ id: nome, nome })), [setores, funcionarios]);
+  const contagensSetor = useMemo(() => funcionarios.reduce((contagens, funcionario) => {
+    if (funcionario.status !== "INATIVO") contagens[funcionario.area] = (contagens[funcionario.area] || 0) + 1;
+    return contagens;
+  }, {}), [funcionarios]);
+  const ativos = funcionarios.filter((funcionario) => funcionario.status !== "INATIVO").length;
+  const filtrosAtivos = Boolean(busca || areaSelecionada !== "Todas");
+  const limparFiltros = () => { setBusca(""); setAreaSelecionada("Todas"); };
 
   return (
-    <>
+    <div className={style.paginaFuncionarios}>
       <div className={style.headerFuncionarios}>
-        <div className={style.tituloFuncionarios}><h1>Funcionários</h1><p>Gerencie o cadastro dos funcionários</p></div>
+        <div className={style.tituloFuncionarios}><h1>Funcionários</h1><p>{funcionarios.length} cadastrados{funcionarios.some((funcionario) => funcionario.status !== undefined) && ` · ${ativos} ativos`}</p></div>
         <div className={style.btnAdicionarFuncionario}><button onClick={() => abrirModalAdicionar()}><Plus /><p>Adicionar Funcionário</p></button></div>
       </div>
       <div className={style.containerFuncionarios}>
-        <div className={style.inputPesquisa}>
-          <Search />
-          <input type="text" placeholder="Buscar funcionário por nome..." value={busca} onChange={(e) => setBusca(e.target.value)} />
-        </div>
-        <div className={style.areaFiltroFuncionarios}>
-          <p>Filtrar por Área</p>
-          <div className={style.btnsFiltros}>
-            <button
-              className={areaSelecionada === "Todas" ? style.filtroAtivo : ""}
-              onClick={() => setAreaSelecionada("Todas")}>
-              Todas as Áreas
-            </button>
-
-            {setores.map((setor) => <button key={setor.id} className={areaSelecionada === setor.nome ? style.filtroAtivo : ""} onClick={() => setAreaSelecionada(setor.nome)}>{setor.nome}</button>)}
+        <div className={style.toolbarFuncionarios}>
+          <div className={style.toolbarBusca}><div className={style.inputPesquisa}><Search /><input aria-label="Buscar funcionário por nome" type="text" placeholder="Buscar funcionário por nome..." value={busca} onChange={(e) => setBusca(e.target.value)} />{busca && <button aria-label="Limpar busca" onClick={() => setBusca("")}><X /></button>}</div></div>
+          <div className={style.areaFiltroFuncionarios}>
+            <span className={style.labelFiltro}><Filter /> Filtrar por área</span>
+            <div className={style.btnsFiltros}>
+              <button aria-pressed={areaSelecionada === "Todas"} className={areaSelecionada === "Todas" ? style.filtroAtivo : ""} onClick={() => setAreaSelecionada("Todas")}><i />Todas as Áreas <b>{ativos}</b></button>
+              {setoresFiltro.map((setor) => <button aria-pressed={areaSelecionada === setor.nome} key={setor.id} style={{ "--cor-setor": corDoSetor(setor.nome) }} className={areaSelecionada === setor.nome ? style.filtroAtivo : ""} onClick={() => setAreaSelecionada(setor.nome)}><i />{setor.nome}<b>{contagensSetor[setor.nome] || 0}</b></button>)}
+            </div>
           </div>
+          {filtrosAtivos && <button className={style.btnLimparFiltros} onClick={limparFiltros}>Limpar filtros</button>}
         </div>
         <div className={style.containerCardFuncionarios}>
-          {carregando && <p>Carregando funcionários...</p>}
-          {!carregando && erro && <p>{erro}</p>}
-          {!carregando && !erro && funcionariosVisiveis.length === 0 && <p>Nenhum funcionário encontrado.</p>}
+          {carregando && <div className={style.skeletonFuncionarios}>{[1, 2, 3, 4].map((item) => <span key={item} />)}</div>}
+          {!carregando && erro && <div className={style.estadoFuncionarios}><AlertCircle /><p>{erro}</p><button onClick={buscarDados}><RefreshCw />Tentar novamente</button></div>}
+          {!carregando && !erro && funcionarios.length === 0 && <div className={style.estadoFuncionarios}><Users /><strong>Nenhum funcionário cadastrado</strong><p>Adicione o primeiro funcionário para começar.</p></div>}
+          {!carregando && !erro && funcionarios.length > 0 && funcionariosVisiveis.length === 0 && <div className={style.estadoFuncionarios}><Filter /><strong>Nenhum resultado para os filtros</strong><button className={style.btnLimparFiltros} onClick={limparFiltros}>Limpar filtros</button></div>}
           {!carregando && !erro && funcionariosVisiveis.map((f) => (
-            <CardFuncionario key={f.id} nome={f.nome} area={f.area} telefone={f.telefone} cep={f.cep} chavePix={f.chavePix}
+            <CardFuncionario key={f.id} nome={f.nome} area={f.area} status={f.status} telefone={f.telefone} cep={f.cep} chavePix={f.chavePix}
               valorDiaria={f.valorDiaria} ajudaTransporte={f.ajudaTransporte} onEditar={() => abrirModalEdicao(f)} onExcluir={() => abrirModalExcluir(f)} />
           ))}
         </div>
@@ -145,7 +150,7 @@ function Funcionarios() {
       <ModalExcluirFuncionario aberto={modalExcluirAberto} onFechar={fecharModalExcluir} funcionario={funcionarioExcluir}
         onConfirmar={async () => { await api.put(`/funcionarios/${funcionarioExcluir.id}/desativar`); await buscarDados(); fecharModalExcluir(); }}
       />
-    </>
+    </div>
   )
 }
 export default Funcionarios;

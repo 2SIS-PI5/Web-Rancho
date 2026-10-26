@@ -1,10 +1,19 @@
 .sideBar {
-    width: 19%;
-    height: 100%;
+    width: var(--sidebar-w, clamp(240px, 18vw, 280px));
+    flex: 0 0 var(--sidebar-w, clamp(240px, 18vw, 280px));
+    height: 100vh;
     display: flex;
     flex-direction: column;
-    justify-content: space-around;
+    justify-content: space-between;
+    transition: width 200ms ease, flex-basis 200ms ease;
+    background: #fff;
+    z-index: 1050;
 }
+
+.sideBarColapsada { width: var(--sidebar-w-collapsed, 72px); flex-basis: var(--sidebar-w-collapsed, 72px); }
+.btnToggleSidebar { align-self: flex-end; width: 40px; height: 40px; margin: 10px 12px 0 0; display: grid; place-items: center; border: 0; border-radius: 10px; background: transparent; color: #64748b; cursor: pointer; }
+.btnToggleSidebar:hover { background: #fff7ed; color: #f04a00; }
+.btnToggleSidebar:focus-visible { outline: 3px solid rgba(249, 115, 22, .22); outline-offset: 2px; }
 
 .tituloSideBar {
     width: 100%;
@@ -141,3 +150,24 @@
     font-size: 16.3px;
     color: rgb(216, 21, 21);
 }
+
+.sideBarColapsada .tituloSideBar { align-items: center; }
+.sideBarColapsada .nomePerfil { width: 40px; height: 40px; margin: 0; }
+.sideBarColapsada .nomePerfil p { font-size: 16px; }
+.sideBarColapsada .nomeRestaurante, .sideBarColapsada .menuItem span, .sideBarColapsada .menuActive span, .sideBarColapsada .botaoSair p { display: none; }
+.sideBarColapsada .menuItem, .sideBarColapsada .menuActive, .sideBarColapsada .botaoSair { width: 48px; justify-content: center; gap: 0; }
+.sideBarColapsada .menuItem svg, .sideBarColapsada .menuActive svg, .sideBarColapsada .botaoSair svg { margin: 0; }
+
+.menuItem:focus-visible, .menuActive:focus-visible, .botaoSair:focus-visible { outline: 3px solid rgba(249, 115, 22, .22); outline-offset: 2px; }
+
+@media (max-width: 1023px) {
+    .sideBar { position: fixed; top: 0; left: 0; width: min(280px, 85vw); flex-basis: auto; transform: translateX(-100%); box-shadow: 8px 0 24px rgba(15, 23, 42, .12); transition: transform 200ms ease; }
+    .sideBar.sideBarColapsada { width: min(280px, 85vw); flex-basis: auto; }
+    .sideBar.sideBarColapsada .nomeRestaurante, .sideBar.sideBarColapsada .menuItem span, .sideBar.sideBarColapsada .menuActive span, .sideBar.sideBarColapsada .botaoSair p { display: flex; }
+    .sideBar.sideBarColapsada .menuItem, .sideBar.sideBarColapsada .menuActive, .sideBar.sideBarColapsada .botaoSair { width: 85%; justify-content: flex-start; gap: 4%; }
+    .sideBar.sideBarColapsada .menuItem svg, .sideBar.sideBarColapsada .menuActive svg, .sideBar.sideBarColapsada .botaoSair svg { margin-left: 5%; }
+    .sideBarAberta { transform: translateX(0); }
+    .btnToggleSidebar { display: grid; }
+}
+
+@media (prefers-reduced-motion: reduce) { .sideBar { transition: none; } }

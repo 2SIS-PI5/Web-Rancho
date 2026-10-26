@@ -183,3 +183,12 @@
 @media (max-width: 767px) { .headerHistorico, .containerHistorico { width: min(100% - var(--space-4), 640px); } .headerHistorico { padding-top: var(--space-6); } .manipularSemana { min-height: auto; padding: var(--space-3); flex-wrap: wrap; } .semanaEscolhida { order: -1; width: 100%; justify-content: space-between; } .periodoEscolhido { font-size: var(--type-lg); } .btnAnterior, .btnProxima { flex: 1; } .filtrosHistorico { position: static; } .toolbarHistorico { align-items: stretch; } .inputHistorico { flex-basis: 100%; max-width: none; } .toolbarHistorico button { flex: 1 1 calc(50% - 8px); justify-content: center; } .toolbarHistorico .btnLimpar { flex-basis: 100%; } .tpList { border: 0; background: transparent; box-shadow: none; overflow: visible; } .tpWrap { margin-bottom: var(--space-3); overflow: hidden; border: 1px solid var(--border); border-radius: var(--radius-lg); box-shadow: var(--shadow-sm); } .tpHead { display: none; } .tpRow { display: grid; grid-template-columns: 1fr auto; gap: var(--space-3); min-height: 0; padding: var(--space-4); } .tpRow > div:nth-child(2) { grid-column: 1 / -1; } .tpValor { grid-column: 1; text-align: left; } .tpVia { grid-column: 2; grid-row: 3; align-self: center; } .tpStatus { grid-column: 2; grid-row: 1; } .tpTotal { align-items: flex-start; } .listaFuncData { grid-template-columns: 1fr; } }
 @media (max-width: 420px) { .containerHistorico, .headerHistorico { width: calc(100% - var(--space-4)); } .infoSemana { grid-template-columns: 1fr; } .cardHero { grid-column: auto; } .toolbarHistorico button { flex-basis: 100%; } .tpGroup, .tpRow { padding-inline: var(--space-3); } }
 @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation-duration: .01ms !important; transition-duration: .01ms !important; } }
+.paginaHistorico .headerHistorico, .paginaHistorico .containerHistorico { width: 100%; max-width: 1600px; }
+.paginaHistorico .tituloHistorico h1 { font-size: 28px; }
+.paginaHistorico .filtrosHistorico { padding: 20px; }
+.paginaHistorico .faixaDias button { min-width: 64px; min-height: 56px; }
+.paginaHistorico .tpRow { min-height: 76px; }
+.paginaHistorico .tpNome, .paginaHistorico .tpDiasQtd { font-size: 15px; }
+.paginaHistorico .tpDiasDatas, .paginaHistorico .tpSetor { font-size: 14px; }
+.paginaHistorico .tpValor { font-size: 16px; }
+.paginaHistorico .tpBadge, .paginaHistorico .tpVia { font-size: 13px; }
