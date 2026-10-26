@@ -34,6 +34,13 @@ export const formatCep = (value) => {
     return digits.length === 8 ? maskCep(digits) : String(value ?? "");
 };
 
+export const formatDistanciaKm = (value) => {
+    const texto = String(value ?? "").trim().replace(",", ".");
+    const distancia = Number(texto);
+    if (!texto || !Number.isFinite(distancia) || distancia < 0) return "Distância indisponível";
+    return `${distancia.toLocaleString("pt-BR", { maximumFractionDigits: 2 })} km`;
+};
+
 export const formatValorBRL = (value) => {
     const texto = String(value ?? "").trim().replace(/[^\d,.-]/g, "");
     if (typeof value !== "number" && !texto) return "";

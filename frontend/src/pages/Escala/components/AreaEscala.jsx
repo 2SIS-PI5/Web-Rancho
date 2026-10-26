@@ -1,7 +1,7 @@
 import style from "../css/Escala.module.css";
-import { Plus, X, User, Search } from "lucide-react";
+import { Plus, X, User, Search, MapPin } from "lucide-react";
 import { useState } from "react";
-import { formatTelefone } from "../../../utils/formatadores";
+import { formatTelefone, formatDistanciaKm } from "../../../utils/formatadores";
 
 function AreaEscala({
     area,
@@ -206,7 +206,13 @@ function AreaEscala({
 
                                         <div className={style.infosFuncionario}>
                                             <p>{f.nome}</p>
-                                            <p>{formatTelefone(f.telefone)}</p>
+                                            <div className={style.contatoDistancia}>
+                                                <span>{formatTelefone(f.telefone)}</span>
+                                                <span className={style.distanciaFuncionario} title="Distância até o Rancho">
+                                                    <MapPin size={13} aria-hidden="true" />
+                                                    {formatDistanciaKm(f.distanciaKm)}
+                                                </span>
+                                            </div>
                                         </div>
 
                                         <div className={style.btnFuncionarioSelecionado}>

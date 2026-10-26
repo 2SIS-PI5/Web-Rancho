@@ -512,7 +512,8 @@ async function buscarCepFreelancer() {
         dados.enderecoCompleto,
         dados.cidade,
         dados.estado,
-        cepVal
+        cepVal,
+        dados
       );
       document.getElementById('fl-latitude').value  = coords.latitude;
       document.getElementById('fl-longitude').value = coords.longitude;

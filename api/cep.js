@@ -4,19 +4,37 @@
 
 async function buscarEnderecoPorCep(cep) {
     // Remove traços e espaços do CEP
-    const cepLimpo = cep.replace(/\D/g, '');
+    const cepLimpo = String(cep ?? '').replace(/\D/g, '');
 
     if (cepLimpo.length !== 8) {
         throw new Error('CEP inválido. Deve conter 8 dígitos.');
     }
 
-    const response = await fetch(`https://viacep.com.br/ws/${cepLimpo}/json/`);
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 10000);
+    let data;
 
-    if (!response.ok) {
-        throw new Error('Erro ao consultar o CEP.');
+    try {
+        const response = await fetch(`https://viacep.com.br/ws/${cepLimpo}/json/`, {
+            signal: controller.signal
+        });
+
+        if (!response.ok) {
+            throw new Error(`ViaCEP indisponivel (HTTP ${response.status}). Tente novamente mais tarde.`);
+        }
+
+        data = await response.json();
+    } catch (error) {
+        if (controller.signal.aborted) {
+            throw new Error('O ViaCEP demorou para responder. Tente novamente.');
+        }
+        if (error instanceof TypeError) {
+            throw new Error('Nao foi possivel conectar ao ViaCEP. Verifique sua conexao e tente novamente.');
+        }
+        throw error;
+    } finally {
+        clearTimeout(timeout);
     }
-
-    const data = await response.json();
 
     if (data.erro) {
         throw new Error('CEP não encontrado.');
@@ -39,15 +57,14 @@ async function buscarEnderecoPorCep(cep) {
 // Tenta 4 estratégias em cascata para máxima precisão
 // =============================================
 
-async function buscarCoordenadasPorEndereco(enderecoCompleto, cidade, estado, cep) {
+async function buscarCoordenadasPorEndereco(enderecoCompleto, cidade, estado, cep, enderecoConsultado) {
 
     // Se tiver CEP, busca o endereço real no ViaCEP primeiro
     // para garantir que temos logradouro + bairro + cidade corretos
     if (cep) {
         try {
-            const cepLimpo = cep.replace(/\D/g, '');
-            const res = await fetch(`https://viacep.com.br/ws/${cepLimpo}/json/`);
-            const dados = await res.json();
+            const endereco = enderecoConsultado || await buscarEnderecoPorCep(cep);
+            const dados = { ...endereco, localidade: endereco.cidade, uf: endereco.estado };
 
             if (!dados.erro) {
                 cidade = dados.localidade;
@@ -115,7 +132,8 @@ async function obterEnderecoCompleto(cep) {
         endereco.enderecoCompleto,
         endereco.cidade,
         endereco.estado,
-        cep
+        cep,
+        endereco
     );
 
     return {

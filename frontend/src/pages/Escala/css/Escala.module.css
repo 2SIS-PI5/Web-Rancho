@@ -687,6 +687,7 @@
 .cardFuncionario {
     width: 90%;
     height: 8.2vh;
+    min-height: 86px;
     border-radius: 12px;
     background-color: rgba(233, 233, 234, 0.177);
     display: flex;
@@ -718,6 +719,7 @@
 
 .infosFuncionario {
     width: 65%;
+    min-width: 0;
     height: 100%;
     display: flex;
     flex-direction: column;
@@ -727,12 +729,27 @@
 
 .infosFuncionario p:nth-child(1) {
     font-weight: 600;
+    overflow-wrap: anywhere;
 }
 
-.infosFuncionario p:nth-child(2) {
+.contatoDistancia {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 4px 12px;
     font-size: 13px;
     font-weight: 500;
     color: #4a4a4adf;
+}
+
+.distanciaFuncionario {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.distanciaFuncionario svg {
+    flex-shrink: 0;
 }
 
 .btnFuncionarioSelecionado {
