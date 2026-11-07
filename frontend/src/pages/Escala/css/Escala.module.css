@@ -745,11 +745,32 @@
 .distanciaFuncionario {
     display: inline-flex;
     align-items: center;
+    flex-wrap: wrap;
     gap: 4px;
 }
 
 .distanciaFuncionario svg {
     flex-shrink: 0;
+}
+
+.distanciaPerto,
+.distanciaLonge {
+    padding: 2px 7px;
+    border-radius: 999px;
+    font-size: 11px;
+    font-weight: 700;
+    line-height: 1.4;
+    white-space: nowrap;
+}
+
+.distanciaPerto {
+    background: #dcfce7;
+    color: #15803d;
+}
+
+.distanciaLonge {
+    background: #fee2e2;
+    color: #b91c1c;
 }
 
 .btnFuncionarioSelecionado {

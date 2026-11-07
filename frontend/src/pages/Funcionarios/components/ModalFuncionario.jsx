@@ -2,7 +2,8 @@ import { useState, useEffect } from "react";
 import { X } from "lucide-react";
 import style from "../css/Funcionarios.module.css";
 import api from "../../../services/api";
-import { maskTelefone, maskCep, maskMoedaCentavos, onlyDigits } from "../../../utils/formatadores";
+import { maskTelefone, maskCep, maskMoedaCentavos, onlyDigits, formatDistanciaKm } from "../../../utils/formatadores";
+import { calcularDistanciaAteRancho } from "../../../services/distancia";
 
 function ModalFuncionario({ aberto, onFechar, funcionario, setores, onSalvo }) {
 
@@ -12,6 +13,9 @@ function ModalFuncionario({ aberto, onFechar, funcionario, setores, onSalvo }) {
     const [chavePix, setChavePix] = useState("");
     const [area, setArea] = useState("");
     const [valorDiaria, setValorDiaria] = useState("");
+    const [distanciaKm, setDistanciaKm] = useState(null);
+    const [calculandoDistancia, setCalculandoDistancia] = useState(false);
+    const [erroDistancia, setErroDistancia] = useState("");
     const [ajudaTransporte, setAjudaTransporte] = useState(false);
     const [erro, setErro] = useState("");
     const [erros, setErros] = useState({});
@@ -30,6 +34,7 @@ function ModalFuncionario({ aberto, onFechar, funcionario, setores, onSalvo }) {
             setChavePix(String(funcionario.chavePix ?? ""));
             setArea(String(funcionario.setorId ?? setores.find((setor) => setor.nome === funcionario.setor)?.id ?? ""));
             setValorDiaria(Number.isFinite(valor) ? maskMoedaCentavos(String(Math.round(valor * 100))) : "");
+            setDistanciaKm(Number.isFinite(Number(funcionario.distanciaKm)) ? Number(funcionario.distanciaKm) : null);
             setAjudaTransporte(Boolean(funcionario.ajudaTransporte));
         } else {
             setNome("");
@@ -38,9 +43,44 @@ function ModalFuncionario({ aberto, onFechar, funcionario, setores, onSalvo }) {
             setChavePix("");
             setArea(setores[0]?.id ?? "");
             setValorDiaria("");
+            setDistanciaKm(null);
             setAjudaTransporte(false);
         }
+        setCalculandoDistancia(false);
+        setErroDistancia("");
     }, [funcionario, aberto, setores]);
+
+    useEffect(() => {
+        const cepCompleto = onlyDigits(cep);
+        let ativo = true;
+
+        if (!aberto || cepCompleto.length !== 8) {
+            setDistanciaKm(null);
+            setCalculandoDistancia(false);
+            setErroDistancia("");
+            return () => { ativo = false; };
+        }
+
+        setDistanciaKm(null);
+        setCalculandoDistancia(true);
+        setErroDistancia("");
+
+        const temporizador = window.setTimeout(async () => {
+            try {
+                const distancia = await calcularDistanciaAteRancho(cepCompleto);
+                if (ativo) setDistanciaKm(distancia);
+            } catch (error) {
+                if (ativo) setErroDistancia(error.message || "Não foi possível calcular a distância.");
+            } finally {
+                if (ativo) setCalculandoDistancia(false);
+            }
+        }, 350);
+
+        return () => {
+            ativo = false;
+            window.clearTimeout(temporizador);
+        };
+    }, [cep, aberto]);
 
     if (!aberto) {
         return null;
@@ -75,6 +115,7 @@ function ModalFuncionario({ aberto, onFechar, funcionario, setores, onSalvo }) {
         if (!pixLimpo || pixLimpo.length > 100) novosErros.chavePix = "Informe uma chave PIX de até 100 caracteres.";
         if (!setores.some((setor) => setor.id === Number(area))) novosErros.area = "Selecione uma área válida.";
         if (!valor || valor > 99999.99) novosErros.valorDiaria = "Informe uma diária entre R$ 0,01 e R$ 99.999,99.";
+        if (!Number.isFinite(distanciaKm)) novosErros.distanciaKm = erroDistancia || "Aguarde o cálculo da distância até o Rancho.";
         setErros(novosErros);
         return Object.keys(novosErros).length === 0;
     }
@@ -84,7 +125,7 @@ function ModalFuncionario({ aberto, onFechar, funcionario, setores, onSalvo }) {
         setErro("");
         setSalvando(true);
         try {
-            const payload = { nome: nome.trim(), telefone: onlyDigits(telefone), cep: onlyDigits(cep), chavePix: chavePix.trim(), setorId: Number(area), valorDiaria: Number(onlyDigits(valorDiaria)) / 100, ajudaTransporte };
+            const payload = { nome: nome.trim(), telefone: onlyDigits(telefone), cep: onlyDigits(cep), chavePix: chavePix.trim(), setorId: Number(area), valorDiaria: Number(onlyDigits(valorDiaria)) / 100, ajudaTransporte, distanciaKm };
             if (modoEdicao) await api.put(`/funcionarios/${funcionario.id}`, payload);
             else await api.post("/funcionarios", payload);
             await onSalvo();
@@ -155,6 +196,9 @@ function ModalFuncionario({ aberto, onFechar, funcionario, setores, onSalvo }) {
                                 onChange={(e) => setCep(maskCep(e.target.value))}
                             />
                             {erros.cep && <span className={style.erroCampo}>{erros.cep}</span>}
+                            {onlyDigits(cep).length === 8 && <span className={erroDistancia || erros.distanciaKm ? style.erroCampo : style.statusDistancia} aria-live="polite">
+                                {calculandoDistancia ? "Calculando distância até o Rancho..." : erros.distanciaKm || erroDistancia || `${formatDistanciaKm(distanciaKm)} em linha reta até o Rancho`}
+                            </span>}
                         </div>
 
                         <div className={style.inputInfo}>
@@ -218,7 +262,7 @@ function ModalFuncionario({ aberto, onFechar, funcionario, setores, onSalvo }) {
                         <p>Cancelar</p>
                     </button>
 
-                    <button disabled={salvando} onClick={cadastrarFuncionario}>
+                    <button disabled={salvando || calculandoDistancia} onClick={cadastrarFuncionario}>
                         <p>
                             {salvando ? "Salvando..." : modoEdicao ? "Salvar Alterações" : "Adicionar"}
                         </p>

@@ -141,7 +141,7 @@ function Funcionarios() {
           {!carregando && !erro && funcionarios.length === 0 && <div className={style.estadoFuncionarios}><Users /><strong>Nenhum funcionário cadastrado</strong><p>Adicione o primeiro funcionário para começar.</p></div>}
           {!carregando && !erro && funcionarios.length > 0 && funcionariosVisiveis.length === 0 && <div className={style.estadoFuncionarios}><Filter /><strong>Nenhum resultado para os filtros</strong><button className={style.btnLimparFiltros} onClick={limparFiltros}>Limpar filtros</button></div>}
           {!carregando && !erro && funcionariosVisiveis.map((f) => (
-            <CardFuncionario key={f.id} nome={f.nome} area={f.area} status={f.status} telefone={f.telefone} cep={f.cep} chavePix={f.chavePix}
+            <CardFuncionario key={f.id} nome={f.nome} area={f.area} status={f.status} telefone={f.telefone} cep={f.cep} distanciaKm={f.distanciaKm} chavePix={f.chavePix}
               valorDiaria={f.valorDiaria} ajudaTransporte={f.ajudaTransporte} onEditar={() => abrirModalEdicao(f)} onExcluir={() => abrirModalExcluir(f)} />
           ))}
         </div>

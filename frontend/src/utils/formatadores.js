@@ -34,10 +34,22 @@ export const formatCep = (value) => {
     return digits.length === 8 ? maskCep(digits) : String(value ?? "");
 };
 
-export const formatDistanciaKm = (value) => {
-    const texto = String(value ?? "").trim().replace(",", ".");
+export const parseDistanciaKm = (value) => {
+    const texto = String(value ?? "").trim().replace(/\s*km\s*$/i, "").replace(",", ".");
     const distancia = Number(texto);
-    if (!texto || !Number.isFinite(distancia) || distancia < 0) return "Distância indisponível";
+    if (!texto || !Number.isFinite(distancia) || distancia < 0) return null;
+    return distancia;
+};
+
+export const classificarDistanciaKm = (value) => {
+    const distancia = parseDistanciaKm(value);
+    if (distancia === null) return null;
+    return distancia <= 20 ? "Perto" : "Longe";
+};
+
+export const formatDistanciaKm = (value) => {
+    const distancia = parseDistanciaKm(value);
+    if (distancia === null) return "Distância indisponível";
     return `${distancia.toLocaleString("pt-BR", { maximumFractionDigits: 2 })} km`;
 };
 

@@ -1,7 +1,42 @@
 import style from "../css/Escala.module.css";
 import { Plus, X, User, Search, MapPin } from "lucide-react";
-import { useState } from "react";
-import { formatTelefone, formatDistanciaKm } from "../../../utils/formatadores";
+import { useEffect, useState } from "react";
+import { classificarDistanciaKm, formatTelefone, formatDistanciaKm, onlyDigits } from "../../../utils/formatadores";
+import { calcularDistanciaAteRancho } from "../../../services/distancia";
+
+function DistanciaFuncionario({ cep, distanciaKm }) {
+    const [resultado, setResultado] = useState({ cep: "", km: null });
+    const cepCompleto = onlyDigits(cep);
+    const distanciaDaApi = classificarDistanciaKm(distanciaKm) !== null;
+
+    useEffect(() => {
+        let ativo = true;
+        if (distanciaDaApi || cepCompleto.length !== 8) return () => { ativo = false; };
+
+        calcularDistanciaAteRancho(cepCompleto)
+            .then((km) => { if (ativo) setResultado({ cep: cepCompleto, km }); })
+            .catch(() => { if (ativo) setResultado({ cep: cepCompleto, km: null }); });
+
+        return () => { ativo = false; };
+    }, [cepCompleto, distanciaDaApi]);
+
+    const resultadoAtual = resultado.cep === cepCompleto && cepCompleto.length === 8;
+    const distanciaAtual = distanciaDaApi ? distanciaKm : resultadoAtual ? resultado.km : null;
+    const textoDistancia = distanciaDaApi || resultadoAtual
+        ? formatDistanciaKm(distanciaAtual)
+        : cepCompleto.length === 8
+            ? "Calculando..."
+            : formatDistanciaKm(null);
+    const classificacao = classificarDistanciaKm(distanciaAtual);
+
+    return (
+        <span className={style.distanciaFuncionario} title="Distância em linha reta até o Rancho" aria-live="polite">
+            <MapPin size={13} aria-hidden="true" />
+            {textoDistancia}
+            {classificacao && <span className={classificacao === "Perto" ? style.distanciaPerto : style.distanciaLonge}>{classificacao}</span>}
+        </span>
+    );
+}
 
 function AreaEscala({
     area,
@@ -208,10 +243,7 @@ function AreaEscala({
                                             <p>{f.nome}</p>
                                             <div className={style.contatoDistancia}>
                                                 <span>{formatTelefone(f.telefone)}</span>
-                                                <span className={style.distanciaFuncionario} title="Distância até o Rancho">
-                                                    <MapPin size={13} aria-hidden="true" />
-                                                    {formatDistanciaKm(f.distanciaKm)}
-                                                </span>
+                                                <DistanciaFuncionario cep={f.cep} distanciaKm={f.distanciaKm} />
                                             </div>
                                         </div>
 
