@@ -1,6 +1,10 @@
 import { Banknote, QrCode, User, Check } from "lucide-react";
 import style from "../css/Pagamento.module.css";
 import { formatBRL, formatTelefone } from "../../../utils/formatadores";
+import { normalizarChavePix, formatarValorPix } from "../../../utils/pix";
+import ModalQrPix from "./ModalQrPix";
+import PixIcon from "./PixIcon";
+import { useRef, useState } from "react";
 
 function CardPgtoFunc({
     id,
@@ -14,8 +18,13 @@ function CardPgtoFunc({
     valorDiaria,
     valorTotal,
     onPagar,
-    pagando
+    pagando,
+    onQr
 }) {
+    const [qrAberto, setQrAberto] = useState(false);
+    const qrButtonRef = useRef(null);
+    const chave = normalizarChavePix(chavePix);
+    const valorValido = Boolean(formatarValorPix(valorTotal));
     return (
         <div className={statusPagto === "PAGO" ? style.cardPagtoFuncPago : style.cardPagtoFun}>
             <div className={style.infosPessoais}>
@@ -48,26 +57,50 @@ function CardPgtoFunc({
                     </button>
                 ) : (
                     <>
-                        <button
+                        <div className={style.linhaBotoesQr}>
+                            <button type="button"
                             className={style.btnPagarEmDinheiro}
                             disabled={pagando}
                             onClick={() => onPagar(id, "DINHEIRO")}
-                        >
-                            <Banknote />
-                            <p>{pagando ? "Pagando..." : "Dinheiro"}</p>
-                        </button>
+                            >
+                                <Banknote />
+                                <p>{pagando ? "Pagando..." : "Dinheiro"}</p>
+                            </button>
 
-                        <button
+                            <button type="button"
                             className={style.btnPagarEmPix}
                             disabled={pagando}
                             onClick={() => onPagar(id, "PIX")}
-                        >
-                            <QrCode />
-                            <p>{pagando ? "Pagando..." : "PIX"}</p>
-                        </button>
+                            >
+                                <PixIcon />
+                                <p>{pagando ? "Pagando..." : "PIX"}</p>
+                            </button>
+                            <button
+                                type="button"
+                                className={style.btnQrCode}
+                                disabled={pagando || !chave.valida || !valorValido}
+                                ref={qrButtonRef}
+                                aria-label="Gerar QR Code"
+                                title="Gerar QR Code"
+                                onClick={() => { setQrAberto(true); onQr?.(); }}
+                            >
+                                <QrCode />
+                                <p>QR Code</p>
+                            </button>
+                        </div>
+                        {(!chave.valida || !valorValido) && <small className={style.ajudaQr}>{!chave.valida ? chave.motivo : "Valor inválido"}</small>}
                     </>
                 )}
             </div>
+            {qrAberto && chave.valida && valorValido && (
+                <ModalQrPix
+                    pagamento={{ id, nome, area, valorTotal }}
+                    chave={chave.chave}
+                    tipo={chave.tipo}
+                    onClose={() => { setQrAberto(false); qrButtonRef.current?.focus(); }}
+                    onPagar={async (...args) => { await onPagar(...args); setQrAberto(false); }}
+                />
+            )}
         </div>
     )
 }

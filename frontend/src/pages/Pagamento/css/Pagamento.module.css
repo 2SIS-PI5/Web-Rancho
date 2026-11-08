@@ -355,7 +355,8 @@
 
 .cardPagtoFun {
     width: 100%;
-    height: 36vh;
+    min-height: 360px;
+    height: auto;
     background-color: white;
     border: 1px solid rgb(225, 224, 224);
     border-top: 7px solid rgba(242, 43, 43, 0.959);
@@ -367,7 +368,8 @@
 
 .cardPagtoFuncPago {
     width: 100%;
-    height: 36vh;
+    min-height: 360px;
+    height: auto;
     background-color: white;
     border: 1px solid rgb(225, 224, 224);
     border-top: 7px solid rgb(0, 191, 0);
@@ -740,9 +742,459 @@
         opacity: 0;
         transform: translateY(8px);
     }
-
     to {
         opacity: 1;
         transform: translateY(0);
     }
 }
+
+    .seletorPagamento {
+        width: 94%;
+        min-height: 64px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 16px;
+    }
+
+    .seletorPagamento button {
+        min-height: 40px;
+        border: 1px solid #e1e0e0;
+        border-radius: 10px;
+        background: white;
+        padding: 0 14px;
+        display: inline-flex;
+        align-items: center;
+        gap: 7px;
+        font-size: 15px;
+        cursor: pointer;
+    }
+
+    .seletorPagamento button:focus-visible,
+    .bannerSemanas button:focus-visible,
+    .btnQrOutlined:focus-visible {
+        outline: 3px solid #c4b5fd;
+        outline-offset: 2px;
+    }
+
+    .seletorPagamento button:disabled {
+        opacity: .45;
+        cursor: not-allowed;
+    }
+
+    .seletorPagamento>div {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        font-size: 15px;
+    }
+
+    .seletorPagamento>div svg {
+        color: #ea601c;
+    }
+
+    .seletorPagamento span {
+        color: #6d28d9;
+        background: #f3e8ff;
+        border-radius: 999px;
+        padding: 4px 9px;
+        font-size: 12px;
+    }
+
+    .bannerSemanas {
+        width: 94%;
+        box-sizing: border-box;
+        padding: 12px 16px;
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        background: #fffbeb;
+        color: #b45309;
+        border: 1px solid #fde68a;
+        border-radius: 10px;
+    }
+
+    .bannerSemanas button {
+        border: 1px solid #b45309;
+        border-radius: 7px;
+        background: transparent;
+        color: #b45309;
+        padding: 6px 10px;
+        cursor: pointer;
+        font-weight: 600;
+    }
+
+    .linhaBotoesQr {
+        width: 100%;
+        display: flex;
+        justify-content: center;
+        gap: 3.5%;
+    }
+
+    .formasPagto {
+        height: auto;
+        min-height: 19%;
+        flex-wrap: wrap;
+        padding-bottom: 8px;
+    }
+
+    .btnQrOutlined {
+        width: 87.5%;
+        min-height: 38px;
+        border: 1px solid #7c3aed;
+        border-radius: 9px;
+        background: white;
+        color: #7c3aed;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        font-size: 13px;
+        cursor: pointer;
+    }
+
+    .btnQrOutlined:hover {
+        background: #f5f3ff;
+    }
+
+    .btnQrOutlined:disabled {
+        opacity: .5;
+        cursor: not-allowed;
+    }
+
+    .ajudaQr {
+        width: 87.5%;
+        color: #b45309;
+        text-align: center;
+    }
+
+    .fundoQr {
+        position: fixed;
+        inset: 0;
+        z-index: 11000;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 18px;
+        background: rgb(0 0 0 / 45%);
+    }
+
+    .cardQr {
+        position: relative;
+        width: min(94vw, 460px);
+        max-height: 95vh;
+        overflow: auto;
+        padding: 24px;
+        box-sizing: border-box;
+        background: white;
+        border-radius: 16px;
+        text-align: center;
+    }
+
+    .cabecalhoQr { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+    .cabecalhoQr h2 { margin: 0 0 5px; }
+    .destinoQr { margin: 0 0 12px; color: #555; }
+    .fecharQr { border: 0; background: transparent; cursor: pointer; color: #334155; padding: 4px; display: inline-flex; }
+    .imagemQr { display: block; width: 320px; max-width: 100%; margin: 8px auto; background: white; }
+    .valorQr { display: block; font-size: 25px; margin: 7px; }
+    .cardQr textarea { width: 100%; min-height: 76px; box-sizing: border-box; resize: vertical; font-size: 11px; }
+    .rotuloCodigo { display: block; text-align: left; font-weight: 600; margin-top: 12px; }
+    .btnCopiarQr { margin: 8px 0; border: 1px solid #7c3aed; color: #7c3aed; background: white; padding: 9px 14px; border-radius: 8px; cursor: pointer; display: inline-flex; gap: 6px; align-items: center; }
+    .statusCopia { color: #15803d; min-height: 18px; margin: 0; font-size: 13px; }
+    .acoesQr { display: flex; gap: 10px; margin-top: 14px; }
+    .acoesQr button { flex: 1; min-height: 42px; border-radius: 8px; cursor: pointer; font-weight: 600; }
+    .btnMarcarQr { border: 1px solid #7c3aed; background: #7c3aed; color: white; }
+    .btnFecharQr { border: 1px solid #d1d5db; background: white; }
+    .carregandoQr { height: 320px; display: grid; place-items: center; color: #666; }
+    .erroQr { min-height: 100px; display: grid; place-items: center; color: #b45309; }
+    .erroQr button { border: 0; background: transparent; color: #7c3aed; cursor: pointer; text-decoration: underline; }
+
+    /* Pagamento week navigation follows the Histórico selector tokens. */
+    .headerPagamento {
+        height: auto;
+        min-height: 0;
+        flex-direction: column;
+        align-items: stretch;
+        gap: 24px;
+        padding: 32px 0 0;
+    }
+
+    .headerPagamento .tituloPagamento {
+        width: 94%;
+        height: auto;
+        margin: 0 auto;
+    }
+
+    .manipularSemana {
+        width: 94%;
+        min-height: 72px;
+        margin: 0 auto;
+        padding: 12px 16px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 16px;
+        background: white;
+        border: 1px solid rgb(225, 224, 224);
+        border-radius: 16px;
+        box-shadow: 0 2px 8px rgb(15 23 42 / 8%);
+        box-sizing: border-box;
+    }
+
+    .manipularSemana button {
+        appearance: none;
+        box-sizing: border-box;
+        min-height: 40px;
+        padding: 0 12px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 4px;
+        border: 1px solid rgb(225, 224, 224);
+        border-radius: 10px;
+        background: white;
+        color: #1f2937;
+        font: 600 14px/1 inherit;
+        cursor: pointer;
+        transition: background-color .15s ease, border-color .15s ease, box-shadow .15s ease, transform .15s ease;
+    }
+
+    .manipularSemana button:hover:not(:disabled) {
+        border-color: #fdba74;
+        background: #fff7ed;
+        transform: translateY(-1px);
+    }
+
+    .manipularSemana button:focus-visible,
+    .manipularSemana input:focus-visible {
+        outline: 3px solid #fed7aa;
+        outline-offset: 2px;
+    }
+
+    .manipularSemana button:disabled {
+        opacity: .45;
+        cursor: not-allowed;
+    }
+
+    .manipularSemana button svg {
+        width: 17px;
+        height: 17px;
+        flex: none;
+    }
+
+    .semanaEscolhida {
+        min-width: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 12px;
+    }
+
+    .semanaEscolhida > svg {
+        width: 21px;
+        height: 21px;
+        flex: none;
+        color: #ea601c;
+    }
+
+    .periodoEscolhido {
+        margin: 0;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        color: #1f2937;
+        font-size: 18px;
+        font-weight: 750;
+        white-space: nowrap;
+    }
+
+    .periodoEscolhido svg {
+        width: 15px;
+        height: 15px;
+    }
+
+    .chipSemanaAtual {
+        padding: 5px 9px;
+        border-radius: 999px;
+        background: #fff7ed;
+        color: #ea601c;
+        font-size: 12px;
+        font-weight: 700;
+        white-space: nowrap;
+    }
+
+    .btnIrParaData {
+        color: #ea601c !important;
+        border-color: #fed7aa !important;
+        background: #fff7ed !important;
+    }
+
+    .btnIrParaData svg {
+        width: 16px !important;
+        height: 16px !important;
+    }
+
+    .inputData {
+        position: absolute;
+        width: 1px;
+        height: 1px;
+        opacity: 0;
+        pointer-events: none;
+    }
+
+    .formasPagto {
+        width: 100%;
+        height: auto;
+        min-height: 19%;
+        display: block;
+        padding: 0 12px 12px;
+        box-sizing: border-box;
+    }
+
+    .linhaBotoesQr {
+        width: 100%;
+        display: grid;
+        grid-template-columns: repeat(3, minmax(128px, 1fr));
+        gap: 10px;
+    }
+
+    .linhaBotoesQr > button {
+        appearance: none;
+        border: 0;
+        box-sizing: border-box;
+        min-width: 0;
+        height: 44px;
+        padding: 0 12px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        border-radius: 10px;
+        color: white;
+        font: 600 14px/1 inherit;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        cursor: pointer;
+        transition: filter .15s ease, transform .15s ease, box-shadow .15s ease;
+    }
+
+    .linhaBotoesQr > button svg {
+        width: 18px;
+        height: 18px;
+        flex: none;
+    }
+
+    .linhaBotoesQr > button:hover:not(:disabled) {
+        filter: brightness(.92);
+        transform: translateY(-1px);
+    }
+
+    .linhaBotoesQr > button:focus-visible {
+        outline: 3px solid #c4b5fd;
+        outline-offset: 2px;
+    }
+
+    .linhaBotoesQr > button:disabled {
+        opacity: .5;
+        cursor: not-allowed;
+    }
+
+    .btnPagarEmDinheiro {
+        width: auto;
+        margin: 0;
+        background: #f0601e;
+    }
+
+    .btnPagarEmPix {
+        width: auto;
+        margin: 0;
+        background: #8b2fff;
+    }
+
+    .btnQrCode {
+        width: auto;
+        margin: 0;
+        background: #1e3a8a;
+    }
+
+    .linhaBotoesQr p {
+        margin: 0;
+        font-size: 14px;
+    }
+
+    .ajudaQr {
+        display: block;
+        width: 100%;
+        margin-top: 6px;
+        color: #b45309;
+        font-size: 12px;
+        text-align: center;
+    }
+
+    .fundoQr {
+        background: rgb(15 23 42 / 50%);
+    }
+
+    .cardQr {
+        width: calc(100% - 32px);
+        max-width: 420px;
+        max-height: calc(100vh - 32px);
+        padding: 24px;
+        border-radius: 16px;
+        box-shadow: 0 20px 50px rgb(15 23 42 / 22%);
+    }
+
+    .imagemQr {
+        width: 280px;
+        height: 280px;
+        padding: 5px;
+        border: 1px solid #e5e7eb;
+        border-radius: 8px;
+    }
+
+    .valorQr {
+        font-size: 28px;
+    }
+
+    @media (max-width: 767px) {
+        .headerPagamento {
+            padding-top: 24px;
+        }
+
+        .manipularSemana {
+            min-height: auto;
+            padding: 12px;
+            flex-wrap: wrap;
+        }
+
+        .semanaEscolhida {
+            order: -1;
+            width: 100%;
+            justify-content: space-between;
+            flex-wrap: wrap;
+        }
+
+        .periodoEscolhido {
+            font-size: 16px;
+        }
+
+        .btnAnterior,
+        .btnProxima {
+            flex: 1;
+        }
+
+        .linhaBotoesQr {
+            grid-template-columns: repeat(2, minmax(128px, 1fr));
+        }
+    }
+
+    @media (max-width: 420px) {
+        .linhaBotoesQr {
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+
+        .linhaBotoesQr > button {
+            padding-inline: 8px;
+        }
+    }
