@@ -139,8 +139,13 @@
 
 .estrelas svg {
     color: rgb(255, 234, 0);
+    fill: none;
+}
+
+.estrelas svg[fill="currentColor"] {
     fill: rgb(255, 234, 0);
 }
+
 
 .avaliacaoFunc p {
     margin-top: 10px;
@@ -317,4 +322,258 @@
 
 .footerModal button:last-child:hover {
     background-color: #eb4a0adf;
+}
+
+.btnHistorico {
+    background: transparent;
+    border: none;
+    color: #5c5c5d;
+    font-size: 13px;
+    cursor: pointer;
+    padding: 0;
+}
+
+.btnHistorico:hover {
+    color: #f56715;
+    text-decoration: underline;
+}
+
+.btnHistorico:disabled {
+    cursor: default;
+    text-decoration: none;
+}
+
+
+.overlayHistorico {
+    position: fixed;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: rgba(0, 0, 0, 0.5);
+    z-index: 1100;
+}
+
+.modalHistorico {
+    width: 550px;
+    max-width: 92%;
+    max-height: 85vh;
+    background-color: white;
+    border-radius: 14px;
+    padding: 25px;
+    box-sizing: border-box;
+    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.2);
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+}
+
+.headerHistorico {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    margin-bottom: 22px;
+}
+
+.headerHistorico h2 {
+    margin: 0;
+    font-size: 21px;
+    font-weight: 600;
+}
+
+.headerHistorico p {
+    margin: 6px 0 0;
+    color: #666;
+    font-size: 14px;
+}
+
+.headerHistorico button {
+    border: none;
+    background: transparent;
+    cursor: pointer;
+    color: #555;
+}
+
+.resumoHistorico {
+    display: grid;
+    grid-template-columns: 1fr 1.3fr;
+    gap: 20px;
+    padding: 20px;
+    background-color: #fafafa;
+    border: 1px solid #e5e5e5;
+    border-radius: 12px;
+}
+
+.mediaHistorico {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 7px;
+}
+
+.mediaHistorico h3 {
+    font-size: 35px;
+    margin: 0;
+    font-weight: 600;
+}
+
+.mediaHistorico p {
+    margin: 0;
+    color: #666;
+    font-size: 13px;
+}
+
+.estrelasHistorico {
+    display: flex;
+    align-items: center;
+    gap: 3px;
+}
+
+.estrelaPreenchida {
+    color: #f5c518;
+    fill: #f5c518;
+    width: 17px;
+    height: 17px;
+}
+
+.estrelaVazia {
+    color: #ccc;
+    fill: none;
+    width: 17px;
+    height: 17px;
+}
+
+.distribuicaoNotas {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 8px;
+}
+
+.linhaNota {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    font-size: 12px;
+    color: #555;
+}
+
+.linhaNota>span:first-child {
+    width: 10px;
+}
+
+.linhaNota>span:last-child {
+    width: 15px;
+    text-align: right;
+}
+
+.linhaNota svg {
+    width: 14px;
+    height: 14px;
+}
+
+.barraNota {
+    flex: 1;
+    height: 7px;
+    background-color: #e5e5e5;
+    border-radius: 10px;
+    overflow: hidden;
+}
+
+.barraNotaPreenchida {
+    height: 100%;
+    background-color: #f5c518;
+    border-radius: 10px;
+}
+
+.listaHistorico {
+    display: flex;
+    flex-direction: column;
+    gap: 13px;
+    margin-top: 25px;
+    overflow-y: auto;
+    min-height: 0;
+    flex: 1;
+
+    /* Esconde a barra de rolagem */
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+}
+
+.listaHistorico::-webkit-scrollbar {
+    display: none;
+}
+
+.resumoHistorico {
+    flex-shrink: 0;
+}
+
+.listaHistorico>h3 {
+    margin: 0 0 3px;
+    font-size: 17px;
+    font-weight: 600;
+}
+
+.cardHistorico {
+    border: 1px solid #e5e5e5;
+    border-radius: 10px;
+    padding: 15px;
+    display: flex;
+    flex-direction: column;
+    gap: 9px;
+}
+
+.topoAvaliacao {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.topoAvaliacao>span {
+    color: #777;
+    font-size: 12px;
+}
+
+.notaAvaliacao {
+    margin: 0;
+    font-size: 13px;
+    font-weight: 600;
+    color: #555;
+}
+
+.descricaoAvaliacao {
+    margin: 0;
+    font-size: 14px;
+    line-height: 1.5;
+    color: #444;
+    overflow-wrap: anywhere;
+}
+
+.mensagemEstado {
+    text-align: center;
+    color: #666;
+    padding: 20px 0;
+}
+
+.mensagemErro {
+    color: #c0392b;
+    text-align: center;
+    padding: 20px 0;
+}
+
+@media (max-width: 550px) {
+    .modalHistorico {
+        padding: 18px;
+    }
+
+    .resumoHistorico {
+        grid-template-columns: 1fr;
+    }
+
+    .distribuicaoNotas {
+        margin-top: 10px;
+    }
 }

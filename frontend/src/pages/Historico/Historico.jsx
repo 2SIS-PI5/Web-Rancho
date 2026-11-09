@@ -25,17 +25,44 @@ function mapearGrupos(funcionarios) {
   return funcionarios.reduce((grupos, funcionario) => {
     const grupo = grupos.find((item) => item.setor === funcionario.setor);
     const pagamentos = funcionario.pagamentos || [];
-    const vias = [...new Set(pagamentos.map((pagamento) => pagamento.formaPagamento).filter(Boolean))];
+
+    const vias = [
+      ...new Set(
+        pagamentos
+          .map((pagamento) => pagamento.formaPagamento)
+          .filter(Boolean)
+      ),
+    ];
+
+    const dias = (funcionario.datas || []).map((detalhe) => {
+      const dataFormatada = formatarData(
+        new Date(`${detalhe.data}T00:00:00`)
+      );
+
+      return detalhe.turno === "NOITE"
+        ? `${dataFormatada} (NOITE)`
+        : dataFormatada;
+    });
+
     const item = {
       id: funcionario.funcionarioId,
       nome: funcionario.nome,
-      dias: funcionario.diasTrabalhados ? [`${funcionario.diasTrabalhados} dia(s)`] : [],
+      dias,
       valor: Number(funcionario.valorTotal || 0),
       via: vias.join(", ") || "Pendente",
       status: pagamentos.length ? "Pago" : "Pendente",
     };
-    if (grupo) grupo.itens.push(item);
-    else grupos.push({ setor: funcionario.setor, cor: corDoSetor(funcionario.setor), itens: [item] });
+
+    if (grupo) {
+      grupo.itens.push(item);
+    } else {
+      grupos.push({
+        setor: funcionario.setor,
+        cor: corDoSetor(funcionario.setor),
+        itens: [item],
+      });
+    }
+
     return grupos;
   }, []);
 }

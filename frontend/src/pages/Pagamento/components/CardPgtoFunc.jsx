@@ -1,6 +1,9 @@
-import { Banknote, QrCode, User, Check } from "lucide-react";
+import { Banknote, QrCode, User, Check, Pencil } from "lucide-react";
 import style from "../css/Pagamento.module.css";
 import { formatBRL, formatTelefone } from "../../../utils/formatadores";
+import { normalizarChavePix, formatarValorPix } from "../../../utils/pix";
+import ModalQrPix from "./ModalQrPix";
+import { useEffect, useRef, useState } from "react";
 
 function CardPgtoFunc({
     id,
@@ -14,8 +17,47 @@ function CardPgtoFunc({
     valorDiaria,
     valorTotal,
     onPagar,
-    pagando
+    onDesfazer,
+    pagando,
+    onQr
 }) {
+    const [qrAberto, setQrAberto] = useState(false);
+    const [confirmando, setConfirmando] = useState(false);
+    const [desfazendo, setDesfazendo] = useState(false);
+    const qrButtonRef = useRef(null);
+    const editarRef = useRef(null);
+    const cancelarRef = useRef(null);
+    const chave = normalizarChavePix(chavePix);
+    const valorValido = Boolean(formatarValorPix(valorTotal));
+    const nomeForma = formaPagamento === "PIX" ? "PIX" : "Dinheiro";
+
+    function fecharConfirmacao() {
+        setConfirmando(false);
+        editarRef.current?.focus();
+    }
+
+    async function desfazer() {
+        setDesfazendo(true);
+        try {
+            await onDesfazer(id);
+            setConfirmando(false);
+        } catch {
+            // o componente pai é quem mostra o alerta de erro
+        } finally {
+            setDesfazendo(false);
+        }
+    }
+
+    useEffect(() => {
+        if (!confirmando) return;
+        cancelarRef.current?.focus();
+        const keydown = (event) => {
+            if (event.key === "Escape" && !desfazendo) fecharConfirmacao();
+        };
+        document.addEventListener("keydown", keydown);
+        return () => document.removeEventListener("keydown", keydown);
+    }, [confirmando, desfazendo]);
+
     return (
         <div className={statusPagto === "PAGO" ? style.cardPagtoFuncPago : style.cardPagtoFun}>
             <div className={style.infosPessoais}>
@@ -41,14 +83,30 @@ function CardPgtoFunc({
             </div>
             <div className={style.formasPagto}>
                 {statusPagto === "PAGO" ? (
-                    <button disabled={true} className={style.btnPagoVia}>
-                        {formaPagamento === "PIX" ? <QrCode /> : <Banknote />}
-                        <p>Pago via {formaPagamento === "PIX" ? "PIX" : "Dinheiro"}</p>
-                        <Check />
-                    </button>
+                    <div className={style.btnPagoVia}>
+                        <div className={style.infoPagoVia}>
+                            {formaPagamento === "PIX" ? <QrCode /> : <Banknote />}
+                            <p>Pago via {nomeForma}</p>
+                            <Check />
+                        </div>
+                        {onDesfazer && (
+                            <button
+                                type="button"
+                                ref={editarRef}
+                                className={style.btnEditarPagto}
+                                aria-label="Alterar forma de pagamento"
+                                title="Alterar forma de pagamento"
+                                disabled={desfazendo}
+                                onClick={() => setConfirmando(true)}
+                            >
+                                <Pencil size={18} />
+                            </button>
+                        )}
+                    </div>
                 ) : (
                     <>
-                        <button
+
+                        <button type="button"
                             className={style.btnPagarEmDinheiro}
                             disabled={pagando}
                             onClick={() => onPagar(id, "DINHEIRO")}
@@ -56,18 +114,56 @@ function CardPgtoFunc({
                             <Banknote />
                             <p>{pagando ? "Pagando..." : "Dinheiro"}</p>
                         </button>
-
                         <button
-                            className={style.btnPagarEmPix}
-                            disabled={pagando}
-                            onClick={() => onPagar(id, "PIX")}
+                            type="button"
+                            className={style.btnQrCode}
+                            disabled={pagando || !chave.valida || !valorValido}
+                            ref={qrButtonRef}
+                            aria-label="Gerar QR Code"
+                            title="Gerar QR Code"
+                            onClick={() => { setQrAberto(true); onQr?.(); }}
                         >
                             <QrCode />
-                            <p>{pagando ? "Pagando..." : "PIX"}</p>
+                            <p>QR Code</p>
                         </button>
+                        {(!chave.valida || !valorValido) && <small className={style.ajudaQr}>{!chave.valida ? chave.motivo : "Valor inválido"}</small>}
                     </>
                 )}
             </div>
+            {qrAberto && chave.valida && valorValido && (
+                <ModalQrPix
+                    pagamento={{ id, nome, area, valorTotal }}
+                    chave={chave.chave}
+                    tipo={chave.tipo}
+                    onClose={() => { setQrAberto(false); qrButtonRef.current?.focus(); }}
+                    onPagar={async (...args) => { await onPagar(...args); setQrAberto(false); }}
+                />
+            )}
+            {confirmando && (
+                <div
+                    className={style.fundoConfirmacao}
+                    role="dialog"
+                    aria-modal="true"
+                    aria-labelledby={`tituloDesfazer-${id}`}
+                    onMouseDown={(event) => { if (event.target === event.currentTarget && !desfazendo) fecharConfirmacao(); }}
+                >
+                    <div className={style.cardConfirmacao}>
+                        <h2 id={`tituloDesfazer-${id}`}>Alterar forma de pagamento?</h2>
+                        <p>
+                            O pagamento de {nome} ({nomeForma}) será desfeito e ele voltará para pendente.
+                            Depois você poderá escolher Dinheiro ou QR Code novamente.
+                        </p>
+                        <div className={style.botoesConfirmacao}>
+                            <button type="button" ref={cancelarRef} className={style.btnCancelarConfirmacao} disabled={desfazendo} onClick={fecharConfirmacao}>
+                                Cancelar
+                            </button>
+                            <button type="button" className={style.btnConfirmarConfirmacao} disabled={desfazendo} onClick={desfazer}>
+                                {desfazendo ? "Desfazendo..." : "Desfazer pagamento"}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     )
 }

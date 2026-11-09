@@ -1,7 +1,65 @@
 import style from "../css/Escala.module.css";
-import { Plus, X, User, Search } from "lucide-react";
-import { useState } from "react";
-import { formatTelefone } from "../../../utils/formatadores";
+import { Plus, X, User, Search, MapPin } from "lucide-react";
+import { useEffect, useState } from "react";
+import {
+    classificarDistanciaKm,
+    formatTelefone,
+    formatDistanciaKm,
+    onlyDigits
+} from "../../../utils/formatadores";
+import { calcularDistanciaAteRancho } from "../../../services/distancia";
+
+function DistanciaFuncionario({ cep, distanciaKm }) {
+    const [resultado, setResultado] = useState({ cep: "", km: null });
+    const cepCompleto = onlyDigits(cep);
+    const distanciaDaApi = classificarDistanciaKm(distanciaKm) !== null;
+
+    useEffect(() => {
+        let ativo = true;
+        if (distanciaDaApi || cepCompleto.length !== 8) return () => { ativo = false; };
+
+        calcularDistanciaAteRancho(cepCompleto)
+            .then((km) => { if (ativo) setResultado({ cep: cepCompleto, km }); })
+            .catch(() => { if (ativo) setResultado({ cep: cepCompleto, km: null }); });
+
+        return () => { ativo = false; };
+    }, [cepCompleto, distanciaDaApi]);
+
+    const resultadoAtual = resultado.cep === cepCompleto && cepCompleto.length === 8;
+    const distanciaAtual = distanciaDaApi ? distanciaKm : resultadoAtual ? resultado.km : null;
+    const classificacao = classificarDistanciaKm(distanciaAtual);
+    const textoDistancia = distanciaDaApi || resultadoAtual
+        ? formatDistanciaKm(distanciaAtual)
+        : cepCompleto.length === 8
+            ? "Calculando..."
+            : formatDistanciaKm(null);
+
+    return (
+        <span
+            className={
+                textoDistancia === "Indisponível"
+                    ? style.distanciaIndisponivel
+                    : style.distanciaFuncionario
+            }
+            title="Distância em linha reta até o Rancho"
+            aria-live="polite"
+        >
+            {textoDistancia === "Indisponível" ? (
+                textoDistancia
+            ) : (
+                <>
+                    <MapPin size={13} aria-hidden="true" />
+                    {textoDistancia}
+                    {classificacao && (
+                        <span className={classificacao === "Perto" ? style.distanciaPerto : style.distanciaLonge}>
+                            {classificacao}
+                        </span>
+                    )}
+                </>
+            )}
+        </span>
+    );
+}
 
 function AreaEscala({
     area,
@@ -102,6 +160,14 @@ function AreaEscala({
         ? funcionariosEscaladosExibidos
         : funcionariosEscalados;
 
+
+    const classeAreaModal =
+        area.nome === "Cozinha"
+            ? style.cardCozinha
+            : area.nome === "Salão"
+                ? style.cardSalao
+                : style.cardAtividades;
+
     return (
         <div className={style.area}>
             <div className={style.tituloArea}>
@@ -169,9 +235,14 @@ function AreaEscala({
                     <div className={style.modalAdicionarFuncionario} onClick={(e) => e.stopPropagation()}>
                         <div className={style.modalHeader}>
                             <div className={style.tituloModalAddFuncArea}>
-                                <div className={style.corArea}></div>
-
-                                <h2>{area.nome}</h2>
+                                <div
+                                    className={`${style.corArea} ${area.nome === "Cozinha"
+                                        ? style.cozinha
+                                        : area.nome === "Salão"
+                                            ? style.salao
+                                            : style.atividades
+                                        }`}
+                                />                                <h2>{area.nome}</h2>
 
                                 <p> - {diaSemana}, {data}</p>
                             </div>
@@ -199,14 +270,17 @@ function AreaEscala({
 
                             <div className={style.listaFuncionarios}>
                                 {funcionariosFiltrados.map((f) => (
-                                    <label className={style.cardFuncionario} key={f.id}>
+                                    <label className={`${style.cardFuncionario} ${classeAreaModal}`} key={f.id}>
                                         <div className={style.fotoFuncionario}>
                                             <User />
                                         </div>
 
                                         <div className={style.infosFuncionario}>
                                             <p>{f.nome}</p>
-                                            <p>{formatTelefone(f.telefone)}</p>
+                                            <div className={style.contatoDistancia}>
+                                                <span>{formatTelefone(f.telefone)}</span>
+                                                <DistanciaFuncionario cep={f.cep} distanciaKm={f.distanciaKm} />
+                                            </div>
                                         </div>
 
                                         <div className={style.btnFuncionarioSelecionado}>

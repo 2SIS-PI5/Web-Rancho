@@ -34,6 +34,25 @@ export const formatCep = (value) => {
     return digits.length === 8 ? maskCep(digits) : String(value ?? "");
 };
 
+export const parseDistanciaKm = (value) => {
+    const texto = String(value ?? "").trim().replace(/\s*km\s*$/i, "").replace(",", ".");
+    const distancia = Number(texto);
+    if (!texto || !Number.isFinite(distancia) || distancia < 0) return null;
+    return distancia;
+};
+
+export const classificarDistanciaKm = (value) => {
+    const distancia = parseDistanciaKm(value);
+    if (distancia === null) return null;
+    return distancia <= 20 ? "Perto" : "";
+};
+
+export const formatDistanciaKm = (value) => {
+    const distancia = parseDistanciaKm(value);
+    if (distancia === null) return "Indisponível";
+    return `${distancia.toLocaleString("pt-BR", { maximumFractionDigits: 2 })} km`;
+};
+
 export const formatValorBRL = (value) => {
     const texto = String(value ?? "").trim().replace(/[^\d,.-]/g, "");
     if (typeof value !== "number" && !texto) return "";

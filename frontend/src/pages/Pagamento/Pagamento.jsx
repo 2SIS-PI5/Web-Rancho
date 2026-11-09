@@ -118,6 +118,7 @@ function Pagamento() {
       const resposta = await api.post("/pagamento/gerar");
 
       const quantidadeGerada = resposta.data.quantidadeGerada;
+      const ultimaEscalaData = resposta.data.ultimaEscalaData;
 
       if (quantidadeGerada === 0) {
         mostrarAlerta(
@@ -127,12 +128,17 @@ function Pagamento() {
         return;
       }
 
+      if (ultimaEscalaData) {
+        setPeriodoInicioSemana(ultimaEscalaData);
+      }
+
       await buscarDados();
 
       mostrarAlerta(
         `${quantidadeGerada} pagamento(s) gerado(s) com sucesso!`,
         "sucesso"
       );
+
     } catch (error) {
       mostrarAlerta(
         mensagemErro(error, "Não foi possível gerar os pagamentos."),
@@ -190,8 +196,47 @@ function Pagamento() {
     }
   }
 
+  async function desfazerPagamento(id) {
+    if (!Number.isFinite(Number(id))) {
+      mostrarAlerta("Pagamento inválido.", "aviso");
+      throw new Error("Pagamento inválido.");
+    }
+
+    try {
+      // ATENÇÃO: este endpoint precisa existir no backend (veja a explicação no chat)
+      await api.put(`/pagamento/${id}/desfazer`);
+
+      setPagamentos((pagamentosAtuais) =>
+        filtroPagamento === "Pagos"
+          ? pagamentosAtuais.filter((pagamento) => pagamento.id !== id)
+          : pagamentosAtuais.map((pagamento) =>
+            pagamento.id === id
+              ? { ...pagamento, status: "PENDENTE", formaPagamento: null }
+              : pagamento
+          )
+      );
+
+      setQuantidades((quantidadesAtuais) => ({
+        ...quantidadesAtuais,
+        pagos: Math.max(0, quantidadesAtuais.pagos - 1),
+        naoPagos: quantidadesAtuais.naoPagos + 1
+      }));
+
+      await buscarResumo();
+
+      mostrarAlerta("Pagamento desfeito. Escolha a forma de pagamento novamente.", "sucesso");
+    } catch (error) {
+      mostrarAlerta(
+        mensagemErro(error, "Não foi possível desfazer o pagamento."),
+        "aviso"
+      );
+      throw error;
+    }
+  }
+
+
   function obterPeriodoSemana(dataEscala) {
-    if (!dataEscala) return "Semana não identificada";
+    if (!dataEscala) return "(não identificado)";
 
     const data = new Date(`${dataEscala}T00:00:00`);
 
@@ -382,6 +427,7 @@ function Pagamento() {
               valorDiaria={pagamento.valorDiaria}
               valorTotal={pagamento.valorAPagar}
               onPagar={pagar}
+              onDesfazer={desfazerPagamento}   
               pagando={pagandoId === pagamento.id}
             />
           ))}

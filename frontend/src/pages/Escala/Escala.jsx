@@ -11,7 +11,6 @@ import {
 
 import { useState, useEffect } from "react";
 import api from "../../services/api";
-import { inicioDaSemana, somarDias } from "../../utils/datas";
 import { agruparPorSetor } from "../../utils/setores";
 
 import CardEscala from "./components/CardEscala";
@@ -23,6 +22,15 @@ function dataIso(data) {
   return `${ano}-${mes}-${dia}`;
 }
 
+function somarDiasIso(data, quantidade) {
+  const [ano, mes, dia] = data.split("-").map(Number);
+  const novaData = new Date(ano, mes - 1, dia);
+
+  novaData.setDate(novaData.getDate() + quantidade);
+
+  return dataIso(novaData);
+}
+
 function mensagemErro(error, fallback) {
   const data = error.response?.data;
   return data?.message || (typeof data === "string" ? data : fallback);
@@ -32,20 +40,20 @@ function Escala() {
   const [datasAberta, setDatasAberta] = useState(false);
   const [dataNova, setDataNova] = useState("");
   const [datasSelecionadas, setDatasSelecionadas] = useState(() => {
-    const hoje = new Date();
-    const diaSemana = hoje.getDay();
+    const hoje = dataIso(new Date());
+    const diaSemana = new Date(`${hoje}T00:00:00`).getDay();
 
-    const segunda = new Date(hoje);
-    const diferenca = diaSemana === 0 ? -6 : 1 - diaSemana;
-    segunda.setDate(hoje.getDate() + diferenca);
+    // Segunda a sexta: próximo sábado.
+    // Sábado: sábado atual.
+    // Domingo: sábado de ontem.
+    const diasAteSabado = diaSemana === 0
+      ? -1
+      : 6 - diaSemana;
 
-    const sabado = somarDias(segunda, 5);
-    const domingo = somarDias(segunda, 6);
+    const sabado = somarDiasIso(hoje, diasAteSabado);
+    const domingo = somarDiasIso(sabado, 1);
 
-    return [
-      dataIso(sabado),
-      dataIso(domingo)
-    ];
+    return [sabado, domingo];
   });
 
   const [funcionarios, setFuncionarios] = useState([]);
@@ -175,6 +183,11 @@ function Escala() {
       return;
     }
 
+    if (dataNova < dataIso(new Date())) {
+      setErro("Não é possível adicionar uma data que já passou.");
+      return;
+    }
+
     if (datasSelecionadas.includes(dataNova)) {
       setErro("Essa data já foi adicionada.");
       return;
@@ -186,53 +199,6 @@ function Escala() {
 
     setDataNova("");
     setSucesso("Data adicionada com sucesso!");
-  }
-
-  function adicionarSabadoDomingoAtual() {
-    setErro("");
-    setSucesso("");
-
-    const hoje = new Date();
-    const diaSemana = hoje.getDay();
-
-    const sabado = new Date(hoje);
-    sabado.setDate(hoje.getDate() + (6 - diaSemana));
-
-    const domingo = new Date(sabado);
-    domingo.setDate(sabado.getDate() + 1);
-
-    const formatarDataISO = (data) => {
-      const ano = data.getFullYear();
-      const mes = String(data.getMonth() + 1).padStart(2, "0");
-      const dia = String(data.getDate()).padStart(2, "0");
-
-      return `${ano}-${mes}-${dia}`;
-    };
-
-    const dataSabado = formatarDataISO(sabado);
-    const dataDomingo = formatarDataISO(domingo);
-
-    const sabadoAdicionado = datasSelecionadas.includes(dataSabado);
-    const domingoAdicionado = datasSelecionadas.includes(dataDomingo);
-
-    if (sabadoAdicionado && domingoAdicionado) {
-      setErro("Sábado e domingo já adicionados.");
-      return;
-    }
-
-    setDatasSelecionadas((atuais) => {
-      const novasDatas = [dataSabado, dataDomingo].filter(
-        (data) => !atuais.includes(data)
-      );
-
-      return [...atuais, ...novasDatas].sort();
-    });
-
-    setSucesso(
-      sabadoAdicionado || domingoAdicionado
-        ? "A data que faltava foi adicionada."
-        : "Sábado e domingo adicionados com sucesso!"
-    );
   }
 
   function removerData(dataRemover) {
@@ -278,20 +244,31 @@ function Escala() {
 
   const setores = agruparPorSetor(funcionarios);
 
-  const escalasVisiveis = datasSelecionadas.flatMap((dataEscala) => {
-    const existentes = escalas.filter(
-      (escala) => escala.dataEscala === dataEscala
-    );
+  const hoje = dataIso(new Date());
+  const diaSemana = new Date(`${hoje}T00:00:00`).getDay();
 
-    return existentes.length
-      ? existentes
-      : [{
-        id: null,
-        dataEscala,
-        turno: "DIA",
-        funcionarios: []
-      }];
-  });
+  // Encontra a segunda-feira da semana atual.
+  const diasDesdeSegunda = (diaSemana + 6) % 7;
+
+  const inicioSemana = somarDiasIso(hoje, -diasDesdeSegunda);
+  const fimSemana = somarDiasIso(inicioSemana, 6);
+
+  const escalasVisiveis = datasSelecionadas
+    .filter((data) => data >= inicioSemana)
+    .flatMap((dataEscala) => {
+      const existentes = escalas.filter(
+        (escala) => escala.dataEscala === dataEscala
+      );
+
+      return existentes.length
+        ? existentes
+        : [{
+          id: null,
+          dataEscala,
+          turno: "DIA",
+          funcionarios: []
+        }];
+    });
 
   function areasDaEscala(escala) {
     return setores.map(([nome, funcionariosDoSetor]) => ({
@@ -382,6 +359,7 @@ function Escala() {
             <div className={style.inserirData}>
               <input
                 type="date"
+                min={dataIso(new Date())}
                 value={dataNova}
                 onChange={(e) => setDataNova(e.target.value)}
               />
@@ -393,15 +371,6 @@ function Escala() {
               >
                 <Plus />
                 <p>Adicionar</p>
-              </button>
-
-              <button
-                type="button"
-                className={style.btnSabDomAtual}
-                onClick={adicionarSabadoDomingoAtual}
-              >
-                <CalendarDays />
-                <p>Sáb/Dom Atual</p>
               </button>
             </div>
 

@@ -477,6 +477,22 @@
     margin-top: 2px;
 }
 
+.tpPendente {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    width: 27%;
+    height: 36%;
+    gap: 6px;
+    border-radius: 999px;
+    font-size: 12px;
+    font-weight: 600;
+    margin-top: 2px;
+    background-color: #ffe0e0;
+    color: #d32f2f;
+}
+
 .tpTotal {
     display: grid;
     grid-template-columns: 34% 19% 12% 14% 21%;

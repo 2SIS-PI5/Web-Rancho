@@ -5,6 +5,7 @@ import { useEffect } from "react";
 import api from "../../services/api";
 import ModalAvaliacao from "./components/ModalAvaliacao";
 import CardAvaliacao from "./components/CardAvaliacao";
+import ModalHistorico from "./components/ModalHistorico.jsx";
 
 function Avaliacoes() {
 
@@ -14,6 +15,7 @@ function Avaliacoes() {
   const [funcionarios, setFuncionarios] = useState([]);
   const [carregando, setCarregando] = useState(true);
   const [erro, setErro] = useState("");
+  const [funcionarioHistorico, setFuncionarioHistorico] = useState(null);
 
   function mensagemErro(error, fallback) {
     const data = error.response?.data;
@@ -48,6 +50,14 @@ function Avaliacoes() {
     setFuncionarioSelecionado(null);
   }
 
+  function abrirHistoricoAvaliacao(funcionario) {
+    setFuncionarioHistorico(funcionario);
+  }
+
+  function fecharHistoricoAvaliacao() {
+    setFuncionarioHistorico(null);
+  }
+
   return (
     <>
       <div className={style.headerAvaliacoes}>
@@ -63,8 +73,15 @@ function Avaliacoes() {
           {!carregando && erro && <p>{erro}</p>}
           {!carregando && !erro && funcionarios.length === 0 && <p>Nenhum funcionário encontrado.</p>}
           {!carregando && !erro && funcionarios.map((f) => (
-            <CardAvaliacao key={f.funcionarioId} nome={f.nome} area={f.cargo} mediaAvaliacao={f.mediaAvaliacoes}
-              qtdAvaliacoes={f.quantidadeAvaliacoes} onAvaliar={() => abrirModalAvaliacao(f)}/>
+            <CardAvaliacao
+              key={f.funcionarioId}
+              nome={f.nome}
+              area={f.cargo}
+              mediaAvaliacao={f.mediaAvaliacoes}
+              qtdAvaliacoes={f.quantidadeAvaliacoes}
+              onAvaliar={() => abrirModalAvaliacao(f)}
+              onVisualizar={() => abrirHistoricoAvaliacao(f)}
+            />
           ))}
         </div>
       </div>
@@ -73,6 +90,12 @@ function Avaliacoes() {
           funcionario={funcionarioSelecionado}
           onFechar={fecharModalAvaliacao}
           onSalvo={buscarFuncionarios}
+        />
+      )}
+      {funcionarioHistorico && (
+        <ModalHistorico
+          funcionario={funcionarioHistorico}
+          onFechar={fecharHistoricoAvaliacao}
         />
       )}
     </>

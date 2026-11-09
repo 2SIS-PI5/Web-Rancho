@@ -1,4 +1,4 @@
-export const INICIO_SEMANA = 6; // 0 = domingo ... 6 = sábado
+export const INICIO_SEMANA = 1; 
 
 export const inicioDaSemana = (data) => {
   const d = new Date(data);

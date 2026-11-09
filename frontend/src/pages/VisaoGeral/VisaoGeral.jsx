@@ -69,6 +69,8 @@ function VisaoGeral() {
   const [carregando, setCarregando] = useState(true);
   const [erro, setErro] = useState("");
   const [tentativa, setTentativa] = useState(0);
+  const [gerandoPdf, setGerandoPdf] = useState(false);
+  const [erroPdf, setErroPdf] = useState("");
 
   useEffect(() => {
     const controller = new AbortController();
@@ -103,7 +105,42 @@ function VisaoGeral() {
     { nome: "Salão", campo: "custoSalao" },
     { nome: "Atividades", campo: "custoAtividades" },
   ];
-  const valorOuVazio = (valor) => Number(valor || 0) > 0 ? formatBRL(valor) : "Sem dados no período";
+  const valorOuVazio = (valor) => Number(valor || 0) > 0 ? formatBRL(valor) : "Sem dados";
+
+
+  async function exportarPdf() {
+    setGerandoPdf(true);
+    setErroPdf("");
+    try {
+      const resposta = await api.get("/relatorio/pdf", { params: { periodo: PERIODOS[periodo] }, responseType: "blob" });
+      const disposicao = resposta.headers["content-disposition"] || "";
+      const nomeArquivo = disposicao.match(/filename="?([^";]+)"?/i)?.[1] || `relatorio-rancho-${PERIODOS[periodo].toLowerCase()}.pdf`;
+      const url = URL.createObjectURL(resposta.data);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = nomeArquivo;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      URL.revokeObjectURL(url);
+    } catch (error) {
+      let mensagem = error.response?.data?.message;
+      if (!mensagem && error.response?.data instanceof Blob) {
+        try { mensagem = JSON.parse(await error.response.data.text()).message; } catch { mensagem = ""; }
+      }
+      setErroPdf(mensagem || "Não foi possível gerar o relatório.");
+    } finally {
+      setGerandoPdf(false);
+    }
+  }
+
+  const tituloGraficoPeriodo = {
+    semanal: "Dias da semana",
+    mensal: "Semanas do mês",
+    semestral: "Evolução dos últimos 6 meses",
+    anual: "Evolução dos últimos 12 meses",
+  };
+
 
   return (
     <>
@@ -127,12 +164,13 @@ function VisaoGeral() {
             ))}
           </div>
 
-          <button type="button" className={style.btnExportar}>
+          <button type="button" className={style.btnExportar} disabled={gerandoPdf} aria-busy={gerandoPdf} onClick={exportarPdf}>
             <FileDown size={16} />
-            Exportar PDF
+            {gerandoPdf ? "Gerando relatório..." : "Exportar PDF"}
           </button>
         </div>
       </div>
+      {erroPdf && <div className={style.erroExportacao} role="alert"><span>{erroPdf}</span><button type="button" onClick={exportarPdf}>Tentar novamente</button></div>}
       <div className={style.containerVisaoGeral}>
         {carregando && <p>Carregando visão geral...</p>}
         {!carregando && erro && <div><p>{erro}</p><button type="button" onClick={() => setTentativa((valor) => valor + 1)}>Tentar novamente</button></div>}
@@ -141,15 +179,15 @@ function VisaoGeral() {
             <CardResumo variante="azul" icone={<DollarSign size={22} />} titulo="Custo Total" valor={valorOuVazio(kpis?.custoTotalMaoObra)} />
             <CardResumo variante="laranja" icone={<Wallet size={22} />} titulo="Pago em Dinheiro" valor={valorOuVazio(kpis?.pagoDinheiro)} />
             <CardResumo variante="roxo" icone={<CreditCard size={22} />} titulo="Pago em PIX" valor={valorOuVazio(kpis?.pagoPix)} />
-            <CardResumo variante="verde" icone={<Users size={22} />} titulo="Equipe" valor={kpis?.totalFuncionarios ? `${kpis.totalFuncionarios} funcionários` : "Sem dados no período"} />
+            <CardResumo variante="verde" icone={<Users size={22} />} titulo="Equipe" valor={kpis?.totalFuncionarios ? `${kpis.totalFuncionarios} funcionários` : "Sem dados"} />
           </div>
 
-          <Painel titulo="Dias da semana" className={style.painelAlto}>
+          <Painel titulo={tituloGraficoPeriodo[periodo]} className={style.painelAlto}>
             {possuiValores(custosPeriodo, ["valor"]) ? <div className={style.grafico}>
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart data={custosPeriodo} margin={{ top: 8, right: 8, left: 0, bottom: 0 }}>
                   <CartesianGrid strokeDasharray="4 4" vertical={false} stroke="#eef0f3" />
-                  <XAxis dataKey="periodo" axisLine={false} tickLine={false} tick={{ fill: "#a1a1aa", fontSize: 13 }} />
+                  <XAxis dataKey="periodo" axisLine={false} tickLine={false} tick={{ fill: "#a1a1aa", fontSize: periodo === "anual" ? 11 : 13 }} />
                   <YAxis axisLine={false} tickLine={false} tick={{ fill: "#a1a1aa", fontSize: 13 }}
                     tickFormatter={(v) => `R$${v}`} />
                   <Tooltip formatter={(v) => formatBRL(v)} cursor={{ fill: "#f8f9fb" }} />
@@ -173,7 +211,17 @@ function VisaoGeral() {
           </Painel>
 
           <Painel titulo="Evolução de custos por setor">
-            <p className={style.vazio}>Sem dados no período</p>
+            {possuiValores(dadosEvolucao, setoresEvolucao.map((setor) => setor.campo)) ? <div className={style.grafico}>
+              <ResponsiveContainer width="100%" height="100%">
+                <LineChart data={dadosEvolucao} margin={{ right: 7 }}>
+                  <CartesianGrid strokeDasharray="4 4" vertical={false} stroke="#eef0f3" />
+                  <XAxis dataKey="periodo" axisLine={false} tickLine={false} tick={{ fill: "#a1a1aa", fontSize: 12 }} />
+                  <YAxis tickFormatter={(valor) => `R$${valor}`} tick={{ fill: "#a1a1aa", fontSize: 13 }} />
+                  <Tooltip formatter={(valor) => formatBRL(valor)} />
+                  {setoresEvolucao.map((setor) => <Line key={setor.nome} type="monotone" dataKey={setor.campo} stroke={corDoSetor(setor.nome)} />)}
+                </LineChart>
+              </ResponsiveContainer>
+            </div> : <p className={style.vazio}>Sem dados no período</p>}
           </Painel>
 
           <Painel titulo="Gastos por setor">
@@ -202,19 +250,6 @@ function VisaoGeral() {
                 );
               })}
             </ul> : <p className={style.vazio}>Sem dados no período</p>}
-          </Painel>
-          <Painel titulo="Evolução de custos por setor">
-            {possuiValores(dadosEvolucao, setoresEvolucao.map((setor) => setor.campo)) ? <div className={style.grafico}>
-              <ResponsiveContainer width="100%" height="100%">
-                <LineChart data={dadosEvolucao}>
-                  <CartesianGrid strokeDasharray="4 4" vertical={false} stroke="#eef0f3" />
-                  <XAxis dataKey="periodo" axisLine={false} tickLine={false} />
-                  <YAxis tickFormatter={(valor) => `R$${valor}`} />
-                  <Tooltip formatter={(valor) => formatBRL(valor)} />
-                  {setoresEvolucao.map((setor) => <Line key={setor.nome} type="monotone" dataKey={setor.campo} stroke={corDoSetor(setor.nome)} />)}
-                </LineChart>
-              </ResponsiveContainer>
-            </div> : <p className={style.vazio}>Sem dados no período</p>}
           </Painel>
         </div>
         }

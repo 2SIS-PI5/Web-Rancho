@@ -163,15 +163,15 @@
 }
 
 .btnsFiltros button:nth-child(2) {
-    width: 19%;
+    width: 22%;
 }
 
 .btnsFiltros button:nth-child(3) {
-    width: 16%;
+    width: 18%;
 }
 
 .btnsFiltros button:nth-child(4) {
-    width: 22%;
+    width: 14%;
 }
 
 .btnsFiltros button.filtroAtivo {
@@ -255,7 +255,6 @@
 
 .estrelasFuncionario svg {
     color: rgb(255, 234, 0);
-    fill: rgb(255, 234, 0);
     transform: scale(0.7);
 }
 
@@ -637,4 +636,39 @@
 .erroCampo {
     color: #c62828;
     font-size: 12px;
+}
+
+.statusDistancia {
+    color: #475569;
+    font-size: 12px;
+}
+
+.paginaFuncionarios .infosFuncionario p .distanciaPerto,
+.paginaFuncionarios .infosFuncionario p .distanciaLonge {
+    width: fit-content;
+    padding: 3px 8px;
+    overflow: visible;
+    border-radius: 999px;
+    font-size: var(--type-xs);
+    font-weight: 750;
+}
+
+.paginaFuncionarios .infosFuncionario p .distanciaPerto {
+    background: #dcfce7;
+    color: #15803d;
+}
+
+.paginaFuncionarios .infosFuncionario p .distanciaLonge {
+    background: #fee2e2;
+    color: #b91c1c;
+}
+
+.distanciaKmFuncionario {
+    color: #18b251;
+    font-weight: 550;
+}
+
+.distanciaIndisponivel {
+    color: #cf1616;
+    font-weight: 550;
 }

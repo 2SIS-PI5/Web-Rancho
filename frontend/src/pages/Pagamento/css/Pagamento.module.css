@@ -335,7 +335,7 @@
 }
 
 .btnsFiltros button:nth-child(4) {
-    width: 22%;
+    width: 15%;
 }
 
 .btnsFiltros button.filtroAtivo {
@@ -347,7 +347,7 @@
     width: 94%;
     height: auto;
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
     gap: 22px;
     align-items: stretch;
     padding-bottom: 28px;
@@ -502,7 +502,7 @@
     gap: 3.5%;
 }
 
-.btnPagarEmPix,
+.btnQrCode,
 .btnPagarEmDinheiro {
     width: 42.5%;
     height: 70%;
@@ -534,12 +534,12 @@
     color: white;
 }
 
-.btnPagarEmPix {
+.btnQrCode {
     background-color: #892cfa;
     color: white;
 }
 
-.btnPagarEmPix svg {
+.btnQrCode svg {
     transform: scale(0.7);
 }
 
@@ -548,7 +548,7 @@
     font-size: 13px;
 }
 
-.btnPagarEmPix p {
+.btnQrCode p {
     margin-right: 3%;
     font-size: 12px;
 }
@@ -588,10 +588,8 @@
     background-color: #f0fdf4;
     border: 1px solid #bbf7d0;
     border-radius: 8px;
-
     color: #15803d;
     box-shadow: 0 4px 12px rgb(0 0 0 / 12%);
-
     animation: aparecerAlerta 0.25s ease-out;
 }
 
@@ -735,14 +733,455 @@
     cursor: not-allowed;
 }
 
-@keyframes aparecerConfirmacao {
+
+.fundoQr {
+    position: fixed;
+    inset: 0;
+    z-index: 11000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 16px;
+    box-sizing: border-box;
+    background: rgb(15 23 42 / 55%);
+    backdrop-filter: blur(3px);
+}
+
+.cardQr {
+    /* cores do modal: ajuste aqui para casar com a identidade */
+    --qr-faixa: #f65317;
+    --qr-acento: #a63a17;
+    --qr-acento-hover: #8c2f11;
+    --qr-confirma: #0aa731d3;
+    --qr-confirma-hover: #10a82ce9;
+    --qr-borda: #e7e2de;
+    --qr-fundo-suave: #faf8f6;
+    --qr-texto: #1c1917;
+    --qr-texto-suave: #57534e;
+    --qr-texto-fraco: #78716c;
+
+    width: 100%;
+    max-width: 480px;
+    max-height: calc(100dvh - 32px);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    background: white;
+    border-radius: 18px;
+    box-shadow: 0 24px 60px rgb(15 23 42 / 30%);
+    color: var(--qr-texto);
+    animation: aparecerQr 0.22s ease-out;
+}
+
+@keyframes aparecerQr {
     from {
         opacity: 0;
-        transform: translateY(8px);
+        transform: translateY(10px) scale(0.98);
     }
 
     to {
         opacity: 1;
-        transform: translateY(0);
+        transform: translateY(0) scale(1);
     }
+}
+
+/* só esta área rola; o rodapé com os botões fica sempre visível */
+.corpoQr {
+    flex: 1;
+    min-height: 0;
+    overflow-y: auto;
+}
+
+/* ---------- faixa escura do topo ---------- */
+
+.faixaQr {
+    padding: 18px 28px 94px;
+    background: var(--qr-faixa);
+    color: white;
+    text-align: left;
+}
+
+.cabecalhoQr {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 12px;
+}
+
+.cabecalhoQr h2 {
+    margin: 0;
+    font-size: 13px;
+    font-weight: 500;
+    letter-spacing: 0.3px;
+    color: white;
+}
+
+.destinoQr {
+    margin: 2px 0 0;
+    font-size: 16px;
+    font-weight: 600;
+    color: white;
+}
+
+.destinoQr span {
+    font-weight: 400;
+    color: white;
+}
+
+.fecharQr {
+    width: 32px;
+    height: 32px;
+    flex-shrink: 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid rgb(255 255 255 / 55%);
+    border-radius: 8px;
+    background: transparent;
+    color: white;
+    cursor: pointer;
+    transition: background 0.15s;
+}
+
+.fecharQr:hover {
+    background: rgb(255 255 255 / 18%);
+}
+
+.valorQr {
+    display: block;
+    margin: 12px 0 0;
+    font-size: 40px;
+    font-weight: 600;
+    line-height: 1;
+    letter-spacing: -1.5px;
+    font-variant-numeric: tabular-nums;
+}
+
+/* ---------- QR sobreposto à faixa ---------- */
+
+.centroQr {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-top: -76px;
+    padding: 0 28px;
+}
+
+.molduraQr {
+    padding: 12px;
+    background: white;
+    border: 1px solid var(--qr-borda);
+    border-radius: 16px;
+    box-shadow: 0 10px 28px rgb(0 0 0 / 16%);
+}
+
+.imagemQr {
+    display: block;
+    width: 168px;
+    height: 168px;
+    padding: 0;
+    border: 0;
+    border-radius: 0;
+    margin: 0;
+}
+
+.carregandoQr,
+.erroQr {
+    width: 168px;
+    height: 168px;
+    display: grid;
+    place-items: center;
+    text-align: center;
+    font-size: 13px;
+    color: var(--qr-texto-fraco);
+}
+
+.erroQr {
+    color: #b45309;
+    align-content: center;
+}
+
+.erroQr p {
+    margin: 0 0 6px;
+}
+
+.erroQr button {
+    border: 0;
+    background: transparent;
+    color: var(--qr-acento);
+    font-weight: 600;
+    text-decoration: underline;
+    cursor: pointer;
+}
+
+.statusPagtoQr {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin: 10px 0 0;
+    font-size: 13px;
+    color: var(--qr-texto-suave);
+}
+
+.chaveQr {
+    margin: 2px 0 0;
+    font-size: 13px;
+    color: var(--qr-texto-fraco);
+}
+
+/* ---------- copia e cola ---------- */
+
+.codigoQr {
+    padding: 14px 28px 4px;
+    text-align: left;
+}
+
+.divisorQr {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 10px;
+    font-size: 12px;
+    color: var(--qr-texto-fraco);
+}
+
+.divisorQr::before,
+.divisorQr::after {
+    content: "";
+    flex: 1;
+    height: 1px;
+    background: #e7e5e4;
+}
+
+/* o label continua no DOM para leitores de tela, mas some visualmente */
+.rotuloCodigo {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    white-space: nowrap;
+}
+
+.campoCopiaQr {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 6px 6px 14px;
+    background: var(--qr-fundo-suave);
+    border: 1px solid var(--qr-borda);
+    border-radius: 12px;
+}
+
+.campoCopiaQr input {
+    flex: 1;
+    min-width: 0;
+    padding: 0;
+    border: 0;
+    outline: 0;
+    background: transparent;
+    font-family: ui-monospace, Menlo, Consolas, monospace;
+    font-size: 12px;
+    color: var(--qr-texto-suave);
+    text-overflow: ellipsis;
+}
+
+.btnCopiarQr {
+    flex-shrink: 0;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    margin: 0;
+    padding: 9px 12px;
+    border: 1px solid #d6d0ca;
+    border-radius: 8px;
+    background: white;
+    color: var(--qr-texto);
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.15s;
+}
+
+.btnCopiarQr:hover {
+    background: #f5f2ef;
+}
+
+.statusCopia {
+    min-height: 16px;
+    margin: 4px 0 0;
+    font-size: 12px;
+    color: #b45309;
+}
+
+/* ---------- rodapé fixo ---------- */
+
+.acoesQr {
+    flex-shrink: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    margin: 0;
+    padding: 12px 28px 14px;
+    border-top: 1px solid #efebe8;
+    background: white;
+}
+
+.acoesQr button {
+    flex: none;
+    min-height: 44px;
+    cursor: pointer;
+    font-weight: 600;
+}
+
+.btnMarcarQr {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    border: 1.6px solid rgba(8, 166, 8, 0.459);
+    border-radius: 11px;
+    background: var(--qr-confirma);
+    color: white;
+    font-size: 15px;
+    transition: background 0.15s;
+}
+
+.btnMarcarQr:hover {
+    background: var(--qr-confirma-hover);
+}
+
+.btnFecharQr {
+    border: 0;
+    background: transparent;
+    color: var(--qr-texto-suave);
+    font-size: 14px;
+    font-weight: 500;
+}
+
+.btnFecharQr:hover {
+    color: var(--qr-texto);
+}
+
+/* foco visível para teclado */
+.fecharQr:focus-visible {
+    outline: 2px solid white;
+    outline-offset: 2px;
+}
+
+.btnCopiarQr:focus-visible,
+.btnMarcarQr:focus-visible,
+.btnFecharQr:focus-visible,
+.erroQr button:focus-visible {
+    outline: 2px solid var(--qr-acento);
+    outline-offset: 2px;
+}
+
+.btnMarcarQr:focus-visible {
+    outline-color: var(--qr-confirma);
+}
+
+.campoCopiaQr:focus-within {
+    border-color: var(--qr-acento);
+}
+
+/* ---------- celular: vira bottom sheet ---------- */
+
+@media (max-width: 520px) {
+    .fundoQr {
+        align-items: flex-end;
+        padding: 0;
+    }
+
+    .cardQr {
+        max-width: none;
+        max-height: 96dvh;
+        border-radius: 20px 20px 0 0;
+        animation-name: subirQr;
+    }
+
+    .valorQr {
+        font-size: 36px;
+    }
+}
+
+@keyframes subirQr {
+    from {
+        transform: translateY(40px);
+        opacity: 0.6;
+    }
+
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .cardQr {
+        animation: none;
+    }
+}
+
+.btnPagoVia {
+    width: 87.7%;
+    height: 70%;
+    margin-bottom: 3%;
+    display: flex;
+    flex-direction: row;
+    align-items: stretch;
+    overflow: hidden;
+    background-color: rgba(3, 192, 3, 0.082);
+    border-radius: 9px;
+    color: green;
+}
+
+.infoPagoVia {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    gap: 2%;
+}
+
+.infoPagoVia p {
+    margin: 0;
+    font-weight: 500;
+    font-size: 13px;
+}
+
+/* mantém o mesmo tamanho de ícone que o botão antigo tinha */
+.btnPagoVia svg {
+    transform: scale(0.8);
+}
+
+.btnEditarPagto {
+    flex-shrink: 0;
+    width: 44px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    border: 0;
+    border-left: 1px solid rgba(0, 128, 0, 0.25);
+    background: transparent;
+    color: green;
+    cursor: pointer;
+    transition: background-color 0.15s;
+}
+
+.btnEditarPagto:hover {
+    background-color: rgba(3, 192, 3, 0.16);
+}
+
+.btnEditarPagto:focus-visible {
+    outline: 2px solid green;
+    outline-offset: -2px;
+}
+
+.btnEditarPagto:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
 }

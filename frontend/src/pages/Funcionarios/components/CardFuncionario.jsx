@@ -1,26 +1,69 @@
 import style from "../css/Funcionarios.module.css";
 
-import { Star, Pencil, Trash2 } from "lucide-react";
-import { formatTelefone, formatCep, formatValorBRL } from "../../../utils/formatadores";
+import { Pencil, Trash2, Route, Star } from "lucide-react";
+import { formatTelefone, formatCep, formatDistanciaKm, formatValorBRL, onlyDigits } from "../../../utils/formatadores";
+import { useEffect, useState } from "react";
+import { calcularDistanciaAteRancho } from "../../../services/distancia";
 
-function CardFuncionario({ nome, area, media, qtdAvaliacoes, telefone, cep, chavePix, valorDiaria,
+function CardFuncionario({ nome, area, mediaAvaliacao, qtdAvaliacoes, telefone, cep, distanciaKm, chavePix, valorDiaria,
     ajudaTransporte, onEditar, onExcluir }) {
     const quantidade = Number(qtdAvaliacoes) || 0;
-    const mediaNumerica = Number(media) || 0;
+    const mediaNumerica = Number(mediaAvaliacao) || 0;
     const estrelasPreenchidas = Math.max(0, Math.min(5, Math.round(mediaNumerica)));
+    const [resultadoDistancia, setResultadoDistancia] = useState({ cep: "", km: null });
+    const distanciaDaApi = formatDistanciaKm(distanciaKm) !== "Indisponível";
+
+    useEffect(() => {
+        let ativo = true;
+        const cepCompleto = onlyDigits(cep);
+
+        if (distanciaDaApi || cepCompleto.length !== 8) return () => { ativo = false; };
+
+        calcularDistanciaAteRancho(cepCompleto)
+            .then((distancia) => { if (ativo) setResultadoDistancia({ cep: cepCompleto, km: distancia }); })
+            .catch(() => { if (ativo) setResultadoDistancia({ cep: cepCompleto, km: null }); });
+
+        return () => { ativo = false; };
+    }, [cep, distanciaDaApi]);
+
+    const cepCompleto = onlyDigits(cep);
+    const resultadoAtual = resultadoDistancia.cep === cepCompleto && cepCompleto.length === 8;
+    const distanciaExibida = distanciaDaApi
+        ? formatDistanciaKm(distanciaKm)
+        : resultadoAtual
+            ? formatDistanciaKm(resultadoDistancia.km)
+            : cepCompleto.length === 8
+                ? "Calculando..."
+                : formatDistanciaKm(null);
+
     return (
         <div className={style.cardFuncionario}>
             <div className={style.nomeAreaLocalizacao}>
                 <p className={style.nomeFuncionario}>{nome}</p>
                 <p className={style.areaFuncionario}>{area}</p>
             </div>
-            <div className={style.estrelasFuncionario}> 
-                {[1, 2, 3, 4, 5].map((estrela) => <Star key={estrela} fill={estrela <= estrelasPreenchidas ? "currentColor" : "none"} />)}
-                <p>{quantidade > 0 ? `${mediaNumerica.toFixed(1)} (${quantidade} ${quantidade === 1 ? "avaliação" : "avaliações"})` : "Sem avaliações"}</p>
+            <div className={style.estrelasFuncionario}>
+                {[1, 2, 3, 4, 5].map((estrela) => (
+                    <Star
+                        key={estrela}
+                        fill={estrela <= estrelasPreenchidas ? "currentColor" : "none"}
+                    />
+                ))}
+
+                <p>{quantidade > 0 ? mediaNumerica.toFixed(1) : "Sem avaliações"}</p>
             </div>
             <div className={style.infosFuncionario}>
                 <p>Telefone: <span className={style.telefoneFuncionario}>{formatTelefone(telefone)}</span></p>
-                <p>CEP: <span className={style.cepFuncionario}>{formatCep(cep)}</span></p>
+                <p>CEP: <span className={style.cepFuncionario}>{formatCep(cep)} - <b
+                    className={
+                        distanciaExibida === "Indisponível"
+                            ? style.distanciaIndisponivel
+                            : style.distanciaKmFuncionario
+                    }
+                >
+                    {distanciaExibida}
+                </b>
+                </span></p>
                 <p>Chave PIX:: <span className={style.cepFuncionario}>{chavePix}</span></p>
                 <p>Valor Diária: <span className={style.valorDiariaFuncionario}>{formatValorBRL(valorDiaria)}</span></p>
                 <p>
