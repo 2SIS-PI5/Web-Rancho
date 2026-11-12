@@ -1,12 +1,12 @@
 import style from "../css/Funcionarios.module.css";
 
-import { Pencil, Trash2, Route, Star } from "lucide-react";
+import { Pencil, Trash2, Route, Star, Mail } from "lucide-react";
 import { formatTelefone, formatCep, formatDistanciaKm, formatValorBRL, onlyDigits } from "../../../utils/formatadores";
 import { useEffect, useState } from "react";
 import { calcularDistanciaAteRancho } from "../../../services/distancia";
 
 function CardFuncionario({ nome, area, mediaAvaliacao, qtdAvaliacoes, telefone, cep, distanciaKm, chavePix, valorDiaria,
-    ajudaTransporte, onEditar, onExcluir }) {
+    ajudaTransporte, email, onEditar, onExcluir }) {
     const quantidade = Number(qtdAvaliacoes) || 0;
     const mediaNumerica = Number(mediaAvaliacao) || 0;
     const estrelasPreenchidas = Math.max(0, Math.min(5, Math.round(mediaNumerica)));
@@ -54,6 +54,7 @@ function CardFuncionario({ nome, area, mediaAvaliacao, qtdAvaliacoes, telefone, 
             </div>
             <div className={style.infosFuncionario}>
                 <p>Telefone: <span className={style.telefoneFuncionario}>{formatTelefone(telefone)}</span></p>
+                <p><Mail size={15} /> E-mail: <span title={email || ""} className={style.telefoneFuncionario} style={{ display: "inline-block", maxWidth: "125px", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", verticalAlign: "bottom" }}>{email || "—"}</span></p>
                 <p>CEP: <span className={style.cepFuncionario}>{formatCep(cep)} - <b
                     className={
                         distanciaExibida === "Indisponível"

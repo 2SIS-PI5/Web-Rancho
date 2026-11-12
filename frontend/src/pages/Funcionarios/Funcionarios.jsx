@@ -134,6 +134,7 @@ function Funcionarios() {
               mediaAvaliacao={f.mediaAvaliacao}
               qtdAvaliacoes={f.quantidadeAvaliacoes}
               telefone={f.telefone}
+              email={f.email}
               cep={f.cep}
               distanciaKm={f.distanciaKm}
               chavePix={f.chavePix}

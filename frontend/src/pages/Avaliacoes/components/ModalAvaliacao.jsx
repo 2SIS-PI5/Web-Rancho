@@ -15,14 +15,17 @@ function ModalAvaliacao({ funcionario, onFechar, onSalvo }) {
             setErro("A nota deve ser um número inteiro entre 1 e 5.");
             return;
         }
-        if (!descricao.trim() || descricao.length > 255) {
-            setErro("A descrição é obrigatória e deve ter até 255 caracteres.");
+        if (descricao.length > 255) {
+            setErro("A descrição deve ter até 255 caracteres.");
             return;
         }
         setSalvando(true);
         setErro("");
         try {
-            await api.post(`/avaliacao/${funcionario.funcionarioId}`, { nota: Number(nota), descricao });
+            await api.post(`/avaliacao/${funcionario.funcionarioId}`, {
+                nota: Number(nota),
+                ...(descricao.trim() ? { descricao: descricao.trim() } : {})
+            });
             await onSalvo();
             onFechar();
         } catch (error) {
@@ -68,12 +71,15 @@ function ModalAvaliacao({ funcionario, onFechar, onSalvo }) {
                     <p>Nota: {nota}</p>
 
                     <textarea
-                        placeholder="Escreva um comentário sobre o desempenho..."
+                        placeholder="Descrição (opcional)"
                         value={descricao}
                         maxLength={255}
                         onChange={(e) => setDescricao(e.target.value)}
                     />
                     <p>{descricao.length}/255</p>
+                    <p className={style.ajudaEmailAvaliacao}>
+                        Só avaliações com descrição são enviadas por e-mail ao funcionário.
+                    </p>
                     {erro && <p>{erro}</p>}
 
                 </div>

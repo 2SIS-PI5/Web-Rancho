@@ -156,10 +156,9 @@ function ModalHistorico({ funcionario, onFechar }) {
                                         Nota: {avaliacao.nota}/5
                                     </p>
 
-                                    <p className={style.descricaoAvaliacao}>
-                                        {avaliacao.descricao?.trim() ||
-                                            "Esta avaliação não possui comentário."}
-                                    </p>
+                                    {avaliacao.descricao?.trim() && (
+                                        <p className={style.descricaoAvaliacao}>{avaliacao.descricao.trim()}</p>
+                                    )}
                                 </div>
                             ))}
                         </div>

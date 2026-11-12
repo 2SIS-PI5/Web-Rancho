@@ -292,6 +292,12 @@
     border-color: #f56715;
 }
 
+.ajudaEmailAvaliacao {
+    color: #6b7280;
+    font-size: 13px;
+    margin: 4px 0 0;
+}
+
 .footerModal {
     display: flex;
     justify-content: flex-end;
