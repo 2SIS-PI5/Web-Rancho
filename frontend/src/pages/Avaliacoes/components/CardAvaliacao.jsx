@@ -48,6 +48,15 @@ function CardAvaliacao({
             </div>
 
             <button
+                type="button"
+                className={style.btnVerAvaliacoes}
+                onClick={onVisualizar}
+            >
+                Ver Avaliações
+            </button>
+
+            <button
+                type="button"
                 className={style.btnAvaliarFunc}
                 onClick={onAvaliar}
             >

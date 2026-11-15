@@ -1,7 +1,7 @@
 import style from "../css/Funcionarios.module.css";
 
 import { Pencil, Trash2, Route, Star, Mail } from "lucide-react";
-import { formatTelefone, formatCep, formatDistanciaKm, formatValorBRL, onlyDigits } from "../../../utils/formatadores";
+import { formatTelefone, formatCep, formatDistanciaKm, classificarDistanciaKm, formatValorBRL, onlyDigits } from "../../../utils/formatadores";
 import { useEffect, useState } from "react";
 import { calcularDistanciaAteRancho } from "../../../services/distancia";
 
@@ -11,7 +11,7 @@ function CardFuncionario({ nome, area, mediaAvaliacao, qtdAvaliacoes, telefone, 
     const mediaNumerica = Number(mediaAvaliacao) || 0;
     const estrelasPreenchidas = Math.max(0, Math.min(5, Math.round(mediaNumerica)));
     const [resultadoDistancia, setResultadoDistancia] = useState({ cep: "", km: null });
-    const distanciaDaApi = formatDistanciaKm(distanciaKm) !== "Indisponível";
+    const distanciaDaApi = classificarDistanciaKm(distanciaKm) !== null;
 
     useEffect(() => {
         let ativo = true;
@@ -24,7 +24,7 @@ function CardFuncionario({ nome, area, mediaAvaliacao, qtdAvaliacoes, telefone, 
             .catch(() => { if (ativo) setResultadoDistancia({ cep: cepCompleto, km: null }); });
 
         return () => { ativo = false; };
-    }, [cep, distanciaDaApi]);
+    }, [cep, distanciaDaApi, distanciaKm]);
 
     const cepCompleto = onlyDigits(cep);
     const resultadoAtual = resultadoDistancia.cep === cepCompleto && cepCompleto.length === 8;
@@ -57,7 +57,7 @@ function CardFuncionario({ nome, area, mediaAvaliacao, qtdAvaliacoes, telefone, 
                 <p><Mail size={15} /> E-mail: <span title={email || ""} className={style.telefoneFuncionario} style={{ display: "inline-block", maxWidth: "125px", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", verticalAlign: "bottom" }}>{email || "—"}</span></p>
                 <p>CEP: <span className={style.cepFuncionario}>{formatCep(cep)} - <b
                     className={
-                        distanciaExibida === "Indisponível"
+                        distanciaExibida === "Distância indisponível"
                             ? style.distanciaIndisponivel
                             : style.distanciaKmFuncionario
                     }

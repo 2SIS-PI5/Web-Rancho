@@ -88,7 +88,7 @@
 
 .cardAvaliacao {
     width: 100%;
-    height: 28vh;
+    min-height: 31vh;
     background-color: white;
     border: 1px solid rgb(225, 224, 224);
     border-radius: 14px;
@@ -185,6 +185,25 @@
     font-weight: 500;
     font-size: 15px;
     cursor: pointer;
+}
+
+.btnVerAvaliacoes {
+    width: 87%;
+    min-height: 30px;
+    margin-top: 8px;
+    border: 1px solid #f56715;
+    border-radius: 8px;
+    background: white;
+    color: #d94d0d;
+    font-size: 13px;
+    cursor: pointer;
+}
+
+.btnVerAvaliacoes:hover,
+.btnVerAvaliacoes:focus-visible {
+    background-color: #fff3ed;
+    outline: 2px solid rgba(245, 103, 21, 0.35);
+    outline-offset: 1px;
 }
 
 .btnAvaliarFunc:hover {
@@ -548,6 +567,12 @@
     font-size: 13px;
     font-weight: 600;
     color: #555;
+}
+
+.avaliadorAvaliacao {
+    margin: 0;
+    font-size: 13px;
+    color: #666;
 }
 
 .descricaoAvaliacao {

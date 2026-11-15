@@ -421,7 +421,6 @@ function Pagamento() {
               area={pagamento.setor}
               statusPagto={pagamento.status}
               formaPagamento={pagamento.formaPagamento}
-              telefone={pagamento.telefone}
               chavePix={pagamento.chavePix}
               diasTrabalhados={pagamento.quantidadeDias}
               valorDiaria={pagamento.valorDiaria}

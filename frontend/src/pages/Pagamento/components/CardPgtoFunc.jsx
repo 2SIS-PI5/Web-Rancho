@@ -1,6 +1,6 @@
 import { Banknote, QrCode, User, Check, Pencil } from "lucide-react";
 import style from "../css/Pagamento.module.css";
-import { formatBRL, formatTelefone } from "../../../utils/formatadores";
+import { formatBRL } from "../../../utils/formatadores";
 import { normalizarChavePix, formatarValorPix } from "../../../utils/pix";
 import ModalQrPix from "./ModalQrPix";
 import { useEffect, useRef, useState } from "react";
@@ -11,7 +11,6 @@ function CardPgtoFunc({
     area,
     statusPagto,
     formaPagamento,
-    telefone,
     chavePix,
     diasTrabalhados,
     valorDiaria,
@@ -75,7 +74,6 @@ function CardPgtoFunc({
                 </div>
             </div>
             <div className={style.infosPagto}>
-                <p className={style.tipoInformacao}>Telefone <span className={style.infoFunc}>{formatTelefone(telefone)}</span></p>
                 <p className={style.tipoInformacao}>Chave PIX <span className={style.infoFunc}>{chavePix}</span></p>
                 <p className={style.tipoInformacao}>Dias trabalhados <span className={style.infoFunc}>{diasTrabalhados}</span></p>
                 <p className={style.tipoInformacao}>Valor diária <span className={style.infoFunc}>{formatBRL(valorDiaria)}</span></p>

@@ -1,25 +1,40 @@
-import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useEffect, useState } from "react";
+import { useLocation, useNavigate } from "react-router-dom";
 
 import style from "./css/Login.module.css";
 import Logo from "../../assets/logo_rancho.png";
 import Input from "../../components/Input";
 import Button from "../../components/Button";
+import { useAuth } from "../../context/AuthContext";
 
 function Login() {
     const navigate = useNavigate();
+    const location = useLocation();
+    const { login, autenticado, inicializando } = useAuth();
 
     const [email, setEmail] = useState("");
     const [senha, setSenha] = useState("");
+    const [erro, setErro] = useState("");
+    const [carregando, setCarregando] = useState(false);
 
-    function Entrar() {
-        if (
-            email === "ranchodocomanche@gmail.com" &&
-            senha === "rancho123"
-        ) {
-            navigate("/escala");
-        } else {
-            alert("E-mail ou senha incorretos!");
+    useEffect(() => {
+        if (!inicializando && autenticado && location.pathname === "/login") {
+            navigate("/visao-geral", { replace: true });
+        }
+    }, [autenticado, inicializando, location.pathname, navigate]);
+
+    async function Entrar(event) {
+        event.preventDefault();
+        setErro("");
+        setCarregando(true);
+        try {
+            await login(email, senha);
+            const destino = location.state?.from || "/visao-geral";
+            navigate(destino, { replace: true });
+        } catch {
+            setErro("E-mail ou senha inválidos.");
+        } finally {
+            setCarregando(false);
         }
     }
 
@@ -37,7 +52,7 @@ function Login() {
                     </div>
                 </div>
 
-                <div className={style.inputsLogin}>
+                <form className={style.inputsLogin} onSubmit={Entrar}>
                     <Input
                         label="E-mail"
                         id="inpt_email"
@@ -55,13 +70,15 @@ function Login() {
                         value={senha}
                         onChange={(e) => setSenha(e.target.value)}
                     />
-                </div>
+                </form>
 
                 <div className={style.botaoMensagem}>
                     <Button
-                        label="Entrar"
+                        label={carregando ? "Entrando..." : "Entrar"}
                         acao={Entrar}
+                        disabled={carregando}
                     />
+                    {erro && <p role="alert">{erro}</p>}
 
                     <p className={style.mensagemAcesso}>
                         Acesso exclusivo para gestores

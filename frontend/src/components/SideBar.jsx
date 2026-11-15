@@ -1,4 +1,4 @@
-import { NavLink, useNavigate } from "react-router-dom";
+import { NavLink } from "react-router-dom";
 import {
     House,
     CalendarDays,
@@ -6,26 +6,38 @@ import {
     Users,
     Star,
     History,
-    LogOut
+    LogOut,
+    PanelLeftClose,
+    PanelLeftOpen
 } from "lucide-react";
 
 import style from "./css/SideBar.module.css";
+import { useAuth } from "../context/AuthContext";
 
-function Sidebar() {
-    const navigate = useNavigate();
+function Sidebar({ recolhida, onAlternar }) {
+    const { usuario, logout } = useAuth();
 
     return (
-        <aside className={style.sideBar}>
+        <aside className={`${style.sideBar} ${recolhida ? style.sideBarRecolhida : ""}`}>
 
             <div className={style.tituloSideBar}>
                 <div className={style.nomePerfil}>
-                    <p>RS</p>
+                    <p>{usuario?.nome?.slice(0, 2).toUpperCase() || "RS"}</p>
                 </div>
 
                 <div className={style.nomeRestaurante}>
                     <h1>Rancho do Comanche</h1>
                     <p>Gestão de Pessoas</p>
                 </div>
+
+                <button
+                    type="button"
+                    className={style.botaoAlternar}
+                    onClick={onAlternar}
+                    aria-label="Alterar Barra Lateral"
+                >
+                    {recolhida ? <PanelLeftOpen /> : <PanelLeftClose />}
+                </button>
             </div>
 
             <nav className={style.menu}>
@@ -35,16 +47,27 @@ function Sidebar() {
                     className={({ isActive }) =>
                         isActive ? style.menuActive : style.menuItem
                     }
+                    title={recolhida ? "Visão Geral" : undefined}
                 >
                     <House />
                     <span>Visão Geral</span>
                 </NavLink>
+
+                {usuario?.role === "GESTOR" && <NavLink
+                    to="/usuarios"
+                    className={({ isActive }) => isActive ? style.menuActive : style.menuItem}
+                    title={recolhida ? "Criar usuário" : undefined}
+                >
+                    <Users />
+                    <span>Criar usuário</span>
+                </NavLink>}
 
                 <NavLink
                     to="/escala"
                     className={({ isActive }) =>
                         isActive ? style.menuActive : style.menuItem
                     }
+                    title={recolhida ? "Escala" : undefined}
                 >
                     <CalendarDays />
                     <span>Escala</span>
@@ -55,6 +78,7 @@ function Sidebar() {
                     className={({ isActive }) =>
                         isActive ? style.menuActive : style.menuItem
                     }
+                    title={recolhida ? "Pagamento" : undefined}
                 >
                     <WalletCards />
                     <span>Pagamento</span>
@@ -65,6 +89,7 @@ function Sidebar() {
                     className={({ isActive }) =>
                         isActive ? style.menuActive : style.menuItem
                     }
+                    title={recolhida ? "Funcionários" : undefined}
                 >
                     <Users />
                     <span>Funcionários</span>
@@ -75,6 +100,7 @@ function Sidebar() {
                     className={({ isActive }) =>
                         isActive ? style.menuActive : style.menuItem
                     }
+                    title={recolhida ? "Avaliações" : undefined}
                 >
                     <Star />
                     <span>Avaliações</span>
@@ -85,6 +111,7 @@ function Sidebar() {
                     className={({ isActive }) =>
                         isActive ? style.menuActive : style.menuItem
                     }
+                    title={recolhida ? "Histórico" : undefined}
                 >
                     <History />
                     <span>Histórico</span>
@@ -94,8 +121,10 @@ function Sidebar() {
 
             <div className={style.sideBarFooter}>
                 <button
+                    type="button"
                     className={style.botaoSair}
-                    onClick={() => navigate("/login")}
+                    onClick={logout}
+                    title={recolhida ? "Sair" : undefined}
                 >
                     <LogOut />
                     <p>Sair</p>

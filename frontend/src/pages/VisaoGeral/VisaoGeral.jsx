@@ -99,12 +99,27 @@ function VisaoGeral() {
     { nome: "PIX", valor: Number(kpis.pagoPix || 0), cor: "#9333ea" },
   ] : [];
   const totalGasto = custosSetor.reduce((total, setor) => total + Number(setor.custoTotal || 0), 0);
-  const dadosEvolucao = evolucaoSetor.map((item) => ({ ...item, periodo: item.periodo || item.dataInicio || "" }));
-  const setoresEvolucao = [
-    { nome: "Cozinha", campo: "custoCozinha" },
-    { nome: "Salão", campo: "custoSalao" },
-    { nome: "Atividades", campo: "custoAtividades" },
-  ];
+  const nomesSetoresEvolucao = [...new Set(
+    evolucaoSetor.flatMap((item) => Object.keys(item.custosPorSetor || {}))
+  )];
+  const setoresEvolucao = nomesSetoresEvolucao.length
+    ? nomesSetoresEvolucao.map((nome, indice) => ({ nome, campo: `setor_${indice}` }))
+    : [
+      { nome: "Cozinha", campo: "custoCozinha" },
+      { nome: "Salão", campo: "custoSalao" },
+      { nome: "Atividades", campo: "custoAtividades" },
+    ];
+  const dadosEvolucao = evolucaoSetor.map((item) => {
+    const valores = Object.fromEntries(
+      setoresEvolucao.map((setor) => [
+        setor.campo,
+        item.custosPorSetor
+          ? Number(item.custosPorSetor[setor.nome] || 0)
+          : Number(item[setor.campo] || 0)
+      ])
+    );
+    return { ...item, ...valores, periodo: item.periodo || item.dataInicio || "" };
+  });
   const valorOuVazio = (valor) => Number(valor || 0) > 0 ? formatBRL(valor) : "Sem dados";
 
 

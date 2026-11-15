@@ -44,12 +44,12 @@ export const parseDistanciaKm = (value) => {
 export const classificarDistanciaKm = (value) => {
     const distancia = parseDistanciaKm(value);
     if (distancia === null) return null;
-    return distancia <= 20 ? "Perto" : "";
+    return distancia <= 20 ? "Perto" : "Longe";
 };
 
 export const formatDistanciaKm = (value) => {
     const distancia = parseDistanciaKm(value);
-    if (distancia === null) return "Indisponível";
+    if (distancia === null) return "Distância indisponível";
     return `${distancia.toLocaleString("pt-BR", { maximumFractionDigits: 2 })} km`;
 };
 

@@ -16,8 +16,20 @@
     overflow-y: auto;
     scrollbar-width: none;
     -ms-overflow-style: none;
+    transition: width 180ms ease;
+}
+
+.layoutRecolhida .mainContent {
+    width: calc(100% - 72px);
 }
 
 .mainContent::-webkit-scrollbar {
     display: none;
+}
+
+@media (max-width: 768px) {
+    .mainContent,
+    .layoutRecolhida .mainContent {
+        width: calc(100% - 64px);
+    }
 }
