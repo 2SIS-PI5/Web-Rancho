@@ -54,7 +54,7 @@ function CardFuncionario({ nome, area, mediaAvaliacao, qtdAvaliacoes, telefone, 
             </div>
             <div className={style.infosFuncionario}>
                 <p>Telefone: <span className={style.telefoneFuncionario}>{formatTelefone(telefone)}</span></p>
-                <p><Mail size={15} /> E-mail: <span title={email || ""} className={style.telefoneFuncionario} style={{ display: "inline-block", maxWidth: "125px", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", verticalAlign: "bottom" }}>{email || "—"}</span></p>
+                <p> E-mail: <span title={email || ""} className={style.telefoneFuncionario} style={{ display: "inline-block", maxWidth: "125px", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", verticalAlign: "bottom" }}>{email || "—"}</span></p>
                 <p>CEP: <span className={style.cepFuncionario}>{formatCep(cep)} - <b
                     className={
                         distanciaExibida === "Distância indisponível"

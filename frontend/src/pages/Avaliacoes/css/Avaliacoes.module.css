@@ -88,7 +88,7 @@
 
 .cardAvaliacao {
     width: 100%;
-    min-height: 31vh;
+    min-height: 33vh;
     background-color: white;
     border: 1px solid rgb(225, 224, 224);
     border-radius: 14px;
@@ -172,7 +172,7 @@
     align-items: center;
     justify-content: center;
     width: 87%;
-    height: 19%;
+    min-height: 37px;
     display: flex;
     flex-direction: row;
     align-items: center;
@@ -183,19 +183,19 @@
     border-radius: 10px;
     color: white;
     font-weight: 500;
-    font-size: 15px;
+    font-size: 14px;
     cursor: pointer;
 }
 
 .btnVerAvaliacoes {
     width: 87%;
-    min-height: 30px;
-    margin-top: 8px;
+    min-height: 37px;
+    margin-top: 12px;
     border: 1px solid #f56715;
     border-radius: 8px;
     background: white;
     color: #d94d0d;
-    font-size: 13px;
+    font-size: 13.5px;
     cursor: pointer;
 }
 

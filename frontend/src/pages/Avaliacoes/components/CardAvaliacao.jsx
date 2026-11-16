@@ -35,7 +35,7 @@ function CardAvaliacao({
             </div>
 
             <div className={style.qtdAvaliacoes}>
-                <button
+                <button 
                     type="button"
                     className={style.btnHistorico}
                     onClick={onVisualizar}

@@ -184,21 +184,6 @@ function ModalFuncionario({ aberto, onFechar, funcionario, setores, onSalvo }) {
                             />
                             {erros.telefone && <span className={style.erroCampo}>{erros.telefone}</span>}
                         </div>
-
-                        <div className={style.inputInfo}>
-                            <p>E-mail</p>
-                            <input
-                                type="email"
-                                inputMode="email"
-                                autoComplete="off"
-                                maxLength={254}
-                                placeholder="nome@exemplo.com"
-                                value={email}
-                                onChange={(e) => setEmail(e.target.value)}
-                                onBlur={() => setEmail(email.trim().toLowerCase())}
-                            />
-                            {erros.email && <span className={style.erroCampo}>{erros.email}</span>}
-                        </div>
                     </div>
 
                     <div className={style.duplaInputs}>
@@ -264,15 +249,33 @@ function ModalFuncionario({ aberto, onFechar, funcionario, setores, onSalvo }) {
 
                     </div>
 
-                    <div className={style.inputCheck}>
-                        <label className={style.inputCheck}>
+                    <div className={style.duplaInputs}>
+
+                        <div className={style.inputCheck}>
+                            <label className={style.inputCheck}>
+                                <input
+                                    type="checkbox"
+                                    checked={ajudaTransporte}
+                                    onChange={(e) => alternarAjudaTransporte(e.target.checked)}
+                                />
+                                <p>Possui ajuda de transporte</p>
+                            </label>
+                        </div>
+
+                        <div className={style.inputInfoEmail}>
+                            <p>E-mail</p>
                             <input
-                                type="checkbox"
-                                checked={ajudaTransporte}
-                                onChange={(e) => alternarAjudaTransporte(e.target.checked)}
+                                type="email"
+                                inputMode="email"
+                                autoComplete="off"
+                                maxLength={254}
+                                placeholder="nome@exemplo.com"
+                                value={email}
+                                onChange={(e) => setEmail(e.target.value)}
+                                onBlur={() => setEmail(email.trim().toLowerCase())}
                             />
-                            <p>Possui ajuda de transporte</p>
-                        </label>
+                            {erros.email && <span className={style.erroCampo}>{erros.email}</span>}
+                        </div>
                     </div>
                 </div>
 

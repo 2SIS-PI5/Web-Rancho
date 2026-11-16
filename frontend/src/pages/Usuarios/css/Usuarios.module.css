@@ -1,0 +1,299 @@
+.paginaUsuarios {
+    width: 100%;
+    min-height: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 35px 0 40px;
+    box-sizing: border-box;
+    background-color: #fafafa;
+}
+
+.cabecalho {
+    width: 94%;
+    display: flex;
+    flex-direction: column;
+    align-items: start;
+    justify-content: center;
+    margin-bottom: 30px;
+}
+
+.cabecalho h1 {
+    font-weight: 550;
+    font-size: 27px;
+}
+
+.cabecalho p {
+    font-weight: 380;
+    color: rgba(92, 92, 92, 0.823);
+}
+
+.formulariosUsuarios {
+    width: 94%;
+    max-width: 1200px;
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 25px;
+    align-items: start;
+    align-content: start;
+    margin-bottom: 40px;
+}
+
+.containerFormulario {
+    width: 100%;
+    min-width: 0;
+    height: fit-content;
+    background-color: white;
+    border: 1px solid rgb(225, 224, 224);
+    border-radius: 15px;
+    padding: 22px;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    margin-bottom: 40px;
+}
+
+.tituloFormulario {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 13px;
+    padding-bottom: 20px;
+    border-bottom: 1px solid rgb(225, 224, 224);
+    margin-bottom: 25px;
+}
+
+.iconeTitulo {
+    width: 42px;
+    height: 42px;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: #fff4eb;
+    color: #ea601c;
+    border-radius: 10px;
+}
+
+.tituloFormulario h2 {
+    font-size: 18px;
+    font-weight: 550;
+    color: #292929;
+    margin-bottom: 4px;
+}
+
+.tituloFormulario p {
+    font-size: 13px;
+    font-weight: 400;
+    color: #777;
+}
+
+/* CAMPOS */
+
+.formulario {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 21px;
+}
+
+.grupoCampo {
+    display: flex;
+    flex-direction: column;
+    gap: 9px;
+}
+
+.grupoCampo label {
+    font-size: 14px;
+    font-weight: 550;
+    color: #444;
+}
+
+.grupoCampo input,
+.grupoCampo select {
+    width: 100%;
+    height: 45px;
+    padding: 0 13px;
+    box-sizing: border-box;
+    border: 1px solid rgb(225, 224, 224);
+    border-radius: 9px;
+    background-color: white;
+    color: #333;
+    font-size: 14px;
+    outline: none;
+    transition: border-color 180ms ease, box-shadow 180ms ease;
+}
+
+.grupoCampo input::placeholder {
+    color: #aaa;
+}
+
+.grupoCampo input:focus,
+.grupoCampo select:focus {
+    border-color: #ea601c;
+    box-shadow: 0 0 0 3px rgba(234, 96, 28, 0.10);
+}
+
+.grupoCampo select {
+    cursor: pointer;
+}
+
+.grupoCampo input:disabled,
+.grupoCampo select:disabled {
+    background-color: #f5f5f5;
+    cursor: not-allowed;
+}
+
+.textoAuxiliar {
+    color: #888;
+    font-size: 12px;
+}
+
+/* INFO PERFIL */
+
+.infoPerfil {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 7px;
+    color: #777;
+    font-size: 12px;
+}
+
+/* BOTÕES */
+
+.acoesFormulario {
+    width: 100%;
+    display: flex;
+    justify-content: flex-end;
+    padding-top: 18px;
+    margin-top: 5px;
+    border-top: 1px solid rgb(225, 224, 224);
+}
+
+.botaoCriar {
+    min-width: 160px;
+    min-height: 44px;
+    padding: 0 18px;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    gap: 9px;
+    border: none;
+    border-radius: 9px;
+    background-color: #ea601c;
+    color: white;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background-color 180ms ease;
+}
+
+.botaoCriar:hover:not(:disabled) {
+    background-color: #fc8346;
+}
+
+.botaoCriar:focus-visible {
+    outline: 2px solid #f56715;
+    outline-offset: 3px;
+}
+
+.botaoCriar:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+/* MENSAGENS */
+
+.mensagemSucesso,
+.mensagemErro {
+    width: 94%;
+    max-width: 1200px;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 9px;
+    padding: 13px 15px;
+    margin-top: 20px;
+    border-radius: 9px;
+    font-size: 13px;
+}
+
+.mensagemSucesso {
+    background-color: #edf8f0;
+    color: #237a3b;
+    border: 1px solid #ccebd4;
+}
+
+.mensagemErro {
+    background-color: #fff0f0;
+    color: #c62828;
+    border: 1px solid #f3cccc;
+}
+
+/* RESPONSIVIDADE */
+
+@media (max-width: 900px) {
+    .formulariosUsuarios {
+        grid-template-columns: 1fr;
+        max-width: 650px;
+    }
+}
+
+@media (max-width: 768px) {
+    .paginaUsuarios {
+        padding: 25px 0 30px;
+    }
+
+    .cabecalho {
+        margin-bottom: 22px;
+    }
+
+    .cabecalho h1 {
+        font-size: 22px;
+    }
+
+    .containerFormulario {
+        padding: 22px 18px;
+    }
+
+    .acoesFormulario {
+        justify-content: stretch;
+    }
+
+    .botaoCriar {
+        width: 100%;
+    }
+}
+
+
+.containerSenha {
+    width: 100%;
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.containerSenha input {
+    padding-right: 45px;
+}
+
+.botaoVisualizar {
+    position: absolute;
+    right: 13px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    border: none;
+    background: transparent;
+    color: #888;
+    cursor: pointer;
+    transition: color 180ms ease;
+}
+
+.botaoVisualizar:hover {
+    color: #ea601c;
+}

@@ -1,4 +1,4 @@
-import { NavLink } from "react-router-dom";
+import { NavLink, useNavigate } from "react-router-dom";
 import {
     House,
     CalendarDays,
@@ -8,7 +8,8 @@ import {
     History,
     LogOut,
     PanelLeftClose,
-    PanelLeftOpen
+    PanelLeftOpen,
+    Pencil
 } from "lucide-react";
 
 import style from "./css/SideBar.module.css";
@@ -16,13 +17,29 @@ import { useAuth } from "../context/AuthContext";
 
 function Sidebar({ recolhida, onAlternar }) {
     const { usuario, logout } = useAuth();
+    const navigate = useNavigate();
 
     return (
         <aside className={`${style.sideBar} ${recolhida ? style.sideBarRecolhida : ""}`}>
 
             <div className={style.tituloSideBar}>
-                <div className={style.nomePerfil}>
-                    <p>{usuario?.nome?.slice(0, 2).toUpperCase() || "RS"}</p>
+
+                <div className={style.nomePerfilAndBotaoEditar}>
+                    <div className={style.nomePerfil}>
+                        <p>{usuario?.nome?.slice(0, 2).toUpperCase() || "RS"}</p>
+                    </div>
+
+                    {usuario?.role === "GESTOR" && (
+                        <button
+                            type="button"
+                            className={style.botaoEditarPerfil}
+                            onClick={() => navigate("/usuarios")}
+                            title="Gerenciar usuários"
+                            aria-label="Gerenciar usuários"
+                        >
+                            <Pencil size={16} />
+                        </button>
+                    )}
                 </div>
 
                 <div className={style.nomeRestaurante}>
@@ -38,6 +55,7 @@ function Sidebar({ recolhida, onAlternar }) {
                 >
                     {recolhida ? <PanelLeftOpen /> : <PanelLeftClose />}
                 </button>
+
             </div>
 
             <nav className={style.menu}>
@@ -53,14 +71,16 @@ function Sidebar({ recolhida, onAlternar }) {
                     <span>Visão Geral</span>
                 </NavLink>
 
-                {usuario?.role === "GESTOR" && <NavLink
-                    to="/usuarios"
-                    className={({ isActive }) => isActive ? style.menuActive : style.menuItem}
-                    title={recolhida ? "Criar usuário" : undefined}
+                <NavLink
+                    to="/funcionarios"
+                    className={({ isActive }) =>
+                        isActive ? style.menuActive : style.menuItem
+                    }
+                    title={recolhida ? "Funcionários" : undefined}
                 >
                     <Users />
-                    <span>Criar usuário</span>
-                </NavLink>}
+                    <span>Funcionários</span>
+                </NavLink>
 
                 <NavLink
                     to="/escala"
@@ -85,14 +105,14 @@ function Sidebar({ recolhida, onAlternar }) {
                 </NavLink>
 
                 <NavLink
-                    to="/funcionarios"
+                    to="/historico"
                     className={({ isActive }) =>
                         isActive ? style.menuActive : style.menuItem
                     }
-                    title={recolhida ? "Funcionários" : undefined}
+                    title={recolhida ? "Histórico" : undefined}
                 >
-                    <Users />
-                    <span>Funcionários</span>
+                    <History />
+                    <span>Histórico</span>
                 </NavLink>
 
                 <NavLink
@@ -105,18 +125,6 @@ function Sidebar({ recolhida, onAlternar }) {
                     <Star />
                     <span>Avaliações</span>
                 </NavLink>
-
-                <NavLink
-                    to="/historico"
-                    className={({ isActive }) =>
-                        isActive ? style.menuActive : style.menuItem
-                    }
-                    title={recolhida ? "Histórico" : undefined}
-                >
-                    <History />
-                    <span>Histórico</span>
-                </NavLink>
-
             </nav>
 
             <div className={style.sideBarFooter}>

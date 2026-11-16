@@ -202,7 +202,7 @@
 
 .nomeAreaLocalizacao {
     width: 100%;
-    height: 25%;
+    height: 20%;
     display: flex;
     flex-direction: column;
     align-items: start;
@@ -241,7 +241,7 @@
 
 .estrelasFuncionario {
     width: 100%;
-    height: 10%;
+    height: 8%;
     display: flex;
     flex-direction: row;
     align-items: center;
@@ -250,7 +250,7 @@
 }
 
 .estrelasFuncionario svg:nth-child(1) {
-    margin-left: 16px;
+    margin-left: 17px;
 }
 
 .estrelasFuncionario svg {
@@ -265,7 +265,7 @@
 
 .infosFuncionario {
     width: 84.7%;
-    height: 40%;
+    height: 42%;
     display: flex;
     flex-direction: column;
     align-items: start;
@@ -283,7 +283,7 @@
 
 
 .infosFuncionario p:nth-child(1) {
-    margin-top: 6px;
+    margin-top: 20px;
 }
 
 .infosFuncionario p span {
@@ -301,6 +301,7 @@
 }
 
 .btnsCardFuncionario {
+    margin-top: 4px;
     width: 100%;
     height: 20%;
     display: flex;
@@ -323,7 +324,6 @@
     transition: 0.1s ease-in-out;
     cursor: pointer;
     color: white;
-    margin-bottom: 7px;
 }
 
 .btnsCardFuncionario button:hover {
@@ -372,7 +372,7 @@
 
 .modalAdicionarFuncionario {
     width: 580px;
-    height: 67vh;
+    height: 71vh;
     background-color: white;
     border-radius: 16px;
     box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
@@ -462,9 +462,20 @@
     gap: 10%;
 }
 
-.duplaInputs .inputInfo input {
+.inputInfoEmail {
+    width: 83%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: start;
+    justify-content: center;
+    gap: 10%;
+}
+
+.duplaInputs .inputInfo input, 
+.inputInfoEmail input {
     width: 80%;
-    height: 22%;
+    height: 23%;
     border: none;
     border-radius: 8px;
     padding: 10px;
@@ -473,7 +484,7 @@
 
 .duplaInputs .inputInfo select {
     width: 87%;
-    height: 46%;
+    height: 48.9%;
     border: none;
     border-radius: 8px;
     padding: 5px;
@@ -496,13 +507,14 @@
 }
 
 .inputCheck {
-    width: 65%;
+    width: 90%;
     height: 15%;
     display: flex;
     flex-direction: row;
     align-items: center;
     justify-content: start;
     gap: 5%;
+    margin-top: 10px;
 }
 
 .inputCheck input {
@@ -521,17 +533,18 @@
     flex-direction: row;
     align-items: start;
     justify-content: center;
-    gap: 5%;
+    gap: 4.5%;
 }
 
 .btnModalCadastro button {
-    width: 44%;
+    width: 42.5%;
     height: 94%;
     border: none;
     border-radius: 10px;
     font-weight: 500;
     font-size: 15px;
     cursor: pointer;
+    margin-top: 18px;
 }
 
 .btnModalCadastro button:nth-child(1) {
